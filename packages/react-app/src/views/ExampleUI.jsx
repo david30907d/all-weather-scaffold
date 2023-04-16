@@ -2,6 +2,9 @@ import { Button, Card, DatePicker, Divider, Input, Progress, Slider, Spin, Switc
 import React, { useState } from "react";
 import { utils } from "ethers";
 import { SyncOutlined } from "@ant-design/icons";
+import TokensDropdown from "./TokensDropdown";
+
+import tokens from "./tokens.json";
 
 import { Address, Balance, Events } from "../components";
 
@@ -17,7 +20,6 @@ export default function ExampleUI({
   writeContracts,
 }) {
   const [newPurpose, setNewPurpose] = useState("loading...");
-
   return (
     <div>
       {/*
@@ -26,6 +28,7 @@ export default function ExampleUI({
       <div style={{ border: "1px solid #cccccc", padding: 16, width: 400, margin: "auto", marginTop: 64 }}>
         <h2>Example UI:</h2>
         <h4>purpose: {purpose}</h4>
+        <TokensDropdown />
         <Divider />
         <div style={{ margin: 8 }}>
           <Input
