@@ -137,7 +137,9 @@ function Swap({ selectedProvider, tokenListURI }) {
       const listOfPairwiseTokens = pairs(baseTokens);
 
       const getPairs = async list => {
-        const listOfPromises = list.map(item => Fetcher.fetchPairData(item[0], item[1], selectedProvider));
+        // const listOfPromises = list.map(item => Fetcher.fetchPairData(item[0], item[1], selectedProvider));
+        // [] is just a placeholder to bypass react exception
+        const listOfPromises = [];
         return Promise.all(listOfPromises.map(p => p.catch(() => undefined)));
       };
 

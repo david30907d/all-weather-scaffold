@@ -25,10 +25,17 @@ const localRpcUrl = process.env.REACT_APP_CODESPACES
   : "http://" + (global.window ? window.location.hostname : "localhost") + ":8545";
 
 export const NETWORKS = {
+  // localhost: {
+  //   name: "localhost",
+  //   color: "#666666",
+  //   chainId: 31337,
+  //   blockExplorer: "",
+  //   rpcUrl: localRpcUrl,
+  // },
   localhost: {
-    name: "localhost",
+    name: "arbitrum",
     color: "#666666",
-    chainId: 31337,
+    chainId: 42161,
     blockExplorer: "",
     rpcUrl: localRpcUrl,
   },

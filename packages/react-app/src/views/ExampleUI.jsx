@@ -17,7 +17,14 @@ export default function ExampleUI({
   writeContracts,
 }) {
   const [newPurpose, setNewPurpose] = useState("loading...");
-
+  // console.log("!!!!!!!!!!!")
+  // console.log("!!!!!!!!!!!")
+  // console.log("!!!!!!!!!!!")
+  // console.log("!!!!!!!!!!!")
+  // console.log("!!!!!!!!!!!")
+  // console.log("!!!!!!!!!!!")
+  console.log("!!!!!!!!!!!");
+  console.log(writeContracts, readContracts, "======================");
   return (
     <div>
       {/*
@@ -25,6 +32,7 @@ export default function ExampleUI({
       */}
       <div style={{ border: "1px solid #cccccc", padding: 16, width: 400, margin: "auto", marginTop: 64 }}>
         <h2>Example UI:</h2>
+        {/* <h2>11:{readContracts['1']}</h2> */}
         <h4>purpose: {purpose}</h4>
         <Divider />
         <div style={{ margin: 8 }}>

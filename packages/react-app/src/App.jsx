@@ -1,5 +1,5 @@
 import { Button, Col, Menu, Row } from "antd";
-
+import { useContractConfig, useExternalContractLoader } from "./hooks";
 import "antd/dist/antd.css";
 import {
   useBalance,
@@ -65,9 +65,10 @@ const web3Modal = Web3ModalSetup();
 
 // 🛰 providers
 const providers = [
-  "https://eth-mainnet.gateway.pokt.network/v1/lb/611156b4a585a20035148406",
-  `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_KEY}`,
-  "https://rpc.scaffoldeth.io:48544",
+  "https://arb-mainnet.g.alchemy.com/v2/Lvdw64kIQvGRlFna1U6XvWNz7tunXNuw",
+  // "https://eth-mainnet.gateway.pokt.network/v1/lb/611156b4a585a20035148406",
+  // `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_KEY}`,
+  // "https://rpc.scaffoldeth.io:48544",
 ];
 
 function App(props) {
@@ -90,6 +91,14 @@ function App(props) {
     process.env.REACT_APP_PROVIDER ? process.env.REACT_APP_PROVIDER : targetNetwork.rpcUrl,
   ]);
 
+  console.log(
+    "localProvider",
+    localProvider,
+    "targetNetwork",
+    targetNetwork,
+    "process.env.REACT_APP_PROVIDER",
+    process.env.REACT_APP_PROVIDER,
+  );
   const mainnetProvider = useStaticJsonRPC(providers, localProvider);
 
   // Sensible pollTimes depending on the provider you are using
@@ -112,7 +121,9 @@ function App(props) {
   };
 
   /* 💵 This hook will get the price of ETH from 🦄 Uniswap: */
-  const price = useExchangeEthPrice(targetNetwork, mainnetProvider, mainnetProviderPollingTime);
+  // TODO(david): this one is buggy!
+  // const price = useExchangeEthPrice(targetNetwork, mainnetProvider, mainnetProviderPollingTime);
+  const price = 2027;
 
   /* 🔥 This hook will get the price of Gas from ⛽️ EtherGasStation */
   const gasPrice = useGasPrice(targetNetwork, "FastGasPrice", localProviderPollingTime);
@@ -131,6 +142,7 @@ function App(props) {
   }, [userSigner]);
 
   // You can warn the user if you would like them to be on a specific network
+  // TODO(david): should fix this localChainId
   const localChainId = localProvider && localProvider._network && localProvider._network.chainId;
   const selectedChainId =
     userSigner && userSigner.provider && userSigner.provider._network && userSigner.provider._network.chainId;
@@ -146,12 +158,11 @@ function App(props) {
   // Just plug in different 🛰 providers to get your balance on different chains:
   const yourMainnetBalance = useBalance(mainnetProvider, address, mainnetProviderPollingTime);
 
-  // const contractConfig = useContractConfig();
-
-  const contractConfig = { deployedContracts: deployedContracts || {}, externalContracts: externalContracts || {} };
-
+  const contractConfig = useContractConfig();
+  console.log("contractConfig: ", contractConfig);
+  // const contractConfig = { deployedContracts: deployedContracts || {}, externalContracts: externalContracts || {} };
   // Load in your local 📝 contract and read a value from it:
-  const readContracts = useContractLoader(localProvider, contractConfig);
+  const readContracts = useExternalContractLoader(localProvider, contractConfig);
 
   // If you want to make 🔐 write transactions to your contracts, use the userSigner:
   const writeContracts = useContractLoader(userSigner, contractConfig, localChainId);
@@ -171,7 +182,24 @@ function App(props) {
     mainnetContracts,
     "DAI",
     "balanceOf",
-    ["0x34aA3F359A9D614239015126635CE7732c18fDF3"],
+    ["0x7EE54ab0f204bb3A83DF90fDd824D8b4abE93222"],
+    mainnetProviderPollingTime,
+  );
+  console.log(
+    "mainnetProvider",
+    mainnetProvider,
+    "contractConfig",
+    contractConfig,
+    "mainnetContracts",
+    mainnetContracts,
+    "myMainnetDAIBalance",
+    myMainnetDAIBalance,
+  );
+  const glpPendleLpBalance = useContractReader(
+    mainnetContracts,
+    "PendleGlpLpPool",
+    "balanceOf",
+    ["0x7EE54ab0f204bb3A83DF90fDd824D8b4abE93222"],
     mainnetProviderPollingTime,
   );
 
@@ -188,15 +216,16 @@ function App(props) {
   //
   useEffect(() => {
     if (
-      DEBUG &&
-      mainnetProvider &&
-      address &&
-      selectedChainId &&
-      yourLocalBalance &&
-      yourMainnetBalance &&
-      readContracts &&
-      writeContracts &&
-      mainnetContracts
+      true
+      // DEBUG &&
+      // mainnetProvider &&
+      // address &&
+      // selectedChainId &&
+      // yourLocalBalance &&
+      // yourMainnetBalance &&
+      // readContracts &&
+      // writeContracts &&
+      // mainnetContracts
     ) {
       console.log("_____________________________________ 🏗 scaffold-eth _____________________________________");
       console.log("🌎 mainnetProvider", mainnetProvider);
@@ -208,6 +237,7 @@ function App(props) {
       console.log("📝 readContracts", readContracts);
       console.log("🌍 DAI contract on mainnet:", mainnetContracts);
       console.log("💵 yourMainnetDAIBalance", myMainnetDAIBalance);
+      console.log("💵 glpPendleLpBalance", glpPendleLpBalance);
       console.log("🔐 writeContracts", writeContracts);
     }
   }, [
@@ -260,7 +290,6 @@ function App(props) {
   }, [loadWeb3Modal]);
 
   const faucetAvailable = localProvider && localProvider.connection && targetNetwork.name.indexOf("local") !== -1;
-
   return (
     <div className="App">
       {/* ✏️ Edit the header and change the title to your project name */}

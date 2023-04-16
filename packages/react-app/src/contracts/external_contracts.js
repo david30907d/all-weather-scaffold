@@ -784,6 +784,271 @@ const DAIABI = [
   },
 ];
 
+const WETHGATEWAYABI = [
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "weth",
+        type: "address",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "constructor",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "previousOwner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipTransferred",
+    type: "event",
+  },
+  {
+    stateMutability: "payable",
+    type: "fallback",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "lendingPool",
+        type: "address",
+      },
+    ],
+    name: "authorizeLendingPool",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "lendingPool",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "interesRateMode",
+        type: "uint256",
+      },
+      {
+        internalType: "uint16",
+        name: "referralCode",
+        type: "uint16",
+      },
+    ],
+    name: "borrowETH",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "lendingPool",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "onBehalfOf",
+        type: "address",
+      },
+      {
+        internalType: "uint16",
+        name: "referralCode",
+        type: "uint16",
+      },
+    ],
+    name: "depositETH",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "lendingPool",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "onBehalfOf",
+        type: "address",
+      },
+      {
+        internalType: "uint16",
+        name: "referralCode",
+        type: "uint16",
+      },
+    ],
+    name: "depositETHWithAutoDLP",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "emergencyEtherTransfer",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "token",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "emergencyTokenTransfer",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getWETHAddress",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "owner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "renounceOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "lendingPool",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "rateMode",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "onBehalfOf",
+        type: "address",
+      },
+    ],
+    name: "repayETH",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "transferOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "lendingPool",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+    ],
+    name: "withdrawETH",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    stateMutability: "payable",
+    type: "receive",
+  },
+];
 // Mainnet DAI, Optimism and Arbitrium Rollup Contracts with local addresses
 module.exports = {
   1: {
@@ -794,6 +1059,18 @@ module.exports = {
       },
       UNI: {
         address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+        abi: ERC20ABI,
+      },
+      RadiantWethGateway: {
+        address: "0xBb5cA40b2F7aF3B1ff5dbce0E9cC78F8BFa817CE",
+        abi: WETHGATEWAYABI,
+      },
+      RadiantEthLendingPool: {
+        address: "0x2032b9A8e9F7e76768CA9271003d3e43E1616B1F",
+        abi: ERC20ABI,
+      },
+      PendleGlpLpPool: {
+        address: "0x7D49E5Adc0EAAD9C027857767638613253eF125f",
         abi: ERC20ABI,
       },
     },
