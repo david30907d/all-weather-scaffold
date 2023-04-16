@@ -53,7 +53,7 @@ const { ethers } = require("ethers");
 */
 
 /// 📡 What chain are your contracts deployed to?
-const initialNetwork = NETWORKS.localhost; // <------- select your target frontend network (localhost, goerli, xdai, mainnet)
+const initialNetwork = NETWORKS.arbitrum; // <------- select your target frontend network (localhost, goerli, xdai, mainnet)
 
 // 😬 Sorry for all the console logging
 const DEBUG = true;
@@ -168,10 +168,10 @@ function App(props) {
 
   // Then read your DAI balance like:
   const myMainnetDAIBalance = useContractReader(
-    mainnetContracts,
-    "DAI",
+    readContracts,
+    "PendleGlpMarket",
     "balanceOf",
-    ["0x34aA3F359A9D614239015126635CE7732c18fDF3"],
+    ["0x7EE54ab0f204bb3A83DF90fDd824D8b4abE93222"],
     mainnetProviderPollingTime,
   );
 
