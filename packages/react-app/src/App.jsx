@@ -1,6 +1,7 @@
 import { Button, Col, Menu, Row } from "antd";
 
 import "antd/dist/antd.css";
+import "semantic-ui-css/semantic.min.css";
 import {
   useBalance,
   useContractLoader,
