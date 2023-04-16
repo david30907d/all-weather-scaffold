@@ -167,11 +167,11 @@ function App(props) {
   // });
 
   // Then read your DAI balance like:
-  const myMainnetDAIBalance = useContractReader(
+  const pendleGllpMarketBalance = useContractReader(
     readContracts,
     "PendleGlpMarket",
     "balanceOf",
-    ["0x7EE54ab0f204bb3A83DF90fDd824D8b4abE93222"],
+    [address],
     mainnetProviderPollingTime,
   );
 
@@ -207,7 +207,7 @@ function App(props) {
       console.log("💵 yourMainnetBalance", yourMainnetBalance ? ethers.utils.formatEther(yourMainnetBalance) : "...");
       console.log("📝 readContracts", readContracts);
       console.log("🌍 DAI contract on mainnet:", mainnetContracts);
-      console.log("💵 yourMainnetDAIBalance", myMainnetDAIBalance);
+      console.log("💵 pendleGllpMarketBalance", pendleGllpMarketBalance);
       console.log("🔐 writeContracts", writeContracts);
     }
   }, [
@@ -220,7 +220,7 @@ function App(props) {
     writeContracts,
     mainnetContracts,
     localChainId,
-    myMainnetDAIBalance,
+    pendleGllpMarketBalance,
   ]);
 
   const loadWeb3Modal = useCallback(async () => {

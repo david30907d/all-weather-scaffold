@@ -93,10 +93,10 @@ export default function ExampleUI({
           <Button
             onClick={() => {
               /* look how you call setPurpose on your contract: */
-              tx(writeContracts.YourContract.setPurpose("🍻 Cheers"));
+              tx(writeContracts.RadiantChefIncentivesController.claimAll(address));
             }}
           >
-            Set Purpose to &quot;🍻 Cheers&quot;
+            Claim Radiant Rewards
           </Button>
         </div>
         <div style={{ margin: 8 }}>
