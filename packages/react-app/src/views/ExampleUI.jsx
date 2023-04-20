@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { utils } from "ethers";
 import { SyncOutlined } from "@ant-design/icons";
 import DropdownExampleSearchSelectionTwo from "./TokensSearchDropdown";
+import RebalancerWidget from "./Rebalancer";
 
 import { Address, Balance, Events } from "../components";
 export default function ExampleUI({
@@ -22,10 +23,10 @@ export default function ExampleUI({
       {/*
         ⚙️ Here is an example UI that displays and sets the purpose in your smart contract:
       */}
-      <iframe src="https://app.1inch.io/#/42161/simple/swap/ETH/USDT"></iframe>
       <div style={{ border: "1px solid #cccccc", padding: 16, width: 400, margin: "auto", marginTop: 64 }}>
         <h2>Example UI:</h2>
         <h4>purpose: {purpose}</h4>
+        <RebalancerWidget />
         <DropdownExampleSearchSelectionTwo />
         <Divider />
         <div style={{ margin: 8 }}>
