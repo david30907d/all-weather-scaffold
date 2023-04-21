@@ -18,13 +18,36 @@ export default function ExampleUI({
   writeContracts,
 }) {
   const [newPurpose, setNewPurpose] = useState("loading...");
+  const [newEth, setNewEth] = useState("loading eth...");
+
   return (
     <div>
       {/*
         ⚙️ Here is an example UI that displays and sets the purpose in your smart contract:
       */}
       <div style={{ border: "1px solid #cccccc", padding: 16, width: 400, margin: "auto", marginTop: 64 }}>
-        <h2>Example UI:</h2>
+        <h2>All Weather Portfolio:</h2>
+        <Input
+          onChange={e => {
+            setNewEth(e.target.value);
+          }}
+        />
+        <Button
+          onClick={() => {
+            tx({
+              to: writeContracts.RadiantDlpLockZap.address,
+              value: utils.parseEther(newEth),
+              data: writeContracts.RadiantDlpLockZap.interface.encodeFunctionData("zap(bool,uint256,uint256,uint256)", [
+                false,
+                0,
+                0,
+                3,
+              ]),
+            });
+          }}
+        >
+          Zap into Arb Radiant DLP
+        </Button>
         <h4>purpose: {purpose}</h4>
         <RebalancerWidget />
         <DropdownExampleSearchSelectionTwo />

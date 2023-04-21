@@ -2882,6 +2882,1035 @@ const RADIANTCHEFINCENTIVESCONTROLLERABI = [
     type: "function",
   },
 ];
+const ARBRADIANTDLPLOCKZAPABI = [
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "previousOwner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipTransferred",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+    ],
+    name: "Paused",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+    ],
+    name: "Unpaused",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "bool",
+        name: "_borrow",
+        type: "bool",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "_ethAmt",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "_rdntAmt",
+        type: "uint256",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "_from",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "_onBehalf",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "_lockTypeIndex",
+        type: "uint256",
+      },
+    ],
+    name: "Zapped",
+    type: "event",
+  },
+  {
+    inputs: [],
+    name: "ACCEPTABLE_RATIO",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "RATIO_DIVISOR",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "ethLPRatio",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "ethOracle",
+    outputs: [
+      {
+        internalType: "contract IChainlinkAggregator",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getPoolHelper",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_asset",
+        type: "address",
+      },
+    ],
+    name: "getVDebtToken",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "contract IPoolHelper",
+        name: "_poolHelper",
+        type: "address",
+      },
+      {
+        internalType: "contract ILendingPool",
+        name: "_lendingPool",
+        type: "address",
+      },
+      {
+        internalType: "contract IWETH",
+        name: "_weth",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_rdntAddr",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_ethLPRatio",
+        type: "uint256",
+      },
+    ],
+    name: "initialize",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "lendingPool",
+    outputs: [
+      {
+        internalType: "contract ILendingPool",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "mfd",
+    outputs: [
+      {
+        internalType: "contract IMultiFeeDistribution",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "owner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "pause",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "paused",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "poolHelper",
+    outputs: [
+      {
+        internalType: "contract IPoolHelper",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "priceProvider",
+    outputs: [
+      {
+        internalType: "contract IPriceProvider",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_tokenAmount",
+        type: "uint256",
+      },
+    ],
+    name: "quoteFromToken",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "optimalWETHAmount",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "rdntAddr",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "renounceOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_mfdAddr",
+        type: "address",
+      },
+    ],
+    name: "setMfd",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_poolHelper",
+        type: "address",
+      },
+    ],
+    name: "setPoolHelper",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_provider",
+        type: "address",
+      },
+    ],
+    name: "setPriceProvider",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "transferOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "unpause",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "weth",
+    outputs: [
+      {
+        internalType: "contract IWETH",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bool",
+        name: "_borrow",
+        type: "bool",
+      },
+      {
+        internalType: "uint256",
+        name: "_wethAmt",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_rdntAmt",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_lockTypeIndex",
+        type: "uint256",
+      },
+    ],
+    name: "zap",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "liquidity",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bool",
+        name: "_borrow",
+        type: "bool",
+      },
+      {
+        internalType: "uint256",
+        name: "_lockTypeIndex",
+        type: "uint256",
+      },
+    ],
+    name: "zapFromVesting",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "liquidity",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bool",
+        name: "_borrow",
+        type: "bool",
+      },
+      {
+        internalType: "uint256",
+        name: "_wethAmt",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_rdntAmt",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "_onBehalf",
+        type: "address",
+      },
+    ],
+    name: "zapOnBehalf",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "liquidity",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    stateMutability: "payable",
+    type: "receive",
+  },
+];
+const BNBRADIANTDLPLOCKZAPABI = [
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "previousOwner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipTransferred",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+    ],
+    name: "Paused",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "newRatio",
+        type: "uint256",
+      },
+    ],
+    name: "SlippageRatioChanged",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+    ],
+    name: "Unpaused",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "bool",
+        name: "_borrow",
+        type: "bool",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "_ethAmt",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "_rdntAmt",
+        type: "uint256",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "_from",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "_onBehalf",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "_lockTypeIndex",
+        type: "uint256",
+      },
+    ],
+    name: "Zapped",
+    type: "event",
+  },
+  {
+    inputs: [],
+    name: "ACCEPTABLE_RATIO",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "RATIO_DIVISOR",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "ethLPRatio",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "ethOracle",
+    outputs: [
+      {
+        internalType: "contract IChainlinkAggregator",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getPoolHelper",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_asset",
+        type: "address",
+      },
+    ],
+    name: "getVDebtToken",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "contract IPoolHelper",
+        name: "_poolHelper",
+        type: "address",
+      },
+      {
+        internalType: "contract ILendingPool",
+        name: "_lendingPool",
+        type: "address",
+      },
+      {
+        internalType: "contract IWETH",
+        name: "_weth",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_rdntAddr",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_ethLPRatio",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_ACCEPTABLE_RATIO",
+        type: "uint256",
+      },
+    ],
+    name: "initialize",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "lendingPool",
+    outputs: [
+      {
+        internalType: "contract ILendingPool",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "mfd",
+    outputs: [
+      {
+        internalType: "contract IMultiFeeDistribution",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "owner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "pause",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "paused",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "poolHelper",
+    outputs: [
+      {
+        internalType: "contract IPoolHelper",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "priceProvider",
+    outputs: [
+      {
+        internalType: "contract IPriceProvider",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_tokenAmount",
+        type: "uint256",
+      },
+    ],
+    name: "quoteFromToken",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "optimalWETHAmount",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "rdntAddr",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "renounceOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_newRatio",
+        type: "uint256",
+      },
+    ],
+    name: "setAcceptableRatio",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_mfdAddr",
+        type: "address",
+      },
+    ],
+    name: "setMfd",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_poolHelper",
+        type: "address",
+      },
+    ],
+    name: "setPoolHelper",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_provider",
+        type: "address",
+      },
+    ],
+    name: "setPriceProvider",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "transferOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "unpause",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "weth",
+    outputs: [
+      {
+        internalType: "contract IWETH",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bool",
+        name: "_borrow",
+        type: "bool",
+      },
+      {
+        internalType: "uint256",
+        name: "_wethAmt",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_rdntAmt",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_lockTypeIndex",
+        type: "uint256",
+      },
+    ],
+    name: "zap",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "liquidity",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bool",
+        name: "_borrow",
+        type: "bool",
+      },
+      {
+        internalType: "uint256",
+        name: "_lockTypeIndex",
+        type: "uint256",
+      },
+    ],
+    name: "zapFromVesting",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "liquidity",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bool",
+        name: "_borrow",
+        type: "bool",
+      },
+      {
+        internalType: "uint256",
+        name: "_wethAmt",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_rdntAmt",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "_onBehalf",
+        type: "address",
+      },
+    ],
+    name: "zapOnBehalf",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "liquidity",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    stateMutability: "payable",
+    type: "receive",
+  },
+];
 // Mainnet DAI, Optimism and Arbitrium Rollup Contracts with local addresses
 module.exports = {
   1: {
@@ -2896,6 +3925,12 @@ module.exports = {
       },
     },
   },
+  56: {
+    RadiantDlpLockZap: {
+      address: "0x9fbb02A3f75353C21Ec06cfbE13f9d45054032d8",
+      abi: BNBRADIANTDLPLOCKZAPABI,
+    },
+  },
   // 42161: Arbitrum
   42161: {
     contracts: {
@@ -2906,6 +3941,11 @@ module.exports = {
       RadiantChefIncentivesController: {
         address: "0xebC85d44cefb1293707b11f707bd3CEc34B4D5fA",
         abi: RADIANTCHEFINCENTIVESCONTROLLERABI,
+      },
+      RadiantDlpLockZap: {
+        // address: "0xd59efe08d199B71474F612eb41E4680DB0620658",
+        address: "0x8991C4C347420E476F1cf09C03abA224A76E2997",
+        abi: ARBRADIANTDLPLOCKZAPABI,
       },
     },
   },
