@@ -273,6 +273,13 @@ module.exports = {
         mnemonic: mnemonic(),
       },
     },
+    bsc: {
+      url: "https://bsc-dataseed1.binance.org/",
+      chainId: 56,
+      accounts: {
+        mnemonic: mnemonic(),
+      },
+    },
   },
   solidity: {
     compilers: [

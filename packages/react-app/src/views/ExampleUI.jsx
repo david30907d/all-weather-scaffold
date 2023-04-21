@@ -19,6 +19,7 @@ export default function ExampleUI({
 }) {
   const [newPurpose, setNewPurpose] = useState("loading...");
   const [newEth, setNewEth] = useState("loading eth...");
+  const [newBnb, setNewBnb] = useState("loading bnb...");
 
   return (
     <div>
@@ -47,6 +48,27 @@ export default function ExampleUI({
           }}
         >
           Zap into Arb Radiant DLP
+        </Button>
+        <Input
+          onChange={e => {
+            setNewBnb(e.target.value);
+          }}
+        />
+        <Button
+          onClick={() => {
+            tx({
+              to: writeContracts.RadiantDlpLockZap.address,
+              value: utils.parseEther(newBnb),
+              data: writeContracts.RadiantDlpLockZap.interface.encodeFunctionData("zap(bool,uint256,uint256,uint256)", [
+                false,
+                0,
+                0,
+                3,
+              ]),
+            });
+          }}
+        >
+          Zap into BNB Radiant DLP
         </Button>
         <h4>purpose: {purpose}</h4>
         <RebalancerWidget />

@@ -239,6 +239,13 @@ export const NETWORKS = {
     blockExplorer: "https://moonbeam-explorer.netlify.app/",
     rpcUrl: "http://127.0.0.1:9933",
   },
+  bsc: {
+    name: "bsc",
+    color: "#53CBC9",
+    chainId: 56,
+    blockExplorer: "https://bscscan.com/",
+    rpcUrl: "https://bsc‑dataseed3.ninicoin.io",
+  },
 };
 
 export const NETWORK = chainId => {

@@ -3926,9 +3926,11 @@ module.exports = {
     },
   },
   56: {
-    RadiantDlpLockZap: {
-      address: "0x9fbb02A3f75353C21Ec06cfbE13f9d45054032d8",
-      abi: BNBRADIANTDLPLOCKZAPABI,
+    contracts: {
+      RadiantDlpLockZap: {
+        address: "0x13Ef2A9e127aE8d9e9b863c7e375Ba68E1a42Ac6",
+        abi: BNBRADIANTDLPLOCKZAPABI,
+      },
     },
   },
   // 42161: Arbitrum
@@ -3943,7 +3945,6 @@ module.exports = {
         abi: RADIANTCHEFINCENTIVESCONTROLLERABI,
       },
       RadiantDlpLockZap: {
-        // address: "0xd59efe08d199B71474F612eb41E4680DB0620658",
         address: "0x8991C4C347420E476F1cf09C03abA224A76E2997",
         abi: ARBRADIANTDLPLOCKZAPABI,
       },
