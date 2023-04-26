@@ -72,7 +72,7 @@ export default function ExampleUI({
           Zap into BNB Radiant DLP
         </Button>
         <h4>purpose: {purpose}</h4>
-        <RebalancerWidget />
+        <RebalancerWidget addresses={[address]} />
         <DropdownExampleSearchSelectionTwo />
         <Divider />
         <div style={{ margin: 8 }}>

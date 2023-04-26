@@ -9,8 +9,16 @@ const tokenAddressInvertedIndex = Object.entries(tokens.props.pageProps.tokensSy
   },
   {},
 );
-const RebalancerWidget = () => {
-  const rebalanceSuggestions = useRebalanceSuggestions();
+const tokenAddressToImageInvertedIndex = Object.entries(tokens.props.pageProps.tokenList["42161"]).reduce(
+  (newObject, currentObject) => {
+    const { symbol, logoURI } = currentObject["1"];
+    newObject[symbol.toLowerCase()] = logoURI;
+    return newObject;
+  },
+  {},
+);
+const RebalancerWidget = addresses => {
+  const rebalanceSuggestions = useRebalanceSuggestions(addresses);
   return (
     <div className="ui label">
       {rebalanceSuggestions.map(suggestion_of_single_category => (
@@ -22,9 +30,6 @@ const RebalancerWidget = () => {
           </div>
           {suggestion_of_single_category.suggestions_for_positions.map(suggestion => (
             <div class="item" key={suggestion.symbol}>
-              <a class="ui tiny image">
-                <img src="/images/avatar/large/jenny.jpg"></img>
-              </a>
               <div class="content">
                 <a class="header">{suggestion.symbol}</a>
                 <div class="description">
@@ -35,14 +40,19 @@ const RebalancerWidget = () => {
                     .map(token => (
                       // TODO(david): optimize the swap path down the road
                       // in v1 we just simply swap into ETH and then swap into the target token
-                      <a
-                        class="ui tiny image"
-                        href={`https://swap.defillama.com/?chain=arbitrum&from=${
-                          tokenAddressInvertedIndex[token.toLowerCase()]
-                        }&to=0x0000000000000000000000000000000000000000`}
-                      >
-                        {token}
-                      </a>
+                      <div>
+                        <a class="ui tiny image">
+                          <img src={tokenAddressToImageInvertedIndex[token.toLowerCase()]}></img>
+                        </a>
+                        <a
+                          class="ui tiny image"
+                          href={`https://swap.defillama.com/?chain=arbitrum&from=${
+                            tokenAddressInvertedIndex[token.toLowerCase()]
+                          }&to=0x0000000000000000000000000000000000000000`}
+                        >
+                          {token}
+                        </a>
+                      </div>
                     ))}
                 </div>
               </div>
