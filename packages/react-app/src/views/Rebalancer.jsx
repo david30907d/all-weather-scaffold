@@ -1,5 +1,6 @@
-import suggestions from "./suggestions.json";
+// import suggestions from "./suggestions.json";
 import tokens from "./tokens.json";
+import { useRebalanceSuggestions } from "../hooks";
 
 const tokenAddressInvertedIndex = Object.entries(tokens.props.pageProps.tokensSymbolsMap["42161"]).reduce(
   (newObject, [address, token]) => {
@@ -9,9 +10,10 @@ const tokenAddressInvertedIndex = Object.entries(tokens.props.pageProps.tokensSy
   {},
 );
 const RebalancerWidget = () => {
+  const rebalanceSuggestions = useRebalanceSuggestions();
   return (
     <div className="ui label">
-      {suggestions.map(suggestion_of_single_category => (
+      {rebalanceSuggestions.map(suggestion_of_single_category => (
         <h2 className="ui header" key={suggestion_of_single_category.category}>
           <i class="money bill alternate icon"></i>
           <div className="content">
@@ -51,18 +53,5 @@ const RebalancerWidget = () => {
     </div>
   );
 };
-// console.log(suggestions);
-// return (<div class="ui label">
-//     {{
-//         for (suggestion_of_single_category of suggestions) {
-//             <h2 class="ui header" key={suggestion_of_single_category['category']}>
-//                 <img class="ui image" src="/images/icons/school.png">
-//                 <div class="content">
-//                 Learn More
-//                 </div>
-//             </h2>
-//         }
-//     }}
-// </div>)
 
 export default RebalancerWidget;

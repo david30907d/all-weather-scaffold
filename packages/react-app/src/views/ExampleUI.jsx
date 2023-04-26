@@ -20,7 +20,6 @@ export default function ExampleUI({
   const [newPurpose, setNewPurpose] = useState("loading...");
   const [newEth, setNewEth] = useState("loading eth...");
   const [newBnb, setNewBnb] = useState("loading bnb...");
-
   return (
     <div>
       {/*
@@ -44,6 +43,8 @@ export default function ExampleUI({
                 0,
                 3,
               ]),
+              // TODO(david): figure out how to set the correct gas limit
+              gasLimit: 3807397,
             });
           }}
         >
