@@ -5,7 +5,7 @@ import { useThemeSwitcher } from "react-css-theme-switcher";
 import Address from "./Address";
 import Balance from "./Balance";
 import Wallet from "./Wallet";
-
+import WalletLabels from "./WalletLabels";
 /** 
   ~ What it does? ~
 
@@ -43,6 +43,7 @@ import Wallet from "./Wallet";
 
 export default function Account({
   address,
+  addresses,
   userSigner,
   localProvider,
   mainnetProvider,
@@ -55,7 +56,6 @@ export default function Account({
   isContract,
 }) {
   const { currentTheme } = useThemeSwitcher();
-
   let accountButtonInfo;
   if (web3Modal?.cachedProvider) {
     accountButtonInfo = { name: "Logout", action: logoutOfWeb3Modal };
@@ -92,6 +92,7 @@ export default function Account({
           {accountButtonInfo.name}
         </Button>
       )}
+      <WalletLabels addresses={addresses} />
     </div>
   );
 }

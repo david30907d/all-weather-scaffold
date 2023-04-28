@@ -9,6 +9,7 @@ import { Address, Balance, Events } from "../components";
 export default function ExampleUI({
   purpose,
   address,
+  addresses,
   mainnetProvider,
   localProvider,
   yourLocalBalance,
@@ -72,7 +73,7 @@ export default function ExampleUI({
           Zap into BNB Radiant DLP
         </Button>
         <h4>purpose: {purpose}</h4>
-        <RebalancerWidget addresses={[address]} />
+        <RebalancerWidget addresses={Array.from(addresses)} />
         <DropdownExampleSearchSelectionTwo />
         <Divider />
         <div style={{ margin: 8 }}>

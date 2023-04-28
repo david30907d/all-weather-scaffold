@@ -23,16 +23,16 @@ const RebalancerWidget = addresses => {
     <div className="ui label">
       {rebalanceSuggestions.map(suggestion_of_single_category => (
         <h2 className="ui header" key={suggestion_of_single_category.category}>
-          <i class="money bill alternate icon"></i>
+          <i className="money bill alternate icon"></i>
           <div className="content">
             {suggestion_of_single_category.category}:{" "}
             {suggestion_of_single_category.investment_shift_of_this_category.toFixed(2) * 100}%
           </div>
           {suggestion_of_single_category.suggestions_for_positions.map(suggestion => (
-            <div class="item" key={suggestion.symbol}>
-              <div class="content">
-                <a class="header">{suggestion.symbol}</a>
-                <div class="description">
+            <div className="item" key={suggestion.symbol}>
+              <div className="content">
+                <a className="header">{suggestion.symbol}</a>
+                <div className="description">
                   <p>Do this change: ${suggestion.diffrence.toFixed(2)}</p>
                   {suggestion.symbol
                     .split(":")[1]
@@ -40,12 +40,12 @@ const RebalancerWidget = addresses => {
                     .map(token => (
                       // TODO(david): optimize the swap path down the road
                       // in v1 we just simply swap into ETH and then swap into the target token
-                      <div>
-                        <a class="ui tiny image">
+                      <div key={token}>
+                        <a className="ui tiny image">
                           <img src={tokenAddressToImageInvertedIndex[token.toLowerCase()]}></img>
                         </a>
                         <a
-                          class="ui tiny image"
+                          className="ui tiny image"
                           href={`https://swap.defillama.com/?chain=arbitrum&from=${
                             tokenAddressInvertedIndex[token.toLowerCase()]
                           }&to=0x0000000000000000000000000000000000000000`}

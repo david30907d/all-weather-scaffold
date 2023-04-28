@@ -78,6 +78,7 @@ function App(props) {
 
   const [injectedProvider, setInjectedProvider] = useState();
   const [address, setAddress] = useState();
+  const [addresses, setAddresses] = useState(new Set());
   const [selectedNetwork, setSelectedNetwork] = useState(networkOptions[0]);
   const location = useLocation();
 
@@ -126,6 +127,10 @@ function App(props) {
       if (userSigner) {
         const newAddress = await userSigner.getAddress();
         setAddress(newAddress);
+
+        const newAddresses = new Set(addresses); // create a copy of the current set
+        newAddresses.add(newAddress); // add the new value to the copy
+        setAddresses(newAddresses);
       }
     }
     getAddress();
@@ -281,6 +286,7 @@ function App(props) {
             <Account
               useBurner={USE_BURNER_WALLET}
               address={address}
+              addresses={Array.from(addresses)}
               localProvider={localProvider}
               userSigner={userSigner}
               mainnetProvider={mainnetProvider}
@@ -358,6 +364,7 @@ function App(props) {
         <Route path="/exampleui">
           <ExampleUI
             address={address}
+            addresses={addresses}
             userSigner={userSigner}
             mainnetProvider={mainnetProvider}
             localProvider={localProvider}
