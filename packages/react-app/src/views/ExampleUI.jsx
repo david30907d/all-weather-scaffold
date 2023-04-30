@@ -1,11 +1,19 @@
 import { Button, Card, DatePicker, Divider, Input, Progress, Slider, Spin, Switch } from "antd";
-import React, { useState } from "react";
-import { utils } from "ethers";
+import React, { useState, useEffect } from "react";
+import { utils, BigNumber } from "ethers";
 import { SyncOutlined } from "@ant-design/icons";
 import DropdownExampleSearchSelectionTwo from "./TokensSearchDropdown";
 import RebalancerWidget from "./Rebalancer";
-
 import { Address, Balance, Events } from "../components";
+
+const getContractEstimatedGas = async (writeContracts, contract, yourLocalBalance) => {
+  if (contract === "RadiantDlpLockZap") {
+    return await writeContracts.RadiantDlpLockZap.estimateGas.zap(false, 0, 0, 3, {
+      value: utils.parseEther(String(utils.formatEther(yourLocalBalance))),
+    });
+  }
+};
+
 export default function ExampleUI({
   purpose,
   address,
@@ -21,6 +29,18 @@ export default function ExampleUI({
   const [newPurpose, setNewPurpose] = useState("loading...");
   const [newEth, setNewEth] = useState("loading eth...");
   const [newBnb, setNewBnb] = useState("loading bnb...");
+  const [newDpx, setNewDpx] = useState("loading dpx...");
+  const [radiantGas, setRadiantGas] = useState();
+
+  useEffect(() => {
+    async function fetchData() {
+      const radiantGas = await getContractEstimatedGas(writeContracts, "RadiantDlpLockZap", yourLocalBalance);
+      setRadiantGas(radiantGas);
+    }
+    if (Object.keys(writeContracts).length !== 0) {
+      fetchData();
+    }
+  }, [writeContracts.RadiantDlpLockZap, yourLocalBalance]);
   return (
     <div>
       {/*
@@ -45,7 +65,7 @@ export default function ExampleUI({
                 3,
               ]),
               // TODO(david): figure out how to set the correct gas limit
-              gasLimit: 3807397,
+              gasLimit: radiantGas.toNumber(),
             });
           }}
         >
@@ -71,6 +91,59 @@ export default function ExampleUI({
           }}
         >
           Zap into BNB Radiant DLP
+        </Button>
+        <Input
+          onChange={e => {
+            setNewDpx(e.target.value);
+          }}
+        />
+        <Input
+          onChange={e => {
+            setNewBnb(e.target.value);
+          }}
+        />
+        <Button
+          onClick={() => {
+            tx({
+              to: writeContracts.SushiSwapRouter.address,
+              value: utils.parseEther(newEth),
+              data: writeContracts.SushiSwapRouter.interface.encodeFunctionData(
+                "addLiquidityETH(address,uint256,uint256,uint256,address,uint256)",
+                [
+                  "0x6c2c06790b3e3e3c38e12ee22f8183b37a13ee55",
+                  utils.parseEther(newDpx),
+                  utils.parseEther(newDpx).mul(995).div(1000),
+                  utils.parseEther(newEth).mul(995).div(1000),
+                  address,
+                  // +300 means 5 minutes
+                  Math.floor(Date.now() / 1000 + 300),
+                ],
+              ),
+            });
+          }}
+        >
+          Zap into Sushi Dopex Farm
+        </Button>
+        <Button
+          onClick={() => {
+            tx({
+              to: writeContracts.GammaUniproxy.address,
+              value: utils.parseEther(newEth),
+              data: writeContracts.GammaUniproxy.interface.encodeFunctionData(
+                "deposit(uint256,uint256,address,address,uint256[4])",
+                [
+                  utils.parseEther(newDpx),
+                  utils.parseEther(newEth),
+                  address,
+                  // this is Gamma's MAGIC token wallet address
+                  "0x21178dd2ba9caee9df37f2d5f89a097d69fb0a7d",
+                  [0, 0, 0, 0],
+                ],
+              ),
+            });
+          }}
+        >
+          Zap into Gamma Uniswap Pool
         </Button>
         <h4>purpose: {purpose}</h4>
         <RebalancerWidget addresses={Array.from(addresses)} />
