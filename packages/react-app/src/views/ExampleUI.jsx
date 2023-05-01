@@ -1,16 +1,66 @@
 import { Button, Card, DatePicker, Divider, Input, Progress, Slider, Spin, Switch } from "antd";
 import React, { useState, useEffect } from "react";
-import { utils, BigNumber } from "ethers";
+import { utils } from "ethers";
 import { SyncOutlined } from "@ant-design/icons";
 import DropdownExampleSearchSelectionTwo from "./TokensSearchDropdown";
 import RebalancerWidget from "./Rebalancer";
 import { Address, Balance, Events } from "../components";
 
-const getContractEstimatedGas = async (writeContracts, contract, yourLocalBalance) => {
+const getContractEstimatedGas = async (writeContracts, contract, yourLocalBalance, price, address) => {
+  const yourLocalBalanceInWei = utils.parseEther(String(utils.formatEther(yourLocalBalance)));
   if (contract === "RadiantDlpLockZap") {
     return await writeContracts.RadiantDlpLockZap.estimateGas.zap(false, 0, 0, 3, {
-      value: utils.parseEther(String(utils.formatEther(yourLocalBalance))),
+      value: yourLocalBalanceInWei,
     });
+  }
+  // else if (contract === "SushiSwapRouter") {
+  //   console.log("newDpx", newDpx, "newEth", newEth)
+  //   console.log("newDpx", newDpx, "newEth", newEth)
+  //   const result = await writeContracts.SushiSwapRouter.estimateGas.addLiquidityETH("0x6c2c06790b3e3e3c38e12ee22f8183b37a13ee55",
+  //     utils.parseEther(newDpx),
+  //     utils.parseEther(newDpx).mul(995).div(1000),
+  //     yourLocalBalanceInWei.mul(995).div(1000),
+  //     address,
+  //     // +300 means 5 minutes
+  //     Math.floor(Date.now() / 1000 + 300), {
+  //     value: yourLocalBalanceInWei,
+  //   });
+  //   console.log("Dpx Gat", result)
+  //   return result
+  // }
+  // else if (contract === "GammaUniproxy") {
+  //   return await writeContracts.GammaUniproxy.estimateGas.deposit(
+  //     "deposit(uint256,uint256,address,address,uint256[4])",
+  //     [
+  //       utils.parseEther("1.610492020841471073"),
+  //       utils.parseEther("0.000147128809490218"),
+  //       address,
+  //       // this is Gamma's MAGIC token wallet address
+  //       "0x21178dd2ba9caee9df37f2d5f89a097d69fb0a7d",
+  //       [0, 0, 0, 0],
+  //     ],
+  //     {
+  //       value: utils.parseEther("0.000147128809490218"),
+  //     });
+  // }
+  else if (contract === "GmxRewardRouterV2") {
+    return await writeContracts.GmxRewardRouterV2.estimateGas.mintAndStakeGlpETH(
+      0,
+      yourLocalBalanceInWei.mul(99).div(100).mul(Math.floor(price)),
+      // 1
+      {
+        value: utils.parseEther(String(utils.formatEther(yourLocalBalance))),
+      },
+    );
+  } else if (contract === "PendleRouter") {
+    return await writeContracts.PendleRouter.estimateGas.addLiquiditySingleToken(
+      0,
+      yourLocalBalanceInWei.mul(99).div(100).mul(Math.floor(price)),
+      // 1
+      {
+        value: yourLocalBalanceInWei,
+      },
+    );
   }
 };
 
@@ -30,17 +80,40 @@ export default function ExampleUI({
   const [newEth, setNewEth] = useState("loading eth...");
   const [newBnb, setNewBnb] = useState("loading bnb...");
   const [newDpx, setNewDpx] = useState("loading dpx...");
+  const [newMagic, setNewMagic] = useState("loading magic...");
   const [radiantGas, setRadiantGas] = useState();
+  const [gmxGas, setGmxGas] = useState();
+  const [dpxGas, setDpxGas] = useState();
+  const [magicGas, setMagicGas] = useState();
 
   useEffect(() => {
     async function fetchData() {
-      const radiantGas = await getContractEstimatedGas(writeContracts, "RadiantDlpLockZap", yourLocalBalance);
+      const radiantGas = await getContractEstimatedGas(
+        writeContracts,
+        "RadiantDlpLockZap",
+        yourLocalBalance,
+        price,
+        address,
+      );
       setRadiantGas(radiantGas);
+      console.log("radiantGas.toNumber()", radiantGas.toNumber());
+      const gmxGas = await getContractEstimatedGas(
+        writeContracts,
+        "GmxRewardRouterV2",
+        yourLocalBalance,
+        price,
+        address,
+      );
+      setGmxGas(gmxGas);
+      const dpxGas = await getContractEstimatedGas(writeContracts, "SushiSwapRouter", yourLocalBalance, price, address);
+      setDpxGas(dpxGas);
+      const magicGas = await getContractEstimatedGas(writeContracts, "GammaUniproxy", yourLocalBalance, price, address);
+      setMagicGas(magicGas);
     }
     if (Object.keys(writeContracts).length !== 0) {
       fetchData();
     }
-  }, [writeContracts.RadiantDlpLockZap, yourLocalBalance]);
+  }, [yourLocalBalance, writeContracts.RadiantDlpLockZap, writeContracts.GmxRewardRouterV2]);
   return (
     <div>
       {/*
@@ -93,20 +166,15 @@ export default function ExampleUI({
           Zap into BNB Radiant DLP
         </Button>
         <Input
+          placeholder="Dpx..."
           onChange={e => {
             setNewDpx(e.target.value);
-          }}
-        />
-        <Input
-          onChange={e => {
-            setNewBnb(e.target.value);
           }}
         />
         <Button
           onClick={() => {
             tx({
               to: writeContracts.SushiSwapRouter.address,
-              value: utils.parseEther(newEth),
               data: writeContracts.SushiSwapRouter.interface.encodeFunctionData(
                 "addLiquidityETH(address,uint256,uint256,uint256,address,uint256)",
                 [
@@ -119,20 +187,26 @@ export default function ExampleUI({
                   Math.floor(Date.now() / 1000 + 300),
                 ],
               ),
+              gasLimit: 1697997,
             });
           }}
         >
           Zap into Sushi Dopex Farm
         </Button>
+        <Input
+          placeholder="Magic..."
+          onChange={e => {
+            setNewMagic(e.target.value);
+          }}
+        />
         <Button
           onClick={() => {
             tx({
               to: writeContracts.GammaUniproxy.address,
-              value: utils.parseEther(newEth),
               data: writeContracts.GammaUniproxy.interface.encodeFunctionData(
                 "deposit(uint256,uint256,address,address,uint256[4])",
                 [
-                  utils.parseEther(newDpx),
+                  utils.parseEther(newMagic),
                   utils.parseEther(newEth),
                   address,
                   // this is Gamma's MAGIC token wallet address
@@ -140,10 +214,48 @@ export default function ExampleUI({
                   [0, 0, 0, 0],
                 ],
               ),
+              gasLimit: gmxGas.toNumber(),
+              // gasLimit: magicGas.toNumber(),
             });
           }}
         >
           Zap into Gamma Uniswap Pool
+        </Button>
+        <Button
+          onClick={() => {
+            tx({
+              to: writeContracts.GmxRewardRouterV2.address,
+              value: utils.parseEther(newEth),
+              data: writeContracts.GmxRewardRouterV2.interface.encodeFunctionData(
+                "mintAndStakeGlpETH(uint256,uint256)",
+                [0, utils.parseEther(newEth).mul(99).div(100).mul(Math.floor(price))],
+              ),
+              gasLimit: gmxGas.toNumber(),
+            });
+          }}
+        >
+          Zap into GLP (need to manually zap into Pendle PT GLP Pool)
+        </Button>
+        <Button
+          onClick={() => {
+            tx({
+              to: writeContracts.PendleRouter.address,
+              data:
+                // TODO(david): ask people how to pass the correct param for getting hex data
+                writeContracts.PendleRouter.interface.encodeFunctionData(
+                  "redeemDueInterestAndRewards(address,address[],address[],address[])",
+                  [
+                    address,
+                    [],
+                    [],
+                    ["0x7d49e5adc0eaad9c027857767638613253ef125f", "0xa0192f6567f8f5dc38c53323235fd08b318d2dca"],
+                  ],
+                ),
+              gasLimit: gmxGas.toNumber(),
+            });
+          }}
+        >
+          Claim Pendle Rewards
         </Button>
         <h4>purpose: {purpose}</h4>
         <RebalancerWidget addresses={Array.from(addresses)} />
