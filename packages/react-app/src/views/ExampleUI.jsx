@@ -1,6 +1,6 @@
 import { Button, Card, DatePicker, Divider, Input, Progress, Slider, Spin, Switch } from "antd";
 import React, { useState, useEffect } from "react";
-import { utils } from "ethers";
+import { utils, FixedNumber, BigNumber } from "ethers";
 import { SyncOutlined } from "@ant-design/icons";
 import DropdownExampleSearchSelectionTwo from "./TokensSearchDropdown";
 import RebalancerWidget from "./Rebalancer";
@@ -257,6 +257,133 @@ export default function ExampleUI({
         >
           Claim Pendle Rewards
         </Button>
+        <Button
+          onClick={() => {
+            tx({
+              to: writeContracts.SushiSwapMiniChefV2.address,
+              data:
+                // TODO(david): ask people how to pass the correct param for getting hex data
+                writeContracts.SushiSwapMiniChefV2.interface.encodeFunctionData("harvest(uint256,address)", [
+                  17,
+                  address,
+                ]),
+              gasLimit: gmxGas.toNumber(),
+            });
+          }}
+        >
+          Claim Sushi Dpx Rewards
+        </Button>
+        <Button
+          onClick={() => {
+            console.log([
+              {
+                // withdraw Radiant USDT
+                target: writeContracts.RadiantLendingPool.address,
+                callData: writeContracts.RadiantLendingPool.interface.encodeFunctionData("withdraw", [
+                  "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+                  BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+                  address,
+                ]),
+              },
+            ]);
+            tx({
+              to: writeContracts.Multicall2.address,
+              data: writeContracts.Multicall2.interface.encodeFunctionData("aggregate", [
+                [
+                  {
+                    // withdraw Radiant USDT
+                    target: writeContracts.RadiantLendingPool.address,
+                    callData: writeContracts.RadiantLendingPool.interface.encodeFunctionData("withdraw", [
+                      "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+                      BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+                      address,
+                    ]),
+                  },
+                ],
+              ]),
+              gasLimit: 30000000,
+            });
+          }}
+        >
+          Claim All Multicall2
+        </Button>
+        <Button
+          onClick={() => {
+            tx({
+              to: writeContracts.RadiantLendingPool.address,
+              data: writeContracts.RadiantLendingPool.interface.encodeFunctionData("withdraw", [
+                "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+                BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+                address,
+              ]),
+              gasLimit: 30000000,
+            });
+          }}
+        >
+          Claim Radiant USDT
+        </Button>
+        <Button
+          onClick={() => {
+            tx({
+              to: writeContracts.ArbitrumClaimableReward.address,
+              data: writeContracts.ArbitrumClaimableReward.interface.encodeFunctionData("withdrawRadiantLending", [
+                "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1",
+                "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+                BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+                address,
+              ]),
+              gasLimit: 30000000,
+            });
+          }}
+        >
+          Claim withdrawRadiantLending
+        </Button>
+        <Button
+          onClick={() => {
+            const calls = [
+              // writeContracts.ArbitrumClaimableReward.interface.encodeFunctionData('getAllRewards', []),
+              writeContracts.ArbitrumClaimableReward.interface.encodeFunctionData("claimPendleReward", [
+                "0x0000000001E4ef00d069e71d6bA041b0A16F7eA0",
+                "0x7D49E5Adc0EAAD9C027857767638613253eF125f",
+                "0xa0192f6567f8f5dc38c53323235fd08b318d2dca",
+              ]),
+              writeContracts.ArbitrumClaimableReward.interface.encodeFunctionData("withdrawRadiantLending", [
+                "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1",
+                "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1",
+                ["0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"],
+                BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+                address,
+              ]),
+            ];
+            console.log("calls: ", calls);
+            console.log("calls: ", calls);
+            console.log("calls: ", calls);
+            tx({
+              to: writeContracts.ArbitrumClaimableReward.address,
+              data:
+                // TODO(david): ask people how to pass the correct param for getting hex data
+                writeContracts.ArbitrumClaimableReward.interface.encodeFunctionData("multicall", [calls]),
+              gasLimit: 30000000,
+            });
+          }}
+        >
+          Claim All Multicall (Wrong)
+        </Button>
+        <div style={{ margin: 8 }}>
+          <Button
+            onClick={() => {
+              tx({
+                to: writeContracts.RadiantV2Lock.address,
+                data:
+                  // TODO(david): ask people how to pass the correct param for getting hex data
+                  writeContracts.RadiantV2Lock.interface.encodeFunctionData("getAllRewards()", []),
+                gasLimit: 30000000,
+              });
+            }}
+          >
+            Claim Radiant Rewards
+          </Button>
+        </div>
         <h4>purpose: {purpose}</h4>
         <RebalancerWidget addresses={Array.from(addresses)} />
         <DropdownExampleSearchSelectionTwo />
@@ -323,16 +450,6 @@ export default function ExampleUI({
           fontSize={16}
         />
         <Divider />
-        <div style={{ margin: 8 }}>
-          <Button
-            onClick={() => {
-              /* look how you call setPurpose on your contract: */
-              tx(writeContracts.RadiantChefIncentivesController.claimAll(address));
-            }}
-          >
-            Claim Radiant Rewards
-          </Button>
-        </div>
         <div style={{ margin: 8 }}>
           <Button
             onClick={() => {

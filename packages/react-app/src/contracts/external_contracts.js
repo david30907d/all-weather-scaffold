@@ -1932,1455 +1932,6 @@ const PENDLEGLPMARKETABI = [
     type: "function",
   },
 ];
-const RADIANTCHEFINCENTIVESCONTROLLERABI = [
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "token",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "user",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "balance",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "totalSupply",
-        type: "uint256",
-      },
-    ],
-    name: "BalanceUpdated",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "_balance",
-        type: "uint256",
-      },
-    ],
-    name: "ChefReserveEmpty",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "_balance",
-        type: "uint256",
-      },
-    ],
-    name: "ChefReserveLow",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "user",
-        type: "address",
-      },
-    ],
-    name: "Disqualified",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint256[]",
-        name: "startTimeOffsets",
-        type: "uint256[]",
-      },
-      {
-        indexed: false,
-        internalType: "uint256[]",
-        name: "rewardsPerSeconds",
-        type: "uint256[]",
-      },
-    ],
-    name: "EmissionScheduleAppended",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint8",
-        name: "version",
-        type: "uint8",
-      },
-    ],
-    name: "Initialized",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "previousOwner",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
-    ],
-    name: "OwnershipTransferred",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "Paused",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "rewardsPerSecond",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "bool",
-        name: "persist",
-        type: "bool",
-      },
-    ],
-    name: "RewardsPerSecondUpdated",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "Unpaused",
-    type: "event",
-  },
-  {
-    inputs: [],
-    name: "accountedRewards",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_token",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_allocPoint",
-        type: "uint256",
-      },
-    ],
-    name: "addPool",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_user",
-        type: "address",
-      },
-    ],
-    name: "afterLockUpdate",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_user",
-        type: "address",
-      },
-    ],
-    name: "allPendingRewards",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "pending",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address[]",
-        name: "_tokens",
-        type: "address[]",
-      },
-      {
-        internalType: "uint256[]",
-        name: "_allocPoints",
-        type: "uint256[]",
-      },
-    ],
-    name: "batchUpdateAllocPoint",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_user",
-        type: "address",
-      },
-    ],
-    name: "beforeLockUpdate",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "bountyManager",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_user",
-        type: "address",
-      },
-      {
-        internalType: "address[]",
-        name: "_tokens",
-        type: "address[]",
-      },
-    ],
-    name: "claim",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_user",
-        type: "address",
-      },
-    ],
-    name: "claimAll",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_user",
-        type: "address",
-      },
-      {
-        internalType: "bool",
-        name: "_execute",
-        type: "bool",
-      },
-    ],
-    name: "claimBounty",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "issueBaseBounty",
-        type: "bool",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "depositedRewards",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "eligibilityEnabled",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    name: "eligibilityExempt",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "eligibleDataProvider",
-    outputs: [
-      {
-        internalType: "contract IEligibilityDataProvider",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    name: "emissionSchedule",
-    outputs: [
-      {
-        internalType: "uint128",
-        name: "startTimeOffset",
-        type: "uint128",
-      },
-      {
-        internalType: "uint128",
-        name: "rewardsPerSecond",
-        type: "uint128",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "emissionScheduleIndex",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "endRewardTime",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "timestamp",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_user",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_balance",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_totalSupply",
-        type: "uint256",
-      },
-    ],
-    name: "handleActionAfter",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_user",
-        type: "address",
-      },
-    ],
-    name: "handleActionBefore",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_poolConfigurator",
-        type: "address",
-      },
-      {
-        internalType: "contract IEligibilityDataProvider",
-        name: "_eligibleDataProvider",
-        type: "address",
-      },
-      {
-        internalType: "contract IMiddleFeeDistribution",
-        name: "_rewardMinter",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_rewardsPerSecond",
-        type: "uint256",
-      },
-    ],
-    name: "initialize",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "lastAllPoolUpdate",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "lastRPS",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "owner",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "pause",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "paused",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_user",
-        type: "address",
-      },
-      {
-        internalType: "address[]",
-        name: "_tokens",
-        type: "address[]",
-      },
-    ],
-    name: "pendingRewards",
-    outputs: [
-      {
-        internalType: "uint256[]",
-        name: "",
-        type: "uint256[]",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "persistRewardsPerSecond",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "poolConfigurator",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    name: "poolInfo",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "totalSupply",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "allocPoint",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "lastRewardTime",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "accRewardPerShare",
-        type: "uint256",
-      },
-      {
-        internalType: "contract IOnwardIncentivesController",
-        name: "onwardIncentives",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "poolLength",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "tokenAddress",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "tokenAmount",
-        type: "uint256",
-      },
-    ],
-    name: "recoverERC20",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_amount",
-        type: "uint256",
-      },
-    ],
-    name: "registerRewardDeposit",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    name: "registeredTokens",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "renounceOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "rewardMinter",
-    outputs: [
-      {
-        internalType: "contract IMiddleFeeDistribution",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "rewardsPerSecond",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_bountyManager",
-        type: "address",
-      },
-    ],
-    name: "setBountyManager",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bool",
-        name: "_newVal",
-        type: "bool",
-      },
-    ],
-    name: "setEligibilityEnabled",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_contract",
-        type: "address",
-      },
-    ],
-    name: "setEligibilityExempt",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256[]",
-        name: "_startTimeOffsets",
-        type: "uint256[]",
-      },
-      {
-        internalType: "uint256[]",
-        name: "_rewardsPerSecond",
-        type: "uint256[]",
-      },
-    ],
-    name: "setEmissionSchedule",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_token",
-        type: "address",
-      },
-      {
-        internalType: "contract IOnwardIncentivesController",
-        name: "_incentives",
-        type: "address",
-      },
-    ],
-    name: "setOnwardIncentives",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_rewardsPerSecond",
-        type: "uint256",
-      },
-      {
-        internalType: "bool",
-        name: "_persist",
-        type: "bool",
-      },
-    ],
-    name: "setRewardsPerSecond",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "start",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "startTime",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "totalAllocPoint",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
-    ],
-    name: "transferOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "unpause",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    name: "userBaseClaimable",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    name: "userInfo",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "rewardDebt",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "enterTime",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "lastClaimTime",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-];
-const ARBRADIANTDLPLOCKZAPABI = [
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "previousOwner",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
-    ],
-    name: "OwnershipTransferred",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "Paused",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "Unpaused",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "bool",
-        name: "_borrow",
-        type: "bool",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "_ethAmt",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "_rdntAmt",
-        type: "uint256",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "_from",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "_onBehalf",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "_lockTypeIndex",
-        type: "uint256",
-      },
-    ],
-    name: "Zapped",
-    type: "event",
-  },
-  {
-    inputs: [],
-    name: "ACCEPTABLE_RATIO",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "RATIO_DIVISOR",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "ethLPRatio",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "ethOracle",
-    outputs: [
-      {
-        internalType: "contract IChainlinkAggregator",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "getPoolHelper",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_asset",
-        type: "address",
-      },
-    ],
-    name: "getVDebtToken",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "contract IPoolHelper",
-        name: "_poolHelper",
-        type: "address",
-      },
-      {
-        internalType: "contract ILendingPool",
-        name: "_lendingPool",
-        type: "address",
-      },
-      {
-        internalType: "contract IWETH",
-        name: "_weth",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "_rdntAddr",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_ethLPRatio",
-        type: "uint256",
-      },
-    ],
-    name: "initialize",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "lendingPool",
-    outputs: [
-      {
-        internalType: "contract ILendingPool",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "mfd",
-    outputs: [
-      {
-        internalType: "contract IMultiFeeDistribution",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "owner",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "pause",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "paused",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "poolHelper",
-    outputs: [
-      {
-        internalType: "contract IPoolHelper",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "priceProvider",
-    outputs: [
-      {
-        internalType: "contract IPriceProvider",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_tokenAmount",
-        type: "uint256",
-      },
-    ],
-    name: "quoteFromToken",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "optimalWETHAmount",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "rdntAddr",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "renounceOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_mfdAddr",
-        type: "address",
-      },
-    ],
-    name: "setMfd",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_poolHelper",
-        type: "address",
-      },
-    ],
-    name: "setPoolHelper",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_provider",
-        type: "address",
-      },
-    ],
-    name: "setPriceProvider",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
-    ],
-    name: "transferOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "unpause",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "weth",
-    outputs: [
-      {
-        internalType: "contract IWETH",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bool",
-        name: "_borrow",
-        type: "bool",
-      },
-      {
-        internalType: "uint256",
-        name: "_wethAmt",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_rdntAmt",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_lockTypeIndex",
-        type: "uint256",
-      },
-    ],
-    name: "zap",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "liquidity",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bool",
-        name: "_borrow",
-        type: "bool",
-      },
-      {
-        internalType: "uint256",
-        name: "_lockTypeIndex",
-        type: "uint256",
-      },
-    ],
-    name: "zapFromVesting",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "liquidity",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bool",
-        name: "_borrow",
-        type: "bool",
-      },
-      {
-        internalType: "uint256",
-        name: "_wethAmt",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_rdntAmt",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "_onBehalf",
-        type: "address",
-      },
-    ],
-    name: "zapOnBehalf",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "liquidity",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    stateMutability: "payable",
-    type: "receive",
-  },
-];
 const BNBRADIANTDLPLOCKZAPABI = [
   {
     anonymous: false,
@@ -3911,7 +2462,924 @@ const BNBRADIANTDLPLOCKZAPABI = [
     type: "receive",
   },
 ];
-
+const GMXREWARDROUTERV2ABI = [
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "StakeGlp",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "token",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "StakeGmx",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "UnstakeGlp",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "token",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "UnstakeGmx",
+    type: "event",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_sender",
+        type: "address",
+      },
+    ],
+    name: "acceptTransfer",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address[]",
+        name: "_accounts",
+        type: "address[]",
+      },
+    ],
+    name: "batchCompoundForAccounts",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address[]",
+        name: "_accounts",
+        type: "address[]",
+      },
+      {
+        internalType: "uint256[]",
+        name: "_amounts",
+        type: "uint256[]",
+      },
+    ],
+    name: "batchStakeGmxForAccount",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "bnGmx",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "bonusGmxTracker",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "claim",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "claimEsGmx",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "claimFees",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "compound",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_account",
+        type: "address",
+      },
+    ],
+    name: "compoundForAccount",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "esGmx",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "feeGlpTracker",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "feeGmxTracker",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "glp",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "glpManager",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "glpVester",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "gmx",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "gmxVester",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "gov",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bool",
+        name: "_shouldClaimGmx",
+        type: "bool",
+      },
+      {
+        internalType: "bool",
+        name: "_shouldStakeGmx",
+        type: "bool",
+      },
+      {
+        internalType: "bool",
+        name: "_shouldClaimEsGmx",
+        type: "bool",
+      },
+      {
+        internalType: "bool",
+        name: "_shouldStakeEsGmx",
+        type: "bool",
+      },
+      {
+        internalType: "bool",
+        name: "_shouldStakeMultiplierPoints",
+        type: "bool",
+      },
+      {
+        internalType: "bool",
+        name: "_shouldClaimWeth",
+        type: "bool",
+      },
+      {
+        internalType: "bool",
+        name: "_shouldConvertWethToEth",
+        type: "bool",
+      },
+    ],
+    name: "handleRewards",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_weth",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_gmx",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_esGmx",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_bnGmx",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_glp",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_stakedGmxTracker",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_bonusGmxTracker",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_feeGmxTracker",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_feeGlpTracker",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_stakedGlpTracker",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_glpManager",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_gmxVester",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_glpVester",
+        type: "address",
+      },
+    ],
+    name: "initialize",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "isInitialized",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_token",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_minUsdg",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_minGlp",
+        type: "uint256",
+      },
+    ],
+    name: "mintAndStakeGlp",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_minUsdg",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_minGlp",
+        type: "uint256",
+      },
+    ],
+    name: "mintAndStakeGlpETH",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "pendingReceivers",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_gov",
+        type: "address",
+      },
+    ],
+    name: "setGov",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_receiver",
+        type: "address",
+      },
+    ],
+    name: "signalTransfer",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+    ],
+    name: "stakeEsGmx",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+    ],
+    name: "stakeGmx",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_account",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+    ],
+    name: "stakeGmxForAccount",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "stakedGlpTracker",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "stakedGmxTracker",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_tokenOut",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_glpAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_minOut",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "_receiver",
+        type: "address",
+      },
+    ],
+    name: "unstakeAndRedeemGlp",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_glpAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_minOut",
+        type: "uint256",
+      },
+      {
+        internalType: "address payable",
+        name: "_receiver",
+        type: "address",
+      },
+    ],
+    name: "unstakeAndRedeemGlpETH",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+    ],
+    name: "unstakeEsGmx",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+    ],
+    name: "unstakeGmx",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "weth",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_token",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_account",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+    ],
+    name: "withdrawToken",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    stateMutability: "payable",
+    type: "receive",
+  },
+];
+const PendleRouterABI = [
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_ROUTER",
+        type: "address",
+      },
+      {
+        internalType: "contract IAddressProvider",
+        name: "provider",
+        type: "address",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "constructor",
+  },
+  {
+    anonymous: 1,
+    inputs: [
+      {
+        indexed: 0,
+        internalType: "address",
+        name: "caller",
+        type: "address",
+      },
+      {
+        indexed: 0,
+        internalType: "address",
+        name: "market",
+        type: "address",
+      },
+      {
+        indexed: 0,
+        internalType: "address",
+        name: "receiver",
+        type: "address",
+      },
+      {
+        indexed: 1,
+        internalType: "uint256",
+        name: "netSyIn",
+        type: "uint256",
+      },
+      {
+        indexed: 1,
+        internalType: "uint256",
+        name: "netLpOut",
+        type: "uint256",
+      },
+    ],
+    name: "AddLiquiditySingleSy",
+    type: "event",
+  },
+  {
+    anonymous: 1,
+    inputs: [
+      {
+        indexed: 0,
+        internalType: "address",
+        name: "caller",
+        type: "address",
+      },
+      {
+        indexed: 0,
+        internalType: "address",
+        name: "market",
+        type: "address",
+      },
+      {
+        indexed: 0,
+        internalType: "address",
+        name: "receiver",
+        type: "address",
+      },
+      {
+        indexed: 1,
+        internalType: "uint256",
+        name: "netSyIn",
+        type: "uint256",
+      },
+      {
+        indexed: 1,
+        internalType: "uint256",
+        name: "netLpOut",
+        type: "uint256",
+      },
+      {
+        indexed: 1,
+        internalType: "uint256",
+        name: "netYtOut",
+        type: "uint256",
+      },
+    ],
+    name: "AddLiquiditySingleSyKeepYt",
+    type: "event",
+  },
+  {
+    anonymous: 1,
+    inputs: [
+      {
+        indexed: 0,
+        internalType: "address",
+        name: "caller",
+        type: "address",
+      },
+      {
+        indexed: 0,
+        internalType: "address",
+        name: "market",
+        type: "address",
+      },
+      {
+        indexed: 0,
+        internalType: "address",
+        name: "token",
+        type: "address",
+      },
+      {
+        indexed: 1,
+        internalType: "address",
+        name: "receiver",
+        type: "address",
+      },
+      {
+        indexed: 1,
+        internalType: "uint256",
+        name: "netTokenIn",
+        type: "uint256",
+      },
+      {
+        indexed: 1,
+        internalType: "uint256",
+        name: "netLpOut",
+        type: "uint256",
+      },
+    ],
+    name: "AddLiquiditySingleToken",
+    type: "event",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
+        internalType: "address[]",
+        name: "sys",
+        type: "address[]",
+      },
+      {
+        internalType: "address[]",
+        name: "yts",
+        type: "address[]",
+      },
+      {
+        internalType: "address[]",
+        name: "markets",
+        type: "address[]",
+      },
+    ],
+    name: "redeemDueInterestAndRewards",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+];
 const SUSHISWAPROUTERABI = [
   {
     inputs: [
@@ -5618,6 +5086,623 @@ const GAMMAUNIPROXYABI = [
     type: "function",
   },
 ];
+
+const SushiSwapMiniChefV2ABI = [
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "pid",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+    ],
+    name: "harvest",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+];
+const ArbitrumClaimableRewardABI = [
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "bool",
+        name: "success",
+        type: "bool",
+      },
+      {
+        indexed: false,
+        internalType: "bytes",
+        name: "returndata",
+        type: "bytes",
+      },
+    ],
+    name: "DelegateCallResult",
+    type: "event",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "pendleContract",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "glpMarketAddress",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "gdaiMarketAddress",
+        type: "address",
+      },
+    ],
+    name: "claimPendleReward",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "radiantContract",
+        type: "address",
+      },
+    ],
+    name: "claimRadiantReward",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "sushiContract",
+        type: "address",
+      },
+    ],
+    name: "claimSushiDpxReward",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes[]",
+        name: "data",
+        type: "bytes[]",
+      },
+    ],
+    name: "multicall",
+    outputs: [
+      {
+        internalType: "bytes[]",
+        name: "results",
+        type: "bytes[]",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "radiantContract",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "radiantLendingContract",
+        type: "address",
+      },
+      {
+        internalType: "address[]",
+        name: "assets",
+        type: "address[]",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+    ],
+    name: "withdrawRadiantLending",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+];
+
+const RadiantV2LockABI = [
+  {
+    inputs: [],
+    name: "getAllRewards",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_user",
+        type: "address",
+      },
+    ],
+    name: "claimAll",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "depositedRewards",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bool",
+        name: "_borrow",
+        type: "bool",
+      },
+      {
+        internalType: "uint256",
+        name: "_wethAmt",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_rdntAmt",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_lockTypeIndex",
+        type: "uint256",
+      },
+    ],
+    name: "zap",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "liquidity",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bool",
+        name: "_borrow",
+        type: "bool",
+      },
+      {
+        internalType: "uint256",
+        name: "_lockTypeIndex",
+        type: "uint256",
+      },
+    ],
+    name: "zapFromVesting",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "liquidity",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bool",
+        name: "_borrow",
+        type: "bool",
+      },
+      {
+        internalType: "uint256",
+        name: "_wethAmt",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_rdntAmt",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "_onBehalf",
+        type: "address",
+      },
+    ],
+    name: "zapOnBehalf",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "liquidity",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+];
+
+const RadiantLendingPoolABI = [
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "asset",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+    ],
+    name: "withdraw",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+];
+
+const Multicall2ABI = [
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "target",
+            type: "address",
+          },
+          {
+            internalType: "bytes",
+            name: "callData",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct Multicall2.Call[]",
+        name: "calls",
+        type: "tuple[]",
+      },
+    ],
+    name: "aggregate",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "blockNumber",
+        type: "uint256",
+      },
+      {
+        internalType: "bytes[]",
+        name: "returnData",
+        type: "bytes[]",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "target",
+            type: "address",
+          },
+          {
+            internalType: "bytes",
+            name: "callData",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct Multicall2.Call[]",
+        name: "calls",
+        type: "tuple[]",
+      },
+    ],
+    name: "blockAndAggregate",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "blockNumber",
+        type: "uint256",
+      },
+      {
+        internalType: "bytes32",
+        name: "blockHash",
+        type: "bytes32",
+      },
+      {
+        components: [
+          {
+            internalType: "bool",
+            name: "success",
+            type: "bool",
+          },
+          {
+            internalType: "bytes",
+            name: "returnData",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct Multicall2.Result[]",
+        name: "returnData",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "blockNumber",
+        type: "uint256",
+      },
+    ],
+    name: "getBlockHash",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "blockHash",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getBlockNumber",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "blockNumber",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getCurrentBlockCoinbase",
+    outputs: [
+      {
+        internalType: "address",
+        name: "coinbase",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getCurrentBlockDifficulty",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "difficulty",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getCurrentBlockGasLimit",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "gaslimit",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getCurrentBlockTimestamp",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "timestamp",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "addr",
+        type: "address",
+      },
+    ],
+    name: "getEthBalance",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "balance",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getLastBlockHash",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "blockHash",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bool",
+        name: "requireSuccess",
+        type: "bool",
+      },
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "target",
+            type: "address",
+          },
+          {
+            internalType: "bytes",
+            name: "callData",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct Multicall2.Call[]",
+        name: "calls",
+        type: "tuple[]",
+      },
+    ],
+    name: "tryAggregate",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "bool",
+            name: "success",
+            type: "bool",
+          },
+          {
+            internalType: "bytes",
+            name: "returnData",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct Multicall2.Result[]",
+        name: "returnData",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bool",
+        name: "requireSuccess",
+        type: "bool",
+      },
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "target",
+            type: "address",
+          },
+          {
+            internalType: "bytes",
+            name: "callData",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct Multicall2.Call[]",
+        name: "calls",
+        type: "tuple[]",
+      },
+    ],
+    name: "tryBlockAndAggregate",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "blockNumber",
+        type: "uint256",
+      },
+      {
+        internalType: "bytes32",
+        name: "blockHash",
+        type: "bytes32",
+      },
+      {
+        components: [
+          {
+            internalType: "bool",
+            name: "success",
+            type: "bool",
+          },
+          {
+            internalType: "bytes",
+            name: "returnData",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct Multicall2.Result[]",
+        name: "returnData",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+];
 // Mainnet DAI, Optimism and Arbitrium Rollup Contracts with local addresses
 module.exports = {
   1: {
@@ -5647,13 +5732,13 @@ module.exports = {
         address: "0x7D49E5Adc0EAAD9C027857767638613253eF125f",
         abi: PENDLEGLPMARKETABI,
       },
-      RadiantChefIncentivesController: {
-        address: "0xebC85d44cefb1293707b11f707bd3CEc34B4D5fA",
-        abi: RADIANTCHEFINCENTIVESCONTROLLERABI,
+      RadiantV2Lock: {
+        address: "0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE",
+        abi: RadiantV2LockABI,
       },
       RadiantDlpLockZap: {
         address: "0x8991C4C347420E476F1cf09C03abA224A76E2997",
-        abi: ARBRADIANTDLPLOCKZAPABI,
+        abi: RadiantV2LockABI,
       },
       SushiSwapRouter: {
         address: "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506",
@@ -5662,6 +5747,30 @@ module.exports = {
       GammaUniproxy: {
         address: "0x22AE0dA638B4c4074A683045cCe759E8Ba990B1f",
         abi: GAMMAUNIPROXYABI,
+      },
+      GmxRewardRouterV2: {
+        address: "0xB95DB5B167D75e6d04227CfFFA61069348d271F5",
+        abi: GMXREWARDROUTERV2ABI,
+      },
+      PendleRouter: {
+        address: "0x0000000001e4ef00d069e71d6ba041b0a16f7ea0",
+        abi: PendleRouterABI,
+      },
+      SushiSwapMiniChefV2: {
+        address: "0xF4d73326C13a4Fc5FD7A064217e12780e9Bd62c3",
+        abi: SushiSwapMiniChefV2ABI,
+      },
+      ArbitrumClaimableReward: {
+        address: "0x94D2Ab5702c4Df00648e2AdDFFdc18fA06086AAc",
+        abi: ArbitrumClaimableRewardABI,
+      },
+      RadiantLendingPool: {
+        address: "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1",
+        abi: RadiantLendingPoolABI,
+      },
+      Multicall2: {
+        address: "0xE5C1DB3d984458863aADbCF2b9684bA3a15123B7",
+        abi: Multicall2ABI,
       },
     },
   },
