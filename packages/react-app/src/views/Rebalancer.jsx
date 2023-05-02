@@ -1,6 +1,7 @@
 // import suggestions from "./suggestions.json";
 import tokens from "./tokens.json";
 import { useRebalanceSuggestions } from "../hooks";
+import RebalanceChart from "./RebalanceChart";
 
 const tokenAddressInvertedIndex = Object.entries(tokens.props.pageProps.tokensSymbolsMap["42161"]).reduce(
   (newObject, [address, token]) => {
@@ -19,8 +20,10 @@ const tokenAddressToImageInvertedIndex = Object.entries(tokens.props.pageProps.t
 );
 const RebalancerWidget = addresses => {
   const rebalanceSuggestions = useRebalanceSuggestions(addresses);
+
   return (
     <div className="ui label">
+      <RebalanceChart rebalanceSuggestions={rebalanceSuggestions} />
       {rebalanceSuggestions.map(suggestion_of_single_category => (
         <h2 className="ui header" key={suggestion_of_single_category.category}>
           <i className="money bill alternate icon"></i>

@@ -275,29 +275,17 @@ export default function ExampleUI({
         </Button>
         <Button
           onClick={() => {
-            console.log([
-              {
-                // withdraw Radiant USDT
-                target: writeContracts.RadiantLendingPool.address,
-                callData: writeContracts.RadiantLendingPool.interface.encodeFunctionData("withdraw", [
-                  "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
-                  BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
-                  address,
-                ]),
-              },
-            ]);
             tx({
               to: writeContracts.Multicall2.address,
               data: writeContracts.Multicall2.interface.encodeFunctionData("aggregate", [
                 [
                   {
                     // withdraw Radiant USDT
-                    target: writeContracts.RadiantLendingPool.address,
-                    callData: writeContracts.RadiantLendingPool.interface.encodeFunctionData("withdraw", [
-                      "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
-                      BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
-                      address,
-                    ]),
+                    target: writeContracts.RadiantDlpLockZap.address,
+                    callData: writeContracts.RadiantDlpLockZap.interface.encodeFunctionData(
+                      "zap(bool,uint256,uint256,uint256)",
+                      [false, 0, 0, 3],
+                    ),
                   },
                 ],
               ]),

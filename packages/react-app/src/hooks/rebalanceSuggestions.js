@@ -4,7 +4,7 @@ import { useState } from "react";
 
 export default function useRebalanceSuggestions(addresses, pollTime = 39999) {
   const [rabalanceSuggestions, setRebalanceSuggestions] = useState([]);
-  const loadGasPrice = async () => {
+  const loadSuggestions = async () => {
     axios
       .get(`http://127.0.0.1:5000/?addresses=${addresses.addresses.join("+")}`)
       .then(response => {
@@ -14,6 +14,6 @@ export default function useRebalanceSuggestions(addresses, pollTime = 39999) {
       .catch(error => console.log(error));
   };
 
-  usePoller(loadGasPrice, pollTime);
+  usePoller(loadSuggestions, pollTime);
   return rabalanceSuggestions;
 }
