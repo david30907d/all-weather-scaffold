@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
+import { Spin } from "antd";
 import React, { useState, useEffect } from "react";
 
 import "../../../../node_modules/react-vis/dist/style.css";
@@ -107,8 +107,9 @@ export default function BasicSunburst(props) {
   const { rebalanceSuggestions } = props;
   const [pathValue, setPathValue] = useState(false);
   const [data, setData] = useState(defaultData);
-  const [finalValue, setFinalValue] = useState("Loading...");
+  const [finalValue, setFinalValue] = useState("Your Portfolio Chart");
   const [clicked, setClicked] = useState(false);
+  const [isChartReady, setIsChartReady] = useState(false);
 
   useEffect(() => {
     const chartData = createChartData(rebalanceSuggestions);
@@ -116,7 +117,19 @@ export default function BasicSunburst(props) {
     setData(updatedData);
   }, [rebalanceSuggestions]);
 
-  return (
+  useEffect(() => {
+    if (data !== defaultData) {
+      setTimeout(() => {
+        setIsChartReady(true);
+      }, 3500); // Adjust the delay as needed
+    }
+  }, [data]);
+
+  return !isChartReady ? (
+    <div style={{ marginTop: 32 }}>
+      <Spin />
+    </div>
+  ) : (
     <div className="basic-sunburst-example-wrapper">
       <div>{clicked ? "click to unlock selection" : "click to lock selection"}</div>
       <Sunburst

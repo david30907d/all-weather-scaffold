@@ -1,6 +1,6 @@
-import { Button, Card, DatePicker, Divider, Input, Progress, Slider, Spin, Switch } from "antd";
+import { Button, Card, DatePicker, Divider, Input, Progress, Slider, Switch } from "antd";
 import React, { useState, useEffect } from "react";
-import { utils, FixedNumber, BigNumber } from "ethers";
+import { utils, BigNumber } from "ethers";
 import { SyncOutlined } from "@ant-design/icons";
 import DropdownExampleSearchSelectionTwo from "./TokensSearchDropdown";
 import RebalancerWidget from "./Rebalancer";
@@ -521,37 +521,6 @@ export default function ExampleUI({
               🐜 ant.design
             </a>{" "}
             too!
-          </div>
-
-          <div style={{ marginTop: 8 }}>
-            <Button type="primary">Buttons</Button>
-          </div>
-
-          <div style={{ marginTop: 8 }}>
-            <SyncOutlined spin /> Icons
-          </div>
-
-          <div style={{ marginTop: 8 }}>
-            Date Pickers?
-            <div style={{ marginTop: 2 }}>
-              <DatePicker onChange={() => {}} />
-            </div>
-          </div>
-
-          <div style={{ marginTop: 32 }}>
-            <Slider range defaultValue={[20, 50]} onChange={() => {}} />
-          </div>
-
-          <div style={{ marginTop: 32 }}>
-            <Switch defaultChecked onChange={() => {}} />
-          </div>
-
-          <div style={{ marginTop: 32 }}>
-            <Progress percent={50} status="active" />
-          </div>
-
-          <div style={{ marginTop: 32 }}>
-            <Spin />
           </div>
         </Card>
       </div>

@@ -6,7 +6,7 @@ export default function useRebalanceSuggestions(addresses, pollTime = 39999) {
   const [rabalanceSuggestions, setRebalanceSuggestions] = useState([]);
   const loadSuggestions = async () => {
     axios
-      .get(`http://127.0.0.1:5000/?addresses=${addresses.addresses.join("+")}`)
+      .get(`http://0.0.0.0:3001/?addresses=${addresses.addresses.join("+")}`)
       .then(response => {
         const newRebalanceSuggestions = response.data;
         setRebalanceSuggestions(newRebalanceSuggestions);
