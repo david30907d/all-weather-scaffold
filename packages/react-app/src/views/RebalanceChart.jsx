@@ -78,10 +78,7 @@ function updateData(data, keyPath) {
 
 const defaultData = updateData(DefaultValue, false);
 
-function createChartData(rebalanceSuggestions) {
-  const netWorth = rebalanceSuggestions.reduce((acc, curr) => {
-    return acc + curr.sum_of_this_category_in_the_portfolio;
-  }, 0);
+function createChartData(rebalanceSuggestions, netWorth) {
   const colorList = ["#12939A", "#125C77", "#4DC19C", "#DDB27C", "#88572C", "#F15C17", "#223F9A", "#DA70BF"];
   const children = rebalanceSuggestions.map((categoryObj, idx) => {
     return {
@@ -104,7 +101,7 @@ function createChartData(rebalanceSuggestions) {
 }
 
 export default function BasicSunburst(props) {
-  const { rebalanceSuggestions } = props;
+  const { rebalanceSuggestions, netWorth } = props;
   const [pathValue, setPathValue] = useState(false);
   const [data, setData] = useState(defaultData);
   const [finalValue, setFinalValue] = useState("Your Portfolio Chart");
@@ -112,7 +109,7 @@ export default function BasicSunburst(props) {
   const [isChartReady, setIsChartReady] = useState(false);
 
   useEffect(() => {
-    const chartData = createChartData(rebalanceSuggestions);
+    const chartData = createChartData(rebalanceSuggestions, netWorth);
     const updatedData = updateData(chartData, false);
     setData(updatedData);
   }, [rebalanceSuggestions]);
@@ -121,7 +118,7 @@ export default function BasicSunburst(props) {
     if (data !== defaultData) {
       setTimeout(() => {
         setIsChartReady(true);
-      }, 3500); // Adjust the delay as needed
+      }, 4500); // Adjust the delay as needed
     }
   }, [data]);
 
