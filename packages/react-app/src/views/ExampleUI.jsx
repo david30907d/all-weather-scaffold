@@ -5,6 +5,7 @@ import { SyncOutlined } from "@ant-design/icons";
 import DropdownExampleSearchSelectionTwo from "./TokensSearchDropdown";
 import RebalancerWidget from "./Rebalancer";
 import { Address, Balance, Events } from "../components";
+import SuggestionsForPositions from "./SuggestionsForBetterStableCoins";
 
 const getContractEstimatedGas = async (writeContracts, contract, yourLocalBalance, price, address) => {
   const yourLocalBalanceInWei = utils.parseEther(String(utils.formatEther(yourLocalBalance)));

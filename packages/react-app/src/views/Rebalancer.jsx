@@ -2,6 +2,8 @@
 import tokens from "./tokens.json";
 import { useRebalanceSuggestions } from "../hooks";
 import RebalanceChart from "./RebalanceChart";
+import SuggestionsForBetterStableCoins from "./SuggestionsForBetterStableCoins";
+import SuggestionsForLPTokens from "./SuggestionsForLPTokens";
 import { Tag } from "antd";
 
 const tokenAddressInvertedIndex = Object.entries(tokens.props.pageProps.tokensSymbolsMap["42161"]).reduce(
@@ -20,7 +22,8 @@ const tokenAddressToImageInvertedIndex = Object.entries(tokens.props.pageProps.t
   {},
 );
 const RebalancerWidget = addresses => {
-  const { rebalanceSuggestions, totalInterest, portfolioApr, sharpeRatio } = useRebalanceSuggestions(addresses);
+  const { rebalanceSuggestions, totalInterest, portfolioApr, topNPoolConsistOfSameLpToken, topNStableCoins } =
+    useRebalanceSuggestions(addresses);
   const netWorth = rebalanceSuggestions.reduce((acc, curr) => {
     return acc + curr.sum_of_this_category_in_the_portfolio;
   }, 0);
@@ -30,8 +33,9 @@ const RebalancerWidget = addresses => {
       <Tag color="magenta">Net Worth: ${netWorth.toFixed(2)}</Tag>
       <Tag color="magenta">Monthly Interest: ${(totalInterest / 12).toFixed(2)}</Tag>
       <Tag color="magenta">Portfolio APR: {portfolioApr.toFixed(2)}%</Tag>
-      <Tag color="magenta">Sharpe Ratio: {sharpeRatio.toFixed(2)}</Tag>
       <RebalanceChart rebalanceSuggestions={rebalanceSuggestions} netWorth={netWorth} />
+      <SuggestionsForLPTokens wording="Better Pool for LP Tokens" topNData={topNPoolConsistOfSameLpToken} />
+      <SuggestionsForBetterStableCoins wording="Better Stable Coin Pools" topNData={topNStableCoins} />
       {rebalanceSuggestions
         .filter(
           suggestion_of_single_category =>
