@@ -1,5 +1,5 @@
 import { Tag } from "antd";
-const columnsForSuggestionsTable = [
+export const getColumnsForSuggestionsTable = portfolioAPR => [
   {
     title: "Chain",
     dataIndex: "chain",
@@ -34,7 +34,7 @@ const columnsForSuggestionsTable = [
     key: "apr",
     dataIndex: "apr",
     render: apr => {
-      let color = apr < 0.3 ? "volcano" : "green";
+      let color = apr < portfolioAPR / 100 ? "volcano" : "green";
       return (
         <>
           <Tag color={color} key={apr}>
@@ -45,4 +45,3 @@ const columnsForSuggestionsTable = [
     },
   },
 ];
-export default columnsForSuggestionsTable;

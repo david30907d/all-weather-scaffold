@@ -1,10 +1,11 @@
 import { Table } from "antd";
 import { useState, useEffect } from "react";
-import columnsForSuggestionsTable from "./utils";
+import { getColumnsForSuggestionsTable } from "./utils";
 
 export default function SuggestionsForBetterStableCoins(props) {
-  const { wording, topNData } = props;
+  const { wording, topNData, portfolioApr } = props;
   const [data, setData] = useState([]);
+  const commonColumns = getColumnsForSuggestionsTable(portfolioApr);
   useEffect(() => {
     if (topNData) {
       const extractedData = topNData.map((metadata, idx) => ({
@@ -22,7 +23,7 @@ export default function SuggestionsForBetterStableCoins(props) {
   return (
     <div>
       <h3>{wording}:</h3>
-      <Table columns={columnsForSuggestionsTable} dataSource={data} />
+      <Table columns={commonColumns} dataSource={data} />
     </div>
   );
 }

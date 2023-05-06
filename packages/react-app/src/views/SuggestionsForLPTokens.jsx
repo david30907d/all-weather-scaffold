@@ -1,10 +1,10 @@
 // import { Table, Tag } from 'antd';
 import { Space, Table } from "antd";
 import { useState, useEffect } from "react";
-import columnsForSuggestionsTable from "./utils";
+import { getColumnsForSuggestionsTable } from "./utils";
 
 const SuggestionsForLPTokens = props => {
-  const { wording, topNData } = props;
+  const { wording, topNData, portfolioApr } = props;
   const columnsForParentRows = [
     {
       title: "Pool",
@@ -46,10 +46,11 @@ const SuggestionsForLPTokens = props => {
           apr: ((metadata.pool_metadata.apy / 100 + 1) ** (1 / 365) - 1) * 365,
         };
       });
+      const commonColumns = getColumnsForSuggestionsTable(portfolioApr);
       return (
         <Table
           columns={[
-            ...columnsForSuggestionsTable,
+            ...commonColumns,
             {
               title: "Action",
               dataIndex: "operation",

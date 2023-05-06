@@ -34,8 +34,16 @@ const RebalancerWidget = addresses => {
       <Tag color="magenta">Monthly Interest: ${(totalInterest / 12).toFixed(2)}</Tag>
       <Tag color="magenta">Portfolio APR: {portfolioApr.toFixed(2)}%</Tag>
       <RebalanceChart rebalanceSuggestions={rebalanceSuggestions} netWorth={netWorth} />
-      <SuggestionsForLPTokens wording="Better Pool for LP Tokens" topNData={topNPoolConsistOfSameLpToken} />
-      <SuggestionsForBetterStableCoins wording="Better Stable Coin Pools" topNData={topNStableCoins} />
+      <SuggestionsForLPTokens
+        wording="Better Pool for LP Tokens"
+        topNData={topNPoolConsistOfSameLpToken}
+        portfolioApr={portfolioApr}
+      />
+      <SuggestionsForBetterStableCoins
+        wording="Better Stable Coin Pools"
+        topNData={topNStableCoins}
+        portfolioApr={portfolioApr}
+      />
       {rebalanceSuggestions
         .filter(
           suggestion_of_single_category =>
