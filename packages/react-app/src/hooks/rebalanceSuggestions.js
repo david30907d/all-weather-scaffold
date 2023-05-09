@@ -1,7 +1,7 @@
 import axios from "axios";
 import { usePoller } from "eth-hooks";
 import { useState } from "react";
-
+const API_URL = process.env.REACT_APP_API_URL;
 export default function useRebalanceSuggestions(addresses, pollTime = 39999) {
   const [rebalanceSuggestions, setRebalanceSuggestions] = useState([]);
   const [totalInterest, setTotalInterest] = useState(0);
@@ -11,7 +11,7 @@ export default function useRebalanceSuggestions(addresses, pollTime = 39999) {
   const [topNStableCoins, setTopNStableCoins] = useState([]);
   const loadSuggestions = async () => {
     axios
-      .get(`http://0.0.0.0:3001/?addresses=${addresses.addresses.join("+")}`)
+      .get(`${API_URL}/address?addresses=${addresses.addresses.join("+")}`)
       .then(response => {
         const newRebalanceSuggestions = response.data.suggestions;
         setRebalanceSuggestions(newRebalanceSuggestions);
