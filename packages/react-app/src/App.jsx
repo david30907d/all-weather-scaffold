@@ -30,7 +30,7 @@ import externalContracts from "./contracts/external_contracts";
 // contracts
 import deployedContracts from "./contracts/hardhat_contracts.json";
 import { getRPCPollTime, Transactor, Web3ModalSetup } from "./helpers";
-import { ExampleUI } from "./views";
+import { ExampleUI, WipUI } from "./views";
 import { useStaticJsonRPC, useGasPrice } from "./hooks";
 
 const { ethers } = require("ethers");
@@ -312,10 +312,13 @@ function App(props) {
       />
       <Menu style={{ textAlign: "center", marginTop: 20 }} selectedKeys={[location.pathname]} mode="horizontal">
         <Menu.Item key="/exampleui">
-          <Link to="/exampleui">ExampleUI</Link>
+          <Link to="/exampleui">Main Page</Link>
         </Menu.Item>
         <Menu.Item key="/mainnetdai">
-          <Link to="/mainnetdai">Mainnet DAI</Link>
+          <Link to="/mainnetdai">(WIP)Mainnet DAI</Link>
+        </Menu.Item>
+        <Menu.Item key="/wipui">
+          <Link to="/wipui">(WIP)UI</Link>
         </Menu.Item>
       </Menu>
 
@@ -356,6 +359,21 @@ function App(props) {
               blockExplorer="https://etherscan.io/"
             />
             */}
+        </Route>
+        <Route path="/wipui">
+          <WipUI
+            address={address}
+            addresses={addresses}
+            userSigner={userSigner}
+            mainnetProvider={mainnetProvider}
+            localProvider={localProvider}
+            yourLocalBalance={yourLocalBalance}
+            price={price}
+            tx={tx}
+            writeContracts={writeContracts}
+            readContracts={readContracts}
+            purpose={purpose}
+          />
         </Route>
       </Switch>
 

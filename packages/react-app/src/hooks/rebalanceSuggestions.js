@@ -2,7 +2,7 @@ import axios from "axios";
 import { usePoller } from "eth-hooks";
 import { useState } from "react";
 const API_URL = process.env.REACT_APP_API_URL;
-export default function useRebalanceSuggestions(addresses, pollTime = 39999) {
+export default function useRebalanceSuggestions(addresses, pollTime = 300000) {
   const [rebalanceSuggestions, setRebalanceSuggestions] = useState([]);
   const [totalInterest, setTotalInterest] = useState(0);
   const [portfolioApr, setPortfolioApr] = useState(0);
