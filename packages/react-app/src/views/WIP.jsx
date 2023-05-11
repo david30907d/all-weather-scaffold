@@ -1,9 +1,8 @@
-import { Button, Card, DatePicker, Divider, Input, Progress, Slider, Switch } from "antd";
+import { Button, Divider, Input } from "antd";
 import React, { useState, useEffect } from "react";
-import { utils, BigNumber } from "ethers";
+import { utils } from "ethers";
 import DropdownExampleSearchSelectionTwo from "./TokensSearchDropdown";
-import RebalancerWidget from "./Rebalancer";
-import { Address, Balance, Events } from "../components";
+import { Events } from "../components";
 
 const getContractEstimatedGas = async (writeContracts, contract, yourLocalBalance, price, address) => {
   const yourLocalBalanceInWei = utils.parseEther(String(utils.formatEther(yourLocalBalance)));
@@ -122,6 +121,12 @@ export default function WipUI({
       <div style={{ border: "1px solid #cccccc", padding: 16, width: 400, margin: "auto", marginTop: 64 }}>
         <h2>All Weather Portfolio:</h2>
         <div>
+          <img
+            src="https://icons.llamao.fi/icons/tokens/1/0x0000000000000000000000000000000000000000?h=20&w=20"
+            alt="Eth"
+            width="20"
+            height="20"
+          />
           <Input
             onChange={e => {
               setNewRadiantEth(e.target.value);
@@ -146,11 +151,23 @@ export default function WipUI({
           </Button>
         </div>
         <div>
+          <img
+            src="https://icons.llamao.fi/icons/tokens/1/0xeec2be5c91ae7f8a338e1e5f3b5de49d07afdc81?h=20&w=20"
+            alt="Dpx"
+            width="20"
+            height="20"
+          />
           <Input
             placeholder="Dpx..."
             onChange={e => {
               setNewDpx(e.target.value);
             }}
+          />
+          <img
+            src="https://icons.llamao.fi/icons/tokens/1/0x0000000000000000000000000000000000000000?h=20&w=20"
+            alt="Eth"
+            width="20"
+            height="20"
           />
           <Input
             placeholder="Eth..."
@@ -184,11 +201,23 @@ export default function WipUI({
           </Button>
         </div>
         <div>
+          <img
+            src="https://icons.llamao.fi/icons/tokens/1/0xb0c7a3ba49c7a6eaba6cd4a96c55a1391070ac9a?h=20&w=20"
+            alt="Magic"
+            width="20"
+            height="20"
+          />
           <Input
             placeholder="Magic..."
             onChange={e => {
               setNewMagic(e.target.value);
             }}
+          />
+          <img
+            src="https://icons.llamao.fi/icons/tokens/1/0x0000000000000000000000000000000000000000?h=20&w=20"
+            alt="Eth"
+            width="20"
+            height="20"
           />
           <Input
             placeholder="Eth..."
@@ -219,6 +248,12 @@ export default function WipUI({
           </Button>
         </div>
         <div>
+          <img
+            src="https://icons.llamao.fi/icons/tokens/1/0x0000000000000000000000000000000000000000?h=20&w=20"
+            alt="Eth"
+            width="20"
+            height="20"
+          />
           <Input
             placeholder="Eth..."
             onChange={e => {

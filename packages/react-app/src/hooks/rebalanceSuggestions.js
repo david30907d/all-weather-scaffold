@@ -3,6 +3,7 @@ import { usePoller } from "eth-hooks";
 import { useState } from "react";
 const API_URL = process.env.REACT_APP_API_URL;
 export default function useRebalanceSuggestions(addresses, pollTime = 300000) {
+  const [netWorth, setNetWorth] = useState(0);
   const [rebalanceSuggestions, setRebalanceSuggestions] = useState([]);
   const [totalInterest, setTotalInterest] = useState(0);
   const [portfolioApr, setPortfolioApr] = useState(0);
@@ -13,6 +14,8 @@ export default function useRebalanceSuggestions(addresses, pollTime = 300000) {
     axios
       .get(`${API_URL}/address?addresses=${addresses.addresses.join("+")}`)
       .then(response => {
+        const newNetWorth = response.data.net_worth;
+        setNetWorth(newNetWorth);
         const newRebalanceSuggestions = response.data.suggestions;
         setRebalanceSuggestions(newRebalanceSuggestions);
         const totalInterest = response.data.total_interest;
@@ -31,6 +34,7 @@ export default function useRebalanceSuggestions(addresses, pollTime = 300000) {
 
   usePoller(loadSuggestions, pollTime);
   return {
+    netWorth,
     rebalanceSuggestions,
     totalInterest,
     portfolioApr,
