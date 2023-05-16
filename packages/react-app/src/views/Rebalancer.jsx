@@ -41,25 +41,27 @@ const RebalancerWidget = addresses => {
         topNData={topNStableCoins}
         portfolioApr={portfolioApr}
       />
-      {rebalanceSuggestions
-        .filter(
-          suggestion_of_single_category =>
-            suggestion_of_single_category.investment_shift_of_this_category > 0.03 ||
-            suggestion_of_single_category.investment_shift_of_this_category < -0.03,
-        )
-        .map(suggestion_of_single_category => (
-          <h2 className="ui header" key={suggestion_of_single_category.category}>
-            <i className="money bill alternate icon"></i>
+      {rebalanceSuggestions.map(suggestion_of_single_category => (
+        <h2 className="ui header" key={suggestion_of_single_category.category}>
+          {suggestion_of_single_category.suggestions_for_positions.filter(
+            suggestion => suggestion.difference > 0 || suggestion.difference < 0,
+          ).length > 0 && (
             <div className="content">
+              <i className="money bill alternate icon"></i>
               {suggestion_of_single_category.category}:{" "}
               {suggestion_of_single_category.investment_shift_of_this_category.toFixed(2) * 100}%
             </div>
-            {suggestion_of_single_category.suggestions_for_positions.map(suggestion => (
+          )}
+          {suggestion_of_single_category.suggestions_for_positions
+            .filter(suggestion => suggestion.difference > 0 || suggestion.difference < 0)
+            .map(suggestion => (
               <div className="item" key={suggestion.symbol}>
                 <div className="content">
-                  <a className="header">{suggestion.symbol}</a>
+                  <a className="header">
+                    {suggestion.symbol}: ${suggestion.balanceUSD.toFixed(2)}
+                  </a>
                   <div className="description">
-                    <p>Do this change: ${suggestion.diffrence.toFixed(2)}</p>
+                    <p>Do this change: ${suggestion.difference.toFixed(2)}</p>
                     {suggestion.symbol
                       .split(":")[1]
                       .split("-")
@@ -84,8 +86,8 @@ const RebalancerWidget = addresses => {
                 </div>
               </div>
             ))}
-          </h2>
-        ))}
+        </h2>
+      ))}
     </div>
   );
 };
