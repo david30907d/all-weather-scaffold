@@ -7,6 +7,8 @@ require("@nomicfoundation/hardhat-chai-matchers");
 require("@tenderly/hardhat-tenderly");
 require("@nomicfoundation/hardhat-toolbox");
 require("hardhat-deploy");
+require("@nomiclabs/hardhat-ethers");
+
 
 const { isAddress, getAddress, formatUnits, parseUnits } = utils;
 
@@ -60,6 +62,12 @@ module.exports = {
   // Follow the directions, and uncomment the network you wish to deploy to.
 
   networks: {
+    hardhat: {
+      forking: {
+        url: "https://arb-mainnet.g.alchemy.com/v2/WIcMNRX1L9IpsIwW_o_IUIdhOWwAnFiO",
+        blockNumber: 92354899
+      }
+    },
     localhost: {
       url: "http://127.0.0.1:8545/",
       /*
