@@ -39,6 +39,16 @@ describe("All Weather Protocol", function () {
       console.log("usdcContract's address: ", usdcContract.address)
       console.log("wallet's USDC balance: ", (await usdcContract.balanceOf(wallet.address)).toString());
       console.log("radiantUsdcVaultToken's USDC balance: ", (await usdcContract.balanceOf(radiantUsdcVaultToken.address)).toString());
+
+      AllWeatherPortfolioLPToken = await ethers.getContractFactory("AllWeatherPortfolioLPToken");
+      portfolioContract = await AllWeatherPortfolioLPToken.deploy("allWeatherPortfolioLPToken", "AWP", radiantUsdcVaultToken.address, usdcAddress);
+      await portfolioContract.deployed();
+      console.log("portfolioContract's address: ", portfolioContract.address)
+      tx = await usdcContract.connect(wallet).approve(portfolioContract.address, ethers.utils.parseUnits("100000000", 18))
+      await tx.wait();
+      tx = await portfolioContract.connect(wallet).deposit(20, { gasLimit: gasLimit })
+      await tx.wait();
+      console.log("portfolioContract's LP balance: ", (await radiantUsdcVaultToken.balanceOf(portfolioContract.address)).toString());
     });
   });
 });

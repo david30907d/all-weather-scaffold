@@ -29,12 +29,12 @@ contract RadiantArbitrumVault is ERC4626 {
     }
 
     /** @dev See {IERC4626-deposit}. */
-    function deposit(uint256 assets, address receiver) public virtual override returns (uint256) {
+    function deposit(uint256 amount, address receiver) public virtual override returns (uint256) {
         console.log("deposit!!");
-        require(assets <= maxDeposit(receiver), "ERC4626: deposit more than max");
+        require(amount <= maxDeposit(receiver), "ERC4626: deposit more than max");
 
-        uint256 shares = previewDeposit(assets);
-        _deposit(_msgSender(), receiver, assets, shares);
+        uint256 shares = previewDeposit(amount);
+        _deposit(_msgSender(), receiver, amount, shares);
 
         return shares;
     }
@@ -48,6 +48,7 @@ contract RadiantArbitrumVault is ERC4626 {
         // slither-disable-next-line reentrancy-no-eth
         console.log(address(_underlying));
         console.log("assets: ", assets);
+        console.log("caller()", caller);
         _underlying.transferFrom(caller, address(this), assets);
         _mint(receiver, shares);
 
