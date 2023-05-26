@@ -2,7 +2,7 @@ require('dotenv').config();
 const { expect } = require("chai");
 const IERC20ABI = require('../contracts/IERC20.json');
 const forkedProviderUrl = "http://localhost:8545";
-const usdcAddress = "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8";
+const usdtAddress = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
 const gasLimit = 8000000; // Adjust this value according to your needs
 
 describe("All Weather Protocol", function () {
@@ -21,33 +21,26 @@ describe("All Weather Protocol", function () {
 
   describe("RadiantArbitrumVault", function () {
     it("Should deploy radiantArbitrumVault contract", async function () {
+      const dai = await ethers.getContractFactory("MockDAI");
+      const daiContract = await dai.connect(wallet).deploy();
+      await daiContract.deployed();
+      const usdtContract = new ethers.Contract(usdtAddress, IERC20ABI, ethersProvider);
       const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
-      radiantUsdcVaultToken = await RadiantArbitrumVault.deploy("radiantUsdcVaultToken", "RVT", usdcAddress);
+      radiantUsdcVaultToken = await RadiantArbitrumVault.deploy("radiantUsdcVaultToken", "RVT", usdtContract.address);
       await radiantUsdcVaultToken.deployed();
-      console.log("owner.address", wallet.address);
-      const usdcContract = new ethers.Contract(usdcAddress, IERC20ABI, ethersProvider);
-      console.log("USDC balance: ", (await usdcContract.balanceOf(wallet.address)).toString());
-
-      let tx = await usdcContract.connect(wallet).approve(radiantUsdcVaultToken.address, ethers.utils.parseUnits("100000000", 18))
-      await tx.wait();
-      tx = await radiantUsdcVaultToken.connect(wallet).deposit(100, wallet.address, { gasLimit: gasLimit });
-      await tx.wait();
-      const totalAssets = await radiantUsdcVaultToken.totalAssets();
-      console.log("totalAssets: ", totalAssets.toString());
-      const shares = await radiantUsdcVaultToken.balanceOf(wallet.address);
-      console.log("shares: ", shares.toString());
-      console.log("usdcContract's address: ", usdcContract.address)
-      console.log("wallet's USDC balance: ", (await usdcContract.balanceOf(wallet.address)).toString());
-      console.log("radiantUsdcVaultToken's USDC balance: ", (await usdcContract.balanceOf(radiantUsdcVaultToken.address)).toString());
-
       AllWeatherPortfolioLPToken = await ethers.getContractFactory("AllWeatherPortfolioLPToken");
-      portfolioContract = await AllWeatherPortfolioLPToken.deploy("allWeatherPortfolioLPToken", "AWP", radiantUsdcVaultToken.address, usdcAddress);
+      portfolioContract = await AllWeatherPortfolioLPToken.deploy("allWeatherPortfolioLPToken", "AWP", radiantUsdcVaultToken.address, usdtContract.address);
       await portfolioContract.deployed();
       console.log("portfolioContract's address: ", portfolioContract.address)
-      tx = await usdcContract.connect(wallet).approve(portfolioContract.address, ethers.utils.parseUnits("100000000", 18))
-      await tx.wait();
-      tx = await portfolioContract.connect(wallet).deposit(20, { gasLimit: gasLimit })
-      await tx.wait();
+      await (await usdtContract.connect(wallet).approve(portfolioContract.address, ethers.utils.parseUnits("100000000", 18), { gasLimit: gasLimit })).wait();
+      await (await portfolioContract.connect(wallet).deposit(1, { gasLimit: gasLimit })).wait();
+      const totalAssets = await radiantUsdcVaultToken.totalAssets();
+      console.log("totalAssets: ", totalAssets.toString());
+      const shares = await radiantUsdcVaultToken.balanceOf(portfolioContract.address);
+      console.log("shares of portfolioContract: ", shares.toString());
+      console.log("wallet's USDT balance: ", (await usdtContract.balanceOf(wallet.address)).toString());
+      console.log("radiantUsdcVaultToken's USDT balance: ", (await usdtContract.balanceOf(radiantUsdcVaultToken.address)).toString());
+
       console.log("portfolioContract's LP balance: ", (await radiantUsdcVaultToken.balanceOf(portfolioContract.address)).toString());
     });
   });

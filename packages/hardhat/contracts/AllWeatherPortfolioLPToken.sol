@@ -32,7 +32,7 @@ contract AllWeatherPortfolioLPToken is ERC20 {
         underlying.approve(radiantVaultAddr, amount);
         require(
             RadiantArbitrumVault(radiantVaultAddr).deposit(amount, address(this)) > 0,
-            "Token transfer failed"
+            "Buying LP token failed"
         );
 
         // Mint tokens to the user making the deposit
