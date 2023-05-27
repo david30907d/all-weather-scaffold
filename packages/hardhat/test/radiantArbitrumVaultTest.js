@@ -17,8 +17,7 @@ describe("All Weather Protocol", function () {
   let radiantArbitrumVault;
   let daiContract;
   before(async() => {
-    const DaiContract = await ethers.getContractFactory('MockDAI');
-    daiContract = await DaiContract.attach(daiAddress);
+    daiContract = await ethers.getContractAt('MockDAI', daiAddress);
   });
 
   beforeEach(async () => {
