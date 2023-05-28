@@ -49,32 +49,4 @@ contract AllWeatherPortfolioLPToken is ERC20 {
         emit Transfer(address(0), msg.sender, amount);
     }
 
-    // function swapTokens(
-    //     address tokenIn,
-    //     address tokenOut,
-    //     uint256 amountIn,
-    //     uint256 amountOutMin,
-    //     uint256 deadline
-    // ) external {
-    //     address[] memory path = new address[](2);
-    //     path[0] = tokenIn;
-    //     path[1] = tokenOut;
-
-    //     IArbitrumUniswap arbitrumUniswap = IArbitrumUniswap(arbitrumUniswapAddress);
-
-    //     // Approve the router to spend the input token
-    //     // Make sure you have already approved the contract to spend the tokens
-    //     // using tokenIn.approve(contractAddress, amountIn) before calling this function
-    //     // or include the approval functionality in this contract.
-    //     // For simplicity, we assume the approval has been done separately.
-
-    //     // Call the swap function
-    //     arbitrumUniswap.swapExactTokensForTokens(
-    //         amountIn,
-    //         amountOutMin,
-    //         path,
-    //         address(this),
-    //         deadline
-    //     );
-    // }
 }
