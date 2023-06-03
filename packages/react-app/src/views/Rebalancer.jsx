@@ -4,6 +4,7 @@ import { useRebalanceSuggestions } from "../hooks";
 import RebalanceChart from "./RebalanceChart";
 import SuggestionsForBetterStableCoins from "./SuggestionsForBetterStableCoins";
 import SuggestionsForLPTokens from "./SuggestionsForLPTokens";
+import TopNLowestAprPools from "./TopNLowestAprPools";
 import { Tag } from "antd";
 
 const tokenAddressInvertedIndex = Object.entries(tokens.props.pageProps.tokensSymbolsMap["42161"]).reduce(
@@ -22,8 +23,15 @@ const tokenAddressToImageInvertedIndex = Object.entries(tokens.props.pageProps.t
   {},
 );
 const RebalancerWidget = addresses => {
-  const { netWorth, rebalanceSuggestions, totalInterest, portfolioApr, topNPoolConsistOfSameLpToken, topNStableCoins } =
-    useRebalanceSuggestions(addresses);
+  const {
+    netWorth,
+    rebalanceSuggestions,
+    totalInterest,
+    portfolioApr,
+    topNLowestAprPools,
+    topNPoolConsistOfSameLpToken,
+    topNStableCoins,
+  } = useRebalanceSuggestions(addresses);
 
   return (
     <div className="ui label">
@@ -31,6 +39,7 @@ const RebalancerWidget = addresses => {
       <Tag color="magenta">Monthly Interest: ${(totalInterest / 12).toFixed(2)}</Tag>
       <Tag color="magenta">Portfolio APR: {portfolioApr.toFixed(2)}%</Tag>
       <RebalanceChart rebalanceSuggestions={rebalanceSuggestions} netWorth={netWorth} />
+      <TopNLowestAprPools wording="TopN Lowest APR Pools" topNData={topNLowestAprPools} portfolioApr={portfolioApr} />
       <SuggestionsForLPTokens
         wording="Better Pool for LP Tokens"
         topNData={topNPoolConsistOfSameLpToken}

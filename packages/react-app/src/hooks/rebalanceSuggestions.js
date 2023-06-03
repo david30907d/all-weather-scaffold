@@ -8,6 +8,7 @@ export default function useRebalanceSuggestions(addresses, pollTime = 300000) {
   const [totalInterest, setTotalInterest] = useState(0);
   const [portfolioApr, setPortfolioApr] = useState(0);
   const [sharpeRatio, setSharpeRatio] = useState(0);
+  const [topNLowestAprPools, setTopNLowestAprPools] = useState([]);
   const [topNPoolConsistOfSameLpToken, setTopNPoolConsistOfSameLpToken] = useState([]);
   const [topNStableCoins, setTopNStableCoins] = useState([]);
   const loadSuggestions = async () => {
@@ -24,6 +25,8 @@ export default function useRebalanceSuggestions(addresses, pollTime = 300000) {
         setPortfolioApr(portfolioApr);
         const sharpeRatio = response.data.sharpe_ratio;
         setSharpeRatio(sharpeRatio);
+        const topNLowestAprPools = response.data.top_n_lowest_apr_pools;
+        setTopNLowestAprPools(topNLowestAprPools);
         const topNPoolConsistOfSameLpToken = response.data.top_n_pool_consist_of_same_lp_token;
         setTopNPoolConsistOfSameLpToken(topNPoolConsistOfSameLpToken);
         const topNStableCoins = response.data.topn_stable_coins;
@@ -39,6 +42,7 @@ export default function useRebalanceSuggestions(addresses, pollTime = 300000) {
     totalInterest,
     portfolioApr,
     sharpeRatio,
+    topNLowestAprPools,
     topNPoolConsistOfSameLpToken,
     topNStableCoins,
   };
