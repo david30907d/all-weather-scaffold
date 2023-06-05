@@ -1,4 +1,3 @@
-require('dotenv').config();
 const { expect } = require("chai");
 
 const myImpersonatedWalletAddress = "0x038919c63AfF9c932C77a0C9c9D98eABc1a4dd08";
