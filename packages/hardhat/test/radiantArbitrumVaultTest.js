@@ -6,7 +6,7 @@ const daiAddress = "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1";
 const radiantInterestBearingDaiAddress = "0x0d914606f3424804fa1bbbe56ccc3416733acec6";
 const radiantLendingPoolAddress = "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1";
 const gmxRouterAddress = "0xB95DB5B167D75e6d04227CfFFA61069348d271F5";
-const gasLimit = 2775600;
+const gasLimit = 2675600;
 
 let wallet;
 let daiContract;
