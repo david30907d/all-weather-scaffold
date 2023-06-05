@@ -34,4 +34,16 @@ contract RadiantArbitrumVault is ERC4626 {
         radiantLending.deposit(address(_underlying), amount, address(this), 0);
         return shares;
     }
+
+    function redeemAll(uint256 shares, address receiver, address owner) public returns (uint256) {
+        // TODO(david): to check how to only withdraw specific amount of shares from radiant lending
+        // Radiant: withdraw all should input ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        radiantLending.withdraw(address(_underlying), 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, address(this));
+        uint256 shares = super.redeem(shares, receiver, owner);
+        return shares;
+    }
+
+    // function claim(){
+        // https://arbiscan.io/tx/0x13ded9cd77e5918bb7b51484c94b0676a6f05dd83506a73924a76cf43e2ce530
+    // }
 }

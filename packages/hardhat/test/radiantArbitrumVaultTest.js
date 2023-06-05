@@ -13,7 +13,6 @@ let daiContract;
 let rDaiContract;
 let allWeatherRadiantVault;
 let portfolioContract;
-let radiantLendingPool;
 const amount = ethers.utils.parseUnits('100', 18); // 100 DAI with 18 decimals
 
 
@@ -52,6 +51,7 @@ describe("All Weather Protocol", function () {
       expect(await allWeatherRadiantVault.balanceOf(portfolioContract.address)).to.equal(amount);
       expect(await rDaiContract.balanceOf(allWeatherRadiantVault.address)).to.equal(amount);
       expect(await portfolioContract.balanceOf(wallet.address)).to.equal(amount);
+
     });
     describe("RadiantArbitrumVault Test", function () {
       it("Should get radiant's interest bearing token in return after deposit", async function () {
@@ -61,7 +61,20 @@ describe("All Weather Protocol", function () {
         await allWeatherRadiantVault.connect(wallet).deposit(amount, wallet.address, { gasLimit: gasLimit });
         expect(await allWeatherRadiantVault.balanceOf(wallet.address)).to.equal(amount);
         expect(await rDaiContract.balanceOf(allWeatherRadiantVault.address)).to.equal(amount);
-  
+      })
+      it("Should be able to withdraw radiant deposit", async function () {
+        const originalBalance = await daiContract.balanceOf(wallet.address);
+        const originalrDaiBalance = await rDaiContract.balanceOf(wallet.address);
+        await (await portfolioContract.connect(wallet).deposit(amount, { gasLimit: gasLimit})).wait();
+        expect(await rDaiContract.balanceOf(allWeatherRadiantVault.address)).to.equal(amount);
+        expect(await rDaiContract.balanceOf(wallet.address)).to.equal(originalrDaiBalance);
+        expect(await daiContract.balanceOf(wallet.address)).to.equal(originalBalance.sub(amount));
+
+        await (await portfolioContract.connect(wallet).redeemAll(amount, { gasLimit: gasLimit})).wait();
+        // to reason why the balance is greater than originalBalance is because of the interest
+        expect(await daiContract.balanceOf(wallet.address)).to.greaterThan(originalBalance);
+        expect(await rDaiContract.balanceOf(allWeatherRadiantVault.address)).to.equal(0);
+        expect(await daiContract.balanceOf(allWeatherRadiantVault.address)).to.equal(0);
       })
     })
   });
