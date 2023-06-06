@@ -9,7 +9,7 @@ export const getColumnsForSuggestionsTable = portfolioAPR => [
     title: "Pool",
     dataIndex: "pool",
     key: "pool",
-    render: text => <a>{text}</a>,
+    render: text => <button>{text}</button>,
   },
   {
     title: "Coin",

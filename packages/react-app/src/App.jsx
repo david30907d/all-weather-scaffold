@@ -30,7 +30,7 @@ import externalContracts from "./contracts/external_contracts";
 // contracts
 import deployedContracts from "./contracts/hardhat_contracts.json";
 import { getRPCPollTime, Transactor, Web3ModalSetup } from "./helpers";
-import { ExampleUI, WipUI } from "./views";
+import { ExampleUI } from "./views";
 import { useStaticJsonRPC, useGasPrice } from "./hooks";
 
 const { ethers } = require("ethers");
@@ -134,7 +134,7 @@ function App(props) {
       }
     }
     getAddress();
-  }, [userSigner]);
+  }, [userSigner, addresses]);
 
   // You can warn the user if you would like them to be on a specific network
   const localChainId = localProvider && localProvider._network && localProvider._network.chainId;
@@ -317,9 +317,6 @@ function App(props) {
         <Menu.Item key="/mainnetdai">
           <Link to="/mainnetdai">(WIP)Mainnet DAI</Link>
         </Menu.Item>
-        <Menu.Item key="/wipui">
-          <Link to="/wipui">(WIP)UI</Link>
-        </Menu.Item>
       </Menu>
 
       <Switch>
@@ -359,21 +356,6 @@ function App(props) {
               blockExplorer="https://etherscan.io/"
             />
             */}
-        </Route>
-        <Route path="/wipui">
-          <WipUI
-            address={address}
-            addresses={addresses}
-            userSigner={userSigner}
-            mainnetProvider={mainnetProvider}
-            localProvider={localProvider}
-            yourLocalBalance={yourLocalBalance}
-            price={price}
-            tx={tx}
-            writeContracts={writeContracts}
-            readContracts={readContracts}
-            purpose={purpose}
-          />
         </Route>
       </Switch>
 

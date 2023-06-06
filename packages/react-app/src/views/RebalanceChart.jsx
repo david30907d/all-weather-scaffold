@@ -112,7 +112,7 @@ export default function BasicSunburst(props) {
     const chartData = createChartData(rebalanceSuggestions, netWorth);
     const updatedData = updateData(chartData, false);
     setData(updatedData);
-  }, [rebalanceSuggestions]);
+  }, [rebalanceSuggestions, netWorth]);
 
   useEffect(() => {
     if (data !== defaultData) {

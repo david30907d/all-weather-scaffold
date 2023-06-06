@@ -66,9 +66,9 @@ const RebalancerWidget = addresses => {
             .map(suggestion => (
               <div className="item" key={suggestion.symbol}>
                 <div className="content">
-                  <a className="header">
+                  <div className="header">
                     {suggestion.symbol}: ${suggestion.balanceUSD.toFixed(2)}
-                  </a>
+                  </div>
                   <div className="description">
                     <p>Do this change: ${suggestion.difference.toFixed(2)}</p>
                     {suggestion.symbol
@@ -78,8 +78,8 @@ const RebalancerWidget = addresses => {
                         // TODO(david): optimize the swap path down the road
                         // in v1 we just simply swap into ETH and then swap into the target token
                         <div key={token}>
-                          <a className="ui tiny image">
-                            <img src={tokenAddressToImageInvertedIndex[token.toLowerCase()]}></img>
+                          <a className="ui tiny image" href={tokenAddressToImageInvertedIndex[token.toLowerCase()]}>
+                            <img src={tokenAddressToImageInvertedIndex[token.toLowerCase()]} alt={token}></img>
                           </a>
                           <a
                             className="ui tiny image"

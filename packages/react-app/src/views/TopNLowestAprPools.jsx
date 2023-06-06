@@ -9,7 +9,7 @@ export default function TopNLowestAprPools(props) {
       title: "Pool",
       dataIndex: "pool",
       key: "pool",
-      render: text => <a>{text}</a>,
+      render: text => <button>{text}</button>,
     },
     {
       title: "APR",

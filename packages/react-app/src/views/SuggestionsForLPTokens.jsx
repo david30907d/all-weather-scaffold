@@ -57,8 +57,8 @@ const SuggestionsForLPTokens = props => {
               key: "operation",
               render: () => (
                 <Space size="middle">
-                  <a>Accept</a>
-                  <a>Decline</a>
+                  <button>Accept</button>
+                  <button>Decline</button>
                 </Space>
               ),
             },
