@@ -65,7 +65,11 @@ module.exports = {
     hardhat: {
       forking: {
         url: "https://arb-mainnet.g.alchemy.com/v2/WIcMNRX1L9IpsIwW_o_IUIdhOWwAnFiO",
-        blockNumber: 86630670,
+        // for radiant
+        // blockNumber: 86630670,
+        // for sushiswap dpx:
+        // blockNumber: 97022421,
+        blockNumber: parseInt(process.env.BLOCK_NUMBER),
       }
     },
     localhost: {
