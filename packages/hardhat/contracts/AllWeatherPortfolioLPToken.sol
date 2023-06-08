@@ -4,8 +4,8 @@
 // 3. all weather vault is erc4626
 
 pragma solidity ^0.8.4;
-
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import "hardhat/console.sol";
 import "./RadiantArbitrumVault.sol";
@@ -21,6 +21,8 @@ interface IArbitrumUniswap {
 }
 
 contract AllWeatherPortfolioLPToken is ERC20 {
+    using SafeERC20 for ERC20;
+
     IERC20 public immutable underlying;
     mapping(address => uint256) public balances;
     address public radiantVaultAddr;

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 interface IMiniChefV2 {
     function userInfo(uint256 pid, address user) external view returns (uint256, int256);
     /// @notice Deposit LP tokens to MCV2 for SUSHI allocation.
@@ -22,4 +23,10 @@ interface IMiniChefV2 {
     /// @param amount LP token amount to withdraw.
     /// @param to Receiver of the LP tokens and SUSHI rewards.
     function withdrawAndHarvest(uint256 pid, uint256 amount, address to) external;
+
+    /// @notice View function to see pending SUSHI on frontend.
+    /// @param _pid The index of the pool. See `poolInfo`.
+    /// @param _user Address of user.
+    /// @return pending SUSHI reward for a given user.
+    function pendingSushi(uint256 _pid, address _user) external view returns (uint256);
 }
