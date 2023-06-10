@@ -43,7 +43,6 @@ import WalletLabels from "./WalletLabels";
 
 export default function Account({
   address,
-  addresses,
   userSigner,
   localProvider,
   mainnetProvider,
@@ -92,7 +91,6 @@ export default function Account({
           {accountButtonInfo.name}
         </Button>
       )}
-      <WalletLabels addresses={addresses} />
     </div>
   );
 }

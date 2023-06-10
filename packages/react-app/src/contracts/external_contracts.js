@@ -5703,6 +5703,85 @@ const Multicall2ABI = [
     type: "function",
   },
 ];
+
+const OneInchABI = [
+  {
+    inputs: [
+      {
+        internalType: "contract IAggregationExecutor",
+        name: "caller",
+        type: "address",
+      },
+      {
+        components: [
+          {
+            internalType: "contract IERC20",
+            name: "srcToken",
+            type: "address",
+          },
+          {
+            internalType: "contract IERC20",
+            name: "dstToken",
+            type: "address",
+          },
+          {
+            internalType: "address payable",
+            name: "srcReceiver",
+            type: "address",
+          },
+          {
+            internalType: "address payable",
+            name: "dstReceiver",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "amount",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "minReturnAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "flags",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes",
+            name: "permit",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct AggregationRouterV4.SwapDescription",
+        name: "desc",
+        type: "tuple",
+      },
+      {
+        internalType: "bytes",
+        name: "data",
+        type: "bytes",
+      },
+    ],
+    name: "swap",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "returnAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "gasLeft",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+];
 // Mainnet DAI, Optimism and Arbitrium Rollup Contracts with local addresses
 module.exports = {
   1: {
@@ -5771,6 +5850,10 @@ module.exports = {
       Multicall2: {
         address: "0xE5C1DB3d984458863aADbCF2b9684bA3a15123B7",
         abi: Multicall2ABI,
+      },
+      OneInch: {
+        address: "0x1111111254fb6c44bAC0beD2854e76F90643097d",
+        abi: OneInchABI,
       },
     },
   },

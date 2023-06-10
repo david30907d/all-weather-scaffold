@@ -22,7 +22,7 @@ const tokenAddressToImageInvertedIndex = Object.entries(tokens.props.pageProps.t
   },
   {},
 );
-const RebalancerWidget = addresses => {
+const RebalancerWidget = address => {
   const {
     netWorth,
     rebalanceSuggestions,
@@ -31,7 +31,7 @@ const RebalancerWidget = addresses => {
     topNLowestAprPools,
     topNPoolConsistOfSameLpToken,
     topNStableCoins,
-  } = useRebalanceSuggestions(addresses);
+  } = useRebalanceSuggestions(address);
 
   return (
     <div className="ui label">

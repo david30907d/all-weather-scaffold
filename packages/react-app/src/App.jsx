@@ -78,7 +78,6 @@ function App(props) {
 
   const [injectedProvider, setInjectedProvider] = useState();
   const [address, setAddress] = useState();
-  const [addresses, setAddresses] = useState(new Set());
   const [selectedNetwork, setSelectedNetwork] = useState(networkOptions[0]);
   const location = useLocation();
 
@@ -127,14 +126,10 @@ function App(props) {
       if (userSigner) {
         const newAddress = await userSigner.getAddress();
         setAddress(newAddress);
-
-        const newAddresses = new Set(addresses); // create a copy of the current set
-        newAddresses.add(newAddress); // add the new value to the copy
-        setAddresses(newAddresses);
       }
     }
     getAddress();
-  }, [userSigner, addresses]);
+  }, [userSigner]);
 
   // You can warn the user if you would like them to be on a specific network
   const localChainId = localProvider && localProvider._network && localProvider._network.chainId;
@@ -172,15 +167,6 @@ function App(props) {
   //   console.log(`⛓ A new mainnet block is here: ${mainnetProvider._lastBlockNumber}`);
   // });
 
-  // Then read your DAI balance like:
-  const pendleGllpMarketBalance = useContractReader(
-    readContracts,
-    "PendleGlpMarket",
-    "balanceOf",
-    [address],
-    mainnetProviderPollingTime,
-  );
-
   // keep track of a variable from the contract in the local React state:
   const purpose = useContractReader(readContracts, "YourContract", "purpose", [], localProviderPollingTime);
 
@@ -213,7 +199,6 @@ function App(props) {
       console.log("💵 yourMainnetBalance", yourMainnetBalance ? ethers.utils.formatEther(yourMainnetBalance) : "...");
       console.log("📝 readContracts", readContracts);
       console.log("🌍 DAI contract on mainnet:", mainnetContracts);
-      console.log("💵 pendleGllpMarketBalance", pendleGllpMarketBalance);
       console.log("🔐 writeContracts", writeContracts);
     }
   }, [
@@ -226,7 +211,6 @@ function App(props) {
     writeContracts,
     mainnetContracts,
     localChainId,
-    pendleGllpMarketBalance,
   ]);
 
   const loadWeb3Modal = useCallback(async () => {
@@ -286,7 +270,6 @@ function App(props) {
             <Account
               useBurner={USE_BURNER_WALLET}
               address={address}
-              addresses={Array.from(addresses)}
               localProvider={localProvider}
               userSigner={userSigner}
               mainnetProvider={mainnetProvider}
@@ -322,8 +305,8 @@ function App(props) {
       <Switch>
         <Route path="/exampleui">
           <ExampleUI
+            chainId={localChainId}
             address={address}
-            addresses={addresses}
             userSigner={userSigner}
             mainnetProvider={mainnetProvider}
             localProvider={localProvider}

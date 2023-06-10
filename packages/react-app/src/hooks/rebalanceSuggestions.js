@@ -2,7 +2,7 @@ import axios from "axios";
 import { usePoller } from "eth-hooks";
 import { useState } from "react";
 const API_URL = process.env.REACT_APP_API_URL;
-export default function useRebalanceSuggestions(addresses, pollTime = 300000) {
+export default function useRebalanceSuggestions(address, pollTime = 300000) {
   const [netWorth, setNetWorth] = useState(0);
   const [rebalanceSuggestions, setRebalanceSuggestions] = useState([]);
   const [totalInterest, setTotalInterest] = useState(0);
@@ -13,7 +13,7 @@ export default function useRebalanceSuggestions(addresses, pollTime = 300000) {
   const [topNStableCoins, setTopNStableCoins] = useState([]);
   const loadSuggestions = async () => {
     axios
-      .get(`${API_URL}/address?addresses=${addresses.addresses.join("+")}`)
+      .get(`${API_URL}/address?addresses=${address}`)
       .then(response => {
         const newNetWorth = response.data.net_worth;
         setNetWorth(newNetWorth);
