@@ -128,3 +128,5 @@ Join the telegram [support chat 💬](https://t.me/joinchat/KByvmRe5wkR-8F_zz6Aj
 ### Automated with Gitpod
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#github.com/scaffold-eth/scaffold-eth)
+
+BLOCK_NUMBER=97022421 yarn test test/dpxArbitrumVaultTest.js
