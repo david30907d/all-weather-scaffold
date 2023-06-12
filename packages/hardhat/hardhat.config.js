@@ -9,7 +9,7 @@ require("@nomicfoundation/hardhat-toolbox");
 require("hardhat-deploy");
 require("@nomiclabs/hardhat-ethers");
 
-
+const { PRIVATE_KEY } = process.env;
 const { isAddress, getAddress, formatUnits, parseUnits } = utils;
 
 /*
@@ -69,6 +69,8 @@ module.exports = {
         // blockNumber: 86630670,
         // for sushiswap dpx:
         // blockNumber: 97022421,
+        // for radiant dLP:
+        // blockNumber: 99084701,
         blockNumber: parseInt(process.env.BLOCK_NUMBER),
       }
     },
@@ -148,6 +150,14 @@ module.exports = {
       accounts: {
         mnemonic: mnemonic(),
       },
+    },
+    scrollTestnet: {
+      url: "https://alpha-rpc.scroll.io/l2",
+      accounts: [`0x${PRIVATE_KEY}`]
+    },
+    mantleAlpha: {
+      url: "https://rpc.testnet.mantle.xyz",
+      accounts: [`0x${PRIVATE_KEY}`]
     },
     mumbai: {
       url: "https://rpc-mumbai.maticvigil.com",

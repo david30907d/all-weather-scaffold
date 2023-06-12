@@ -7,7 +7,6 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/interfaces/IERC4626.sol";
-import "hardhat/console.sol";
 import "./RadiantArbitrumVault.sol";
 
 interface IArbitrumUniswap {
@@ -23,24 +22,24 @@ interface IArbitrumUniswap {
 contract AllWeatherPortfolioLPToken is ERC20 {
     using SafeERC20 for ERC20;
 
-    IERC20 public immutable underlying;
+    IERC20 public immutable asset;
     mapping(address => uint256) public balances;
     address public radiantVaultAddr;
-    constructor(string memory name_, string memory symbol_, address radiantVaultAddr_,  IERC20Metadata underlying_)
+    constructor(string memory name_, string memory symbol_, address radiantVaultAddr_,  address asset_)
         ERC20(name_, symbol_) 
     {
         radiantVaultAddr = radiantVaultAddr_;
-        underlying = underlying_;
+        asset = ERC20(asset_);
     }
 
     function deposit(uint256 amount) public {
         require(amount > 0, "Token amount must be greater than 0");
         // Transfer tokens from the user to the contract
         require(
-            underlying.transferFrom(msg.sender, address(this), amount),
+            asset.transferFrom(msg.sender, address(this), amount),
             "Token transfer failed"
         );
-        underlying.approve(radiantVaultAddr, amount);
+        asset.approve(radiantVaultAddr, amount);
         require(
             RadiantArbitrumVault(radiantVaultAddr).deposit(amount, address(this)) > 0,
             "Buying LP token failed"
@@ -52,7 +51,6 @@ contract AllWeatherPortfolioLPToken is ERC20 {
     }
     function redeemAll(uint256 amount) public {
         _burn(msg.sender, amount);
-        console.log("receriver", msg.sender);
         RadiantArbitrumVault(radiantVaultAddr).redeemAll(amount, msg.sender, address(this));
     }
 
