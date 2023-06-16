@@ -1,17 +1,16 @@
 const { expect } = require("chai");
 
-const myImpersonatedWalletAddress = "0x7ee54ab0f204bb3a83df90fdd824d8b4abe93222";
+const myImpersonatedWalletAddress = "0xe4bac3e44e8080e1491c11119197d33e396ea82b";
 const wethAddress = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
-const radiantLockedDlpAddress = "0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE";
 const radiantDlpAddress = "0x32dF62dc3aEd2cD6224193052Ce665DC18165841";
 const radiantLockZapAddress = "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1";
-const gasLimit = 2675600;
+const gasLimit = 3575600;
 
 let wallet;
 let weth;
-let rDaiContract;
 let radiantVault;
 let portfolioContract;
+let multiFeeDistribution;
 const amount = ethers.utils.parseUnits('0.01', 18); // 100 DAI with 18 decimals
 
 
@@ -30,11 +29,13 @@ describe("All Weather Protocol", function () {
     portfolioContract = await AllWeatherPortfolioLPToken.deploy("allWeatherPortfolioLPToken", "AWP", radiantVault.address, weth.address);
     await portfolioContract.deployed();
 
-    await (await weth.connect(wallet).approve(portfolioContract.address, ethers.utils.parseUnits("100000000", 18), { gasLimit: gasLimit })).wait();
+    await (await weth.connect(wallet).approve(portfolioContract.address, amount, { gasLimit: gasLimit })).wait();
+    const IMultiFeeDistribution = await hre.artifacts.readArtifact("IMultiFeeDistribution");
+    multiFeeDistribution = new ethers.utils.Interface(IMultiFeeDistribution.abi);
   });
 
   describe("Portfolio LP Contract Test", function () {
-    it("Should be able to deposit ERC20 to portfolio contract", async function () {
+    it("Should be able to zapin with WETH into Radiant dLP", async function () {
       const originalBalance = await weth.balanceOf(wallet.address);
       console.log("original balance: ", originalBalance.toString());
       console.log("Start depositing...");
@@ -50,6 +51,26 @@ describe("All Weather Protocol", function () {
       expect(vaultShareAfterDeposit).to.gt(0);
       const radiantLockedDlpBalanceAfterDeposit = await radiantVault.totalAssets();
       expect(radiantLockedDlpBalanceAfterDeposit).to.gt(amount);
+    });
+    it("Should be able to withdraw Radiant dLP", async function () {
+      const radiantLockedDlpBalanceBeforeDeposit = await radiantVault.totalAssets();
+      expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
+      await (await portfolioContract.connect(wallet).deposit(amount, { gasLimit: gasLimit})).wait();
+      const radiantLockedDlpBalanceAfterDeposit = await radiantVault.totalAssets();
+      expect(radiantLockedDlpBalanceAfterDeposit).to.gt(0);
+
+      // Simulate a year later
+      const oneMonthInSeconds = 12 * 31 * 24 * 60 * 60;
+      const currentTimestamp = Math.floor(Date.now() / 1000);
+      const futureTimestamp = currentTimestamp + oneMonthInSeconds;
+      await ethers.provider.send('evm_setNextBlockTimestamp', [futureTimestamp]);
+      await ethers.provider.send('evm_mine');
+
+      // withdraw
+      await (await portfolioContract.connect(wallet).redeemAll(amount, { gasLimit: gasLimit})).wait();
+      const radiantLockedDlpAfterRedeem = await radiantVault.totalAssets();
+      expect(radiantLockedDlpAfterRedeem).to.equal(0);
+      expect(await dlpToken.balanceOf(wallet.address)).to.equal(radiantLockedDlpBalanceAfterDeposit);
     });
   });
 });

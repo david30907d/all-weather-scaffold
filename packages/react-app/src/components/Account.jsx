@@ -5,7 +5,6 @@ import { useThemeSwitcher } from "react-css-theme-switcher";
 import Address from "./Address";
 import Balance from "./Balance";
 import Wallet from "./Wallet";
-import WalletLabels from "./WalletLabels";
 /** 
   ~ What it does? ~
 

@@ -134,4 +134,4 @@ Join the telegram [support chat 💬](https://t.me/joinchat/KByvmRe5wkR-8F_zz6Aj
 * dpx: `BLOCK_NUMBER=97022421 yarn test test/dpxArbitrumVaultTest.js`
 * radiant:
     * USDT: `BLOCK_NUMBER=86630670 yarn test test/radiantArbitrumVaultTest.js`
-    * wETH: `BLOCK_NUMBER=82762391  yarn test test/radiantArbitrumVaultTest.js`
+    * wETH: `BLOCK_NUMBER=101043121  yarn test test/radiantArbitrumVaultTest.js`

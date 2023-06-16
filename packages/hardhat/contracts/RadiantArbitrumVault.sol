@@ -12,6 +12,7 @@ import "hardhat/console.sol";
 import "./radiant/ILendingPool.sol";
 import "./radiant/ILockZap.sol";
 import "./radiant/IFeeDistribution.sol";
+import "./radiant/IMultiFeeDistribution.sol";
 import "./gmx-contracts/IRewardRouterV2.sol";
 
 
@@ -23,7 +24,9 @@ contract RadiantArbitrumVault is ERC4626 {
     ILendingPool public radiantLending;
     ILockZap public lockZap;
     IRewardRouterV2 public gmxRouter;
+    IMultiFeeDistribution public multiFeeDistribution;
     IERC20 public constant weth = IERC20(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1);
+
     constructor(IERC20Metadata asset_, address radiantLending_, address gmx_) 
         ERC4626(asset_)
         ERC20("AllWeatherLP-Radiant", "ALP-r") 
@@ -31,15 +34,18 @@ contract RadiantArbitrumVault is ERC4626 {
         _asset = asset_;
         radiantLending = ILendingPool(radiantLending_);
         lockZap = ILockZap(0x8991C4C347420E476F1cf09C03abA224A76E2997);
+        multiFeeDistribution = IMultiFeeDistribution(0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE);
         gmxRouter = IRewardRouterV2(gmx_);
     }
 
     function totalAssets() public view override returns (uint256) {
-        (uint256 total,,,,) = IFeeDistribution(0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE).lockedBalances(address(this));
-        return total;
+        (uint256 lockedBalances,,,,) = IFeeDistribution(0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE).lockedBalances(address(this));
+        return lockedBalances + _asset.balanceOf(address(this));
     }
 
-    function deposit(uint256 amount, address receiver) public override returns (uint256) {
+    function deposit(uint256 amount, address receiver) public override returns (uint256 shares) {
+        // the reason why I cannot just call `super.deposit` is that user don't have dLP at the time they deposit.
+        // need to take advantage of the zap to get dLP, so need to modity `super.deposit()`
         require(amount <= maxDeposit(receiver), "ERC4626: deposit more than max");
 
         SafeERC20.safeTransferFrom(weth, msg.sender, address(this), amount);
@@ -51,12 +57,11 @@ contract RadiantArbitrumVault is ERC4626 {
         return shares;
     }
 
-    function redeemAll(uint256 shares, address receiver, address owner) public returns (uint256) {
-        // TODO(david): to check how to only withdraw specific amount of shares from radiant lending
-        // Radiant: withdraw all should input ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        radiantLending.withdraw(address(_asset), 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, address(this));
-        uint256 shares = super.redeem(shares, receiver, owner);
-        return shares;
+    function redeemAll(address receiver, address owner) public returns (uint256) {
+        uint256 radiantDlpShares = multiFeeDistribution.withdrawExpiredLocksForWithOptions(address(this), 1, true);
+        uint256 vaultShare = super.redeem(radiantDlpShares, receiver, owner);
+        require(radiantDlpShares == vaultShare, "radiantDlpShares != vaultShare");
+        return vaultShare;
     }
 
     // function claim(){

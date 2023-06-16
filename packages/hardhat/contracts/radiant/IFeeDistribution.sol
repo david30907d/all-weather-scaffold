@@ -1,15 +1,18 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+
+pragma solidity 0.8.4;
 pragma abicoder v2;
 
-struct LockedBalance {
-	uint256 amount;
-	uint256 unlockTime;
-	uint256 multiplier;
-	uint256 duration;
-}
+import "./LockedBalance.sol";
 
 interface IFeeDistribution {
+	struct RewardData {
+		address token;
+		uint256 amount;
+	}
+
+	function addReward(address rewardsToken) external;
+
 	function lockedBalances(
 		address user
 	) external view returns (uint256, uint256, uint256, uint256, LockedBalance[] memory);

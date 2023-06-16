@@ -51,7 +51,7 @@ contract AllWeatherPortfolioLPToken is ERC20 {
     }
     function redeemAll(uint256 amount) public {
         _burn(msg.sender, amount);
-        RadiantArbitrumVault(radiantVaultAddr).redeemAll(amount, msg.sender, address(this));
+        RadiantArbitrumVault(radiantVaultAddr).redeemAll(msg.sender, address(this));
     }
 
 }
