@@ -50,13 +50,13 @@ contract DpxArbitrumVault is ERC4626 {
 
     function claim(address receiver) public {
         sushiSwapMiniChef.harvest(pid, address(this));
-        (uint256 sushiRewards, uint256 dpxRewards) = claimableAmount(address(this));
+        (uint256 sushiRewards, uint256 dpxRewards) = claimableRewards(address(this));
         uint256 percentageWithMultiplier = balanceOf(receiver).mul(percentageMultiplier).div(totalSupply());
         SafeERC20.safeTransfer(sushiRewardToken, receiver, sushiRewards.mul(percentageWithMultiplier).div(percentageMultiplier));
         SafeERC20.safeTransfer(dpxRewardToken, receiver, dpxRewards.mul(percentageWithMultiplier).div(percentageMultiplier));
     }
 
-    function claimableAmount(address receiver) public view returns (uint256, uint256) {
+    function claimableRewards(address receiver) public view returns (uint256, uint256) {
         return (sushiSwapMiniChef.pendingSushi(pid, receiver), dpxRewarder.pendingToken(pid, receiver));
     }
 }

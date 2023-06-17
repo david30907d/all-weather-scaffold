@@ -54,7 +54,7 @@ describe("All Weather Protocol", function () {
       await mineBlocks(1); // Mine 1 blocks
       expect(await sushiToken.balanceOf(dpxVault.address)).to.equal(0);
       expect(await dpxToken.balanceOf(dpxVault.address)).to.equal(0);
-      const [sushiReward, dpxReward] = await dpxVault.claimableAmount(dpxVault.address);
+      const [sushiReward, dpxReward] = await dpxVault.claimableRewards(dpxVault.address);
       await dpxVault.claim(dpxVault.address);
       expect(sushiReward).to.be.gt(0);
       expect(dpxReward).to.be.gt(0);

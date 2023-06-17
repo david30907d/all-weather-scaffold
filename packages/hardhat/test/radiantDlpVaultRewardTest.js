@@ -35,39 +35,25 @@ describe("All Weather Protocol", function () {
   });
 
   describe("Portfolio LP Contract Test", function () {
-    it("Should be able to zapin with WETH into Radiant dLP", async function () {
-      const originalBalance = await weth.balanceOf(wallet.address);
-      console.log("original balance: ", originalBalance.toString());
-      console.log("Start depositing...");
-      console.log(amount.toString())
-      const originalVaultShare = await radiantVault.balanceOf(portfolioContract.address)
-      expect(originalVaultShare).to.equal(0);
-
-      const originalRadiantLockedDlpBalance = await radiantVault.totalAssets();
-      expect(originalRadiantLockedDlpBalance).to.equal(0);
+    it("Should be able to claim Radiant dLP with fee", async function () {
       await (await portfolioContract.connect(wallet).deposit(amount, { gasLimit: gasLimit})).wait();
-      
-      const vaultShareAfterDeposit = await radiantVault.balanceOf(portfolioContract.address)
-      expect(vaultShareAfterDeposit).to.gt(0);
-      const radiantLockedDlpBalanceAfterDeposit = await radiantVault.totalAssets();
-      expect(radiantLockedDlpBalanceAfterDeposit).to.gt(amount);
-    });
-    it("Should be able to withdraw Radiant dLP", async function () {
-      const radiantLockedDlpBalanceBeforeDeposit = await radiantVault.totalAssets();
-      expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
-      await (await portfolioContract.connect(wallet).deposit(amount, { gasLimit: gasLimit})).wait();
-      const radiantLockedDlpBalanceAfterDeposit = await radiantVault.totalAssets();
-      expect(radiantLockedDlpBalanceAfterDeposit).to.gt(0);
 
-      // currentTimestamp += 12 * 31 * 24 * 60 * 60; // Increment timestamp
-      currentTimestamp = Math.floor(Date.now() / 1000);
+      currentTimestamp += 12 * 31 * 24 * 60 * 60; // Increment timestamp
       await simulateAYearLater();
 
-      // withdraw
-      await (await portfolioContract.connect(wallet).redeemAll(amount, { gasLimit: gasLimit})).wait();
-      const radiantLockedDlpAfterRedeem = await radiantVault.totalAssets();
-      expect(radiantLockedDlpAfterRedeem).to.equal(0);
-      expect(await dlpToken.balanceOf(wallet.address)).to.equal(radiantLockedDlpBalanceAfterDeposit);
+      const rRewardTokens = ["0x912ce59144191c1204e64559fe8253a0e49e6548","0x5979d7b546e38e414f7e9822514be443a4800529","0xda10009cbd5d07dd0cecc66161fc93d7c9000da1","0xff970a61a04b1ca14834a43f5de4533ebddb5cc8","0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9","0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f"];
+      const nativeRewardTokens = ["0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f","0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9","0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8","0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1","0x5979D7b546E38E414F7E9822514be443A4800529","0x912CE59144191C1204E64559FE8253a0e49E6548"];
+      let balancesBeforeClaim = [];
+      for (const nativeRewardToken of nativeRewardTokens) {
+        const nativeToken = await ethers.getContractAt("MockDAI", nativeRewardToken);
+        balancesBeforeClaim.push(await nativeToken.balanceOf(wallet.address));
+      }
+      await (await portfolioContract.connect(wallet).claim(rRewardTokens, nativeRewardTokens, { gasLimit: gasLimit})).wait();
+      for (const nativeRewardToken of nativeRewardTokens) {
+        const nativeToken = await ethers.getContractAt("MockDAI", nativeRewardToken);
+        const balanceAfterClaim = await nativeToken.balanceOf(wallet.address);
+        expect(balanceAfterClaim).to.gt(balancesBeforeClaim.pop());
+      }
     });
   });
 });

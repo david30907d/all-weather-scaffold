@@ -43,28 +43,42 @@ contract RadiantArbitrumVault is ERC4626 {
         return lockedBalances + _asset.balanceOf(address(this));
     }
 
-    function deposit(uint256 amount, address receiver) public override returns (uint256 shares) {
+    function deposit(uint256 _amount, address _receiver) public override returns (uint256 shares) {
         // the reason why I cannot just call `super.deposit` is that user don't have dLP at the time they deposit.
         // need to take advantage of the zap to get dLP, so need to modity `super.deposit()`
-        require(amount <= maxDeposit(receiver), "ERC4626: deposit more than max");
+        require(_amount <= maxDeposit(_receiver), "ERC4626: deposit more than max");
 
-        SafeERC20.safeTransferFrom(weth, msg.sender, address(this), amount);
-        SafeERC20.safeApprove(weth, address(lockZap), amount);
-        uint256 shares = lockZap.zap(false, amount, 0, 3);
-        _mint(receiver, shares);
+        SafeERC20.safeTransferFrom(weth, msg.sender, address(this), _amount);
+        SafeERC20.safeApprove(weth, address(lockZap), _amount);
+        uint256 shares = lockZap.zap(false, _amount, 0, 3);
+        _mint(_receiver, shares);
 
-        emit Deposit(_msgSender(), receiver, amount, shares);
+        emit Deposit(_msgSender(), _receiver, _amount, shares);
         return shares;
     }
 
-    function redeemAll(address receiver, address owner) public returns (uint256) {
+    function redeemAll(address _receiver, address _owner) public returns (uint256) {
         uint256 radiantDlpShares = multiFeeDistribution.withdrawExpiredLocksForWithOptions(address(this), 1, true);
-        uint256 vaultShare = super.redeem(radiantDlpShares, receiver, owner);
+        uint256 vaultShare = super.redeem(radiantDlpShares, _receiver, _owner);
         require(radiantDlpShares == vaultShare, "radiantDlpShares != vaultShare");
         return vaultShare;
     }
 
-    // function claim(){
-        // https://arbiscan.io/tx/0x13ded9cd77e5918bb7b51484c94b0676a6f05dd83506a73924a76cf43e2ce530
-    // }
+    function claim(address _receiver, address[] memory _rRewardTokens, address[] memory _nativeRewardTokens) public {
+        multiFeeDistribution.getAllRewards();
+        // should withdraw rToken first!
+        for (uint256 i = 0; i < _rRewardTokens.length; i++) {
+            // if you want to redeem of of your rXXX token back to native
+            // then the amount should be 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+            radiantLending.withdraw(_rRewardTokens[i], 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, _receiver);
+        }
+        for (uint256 i = 0; i < _nativeRewardTokens.length; i++) {
+            IERC20 nativeToken = IERC20(_nativeRewardTokens[i]);
+            nativeToken.safeTransfer(_receiver, nativeToken.balanceOf(address(this)));
+        }
+    }
+
+    function claimableRewards(address _owner) public view returns (uint256) {
+        return multiFeeDistribution.claimableRewards(_owner)[2].amount;
+    }
 }

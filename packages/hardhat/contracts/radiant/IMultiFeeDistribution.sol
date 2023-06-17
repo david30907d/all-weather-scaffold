@@ -18,6 +18,9 @@ interface IMultiFeeDistribution is IFeeDistribution {
 	);
 	event Locked(address indexed user, uint256 amount, uint256 lockedBalance, bool isLP);
 
+	/// @notice Reward tokens being distributed
+	function rewardTokens() external view returns (address[] memory);
+
 	function exit(bool claimRewards) external;
 
 	function stake(uint256 amount, address onBehalfOf, uint256 typeIndex) external;
@@ -57,6 +60,10 @@ interface IMultiFeeDistribution is IFeeDistribution {
 	function claimFromConverter(address) external;
 
 	function mint(address user, uint256 amount, bool withPenalty) external;
+
+	function getReward(address[] memory _rewardTokens) external;
+
+	function getAllRewards() external;
 }
 
 interface IMFDPlus is IMultiFeeDistribution {
