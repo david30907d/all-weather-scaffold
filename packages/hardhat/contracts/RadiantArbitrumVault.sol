@@ -15,6 +15,7 @@ import "./radiant/IFeeDistribution.sol";
 import "./radiant/IMultiFeeDistribution.sol";
 import "./radiant/IWETHGateway.sol";
 import "./radiant/IAToken.sol";
+import "./radiant/IFeeDistribution.sol";
 import "./gmx-contracts/IRewardRouterV2.sol";
 
 
@@ -71,8 +72,9 @@ contract RadiantArbitrumVault is ERC4626 {
         _claimETHReward(_receiver);
     }
 
-    function claimableRewards(address _owner) public view returns (uint256) {
-        return multiFeeDistribution.claimableRewards(_owner)[2].amount;
+    function claimableRewards(address _portfolioAddress) public view returns (IFeeDistribution.RewardData[] memory rewards) {
+        IFeeDistribution.RewardData[] memory radiantRewardData = multiFeeDistribution.claimableRewards(address(this));
+        return _calculateClaimableRewards(_portfolioAddress, radiantRewardData);
     }
 
     function _claimERC20Rewards(address _receiver, address[] memory _rRewardTokens) internal {
@@ -88,7 +90,7 @@ contract RadiantArbitrumVault is ERC4626 {
 		IAToken aWETH = IAToken(radiantLending.getReserveData(address(weth)).aTokenAddress);
         SafeERC20.safeApprove(aWETH, address(wethGateway), type(uint256).max);
         uint256 userBalance = aWETH.balanceOf(address(this));
-        wethGateway.withdrawETH(address(radiantLending), _calculateClaimableETHForUser(_receiver), _receiver);
+        wethGateway.withdrawETH(address(radiantLending), _calculateClaimableETHForUser(_receiver, userBalance), _receiver);
     }
 
     function _calculateClaimableERC20RewardForUser(address _receiver, address _rRewardTokens) internal returns (uint256) {
@@ -96,8 +98,13 @@ contract RadiantArbitrumVault is ERC4626 {
         return type(uint256).max;
     }
 
-    function _calculateClaimableETHForUser(address _receiver) internal returns (uint256) {
-        // TODO(david): need to calculate the reward for user
+    function _calculateClaimableETHForUser(address _receiver, uint256 _userBalance) internal returns (uint256) {
+        // TODO(david): need to calculate the reward for user by using _userBalance
         return type(uint256).max;
+    }
+
+    function _calculateClaimableRewards(address _portfolioAddress, IFeeDistribution.RewardData[] memory _radiantRewardData) internal view returns (IFeeDistribution.RewardData[] memory rewards) {
+        // TODO(david): should use _portfolioAddress to calculate the reward, per the shares of this portfolio in this radiant vault
+        return _radiantRewardData;
     }
 }

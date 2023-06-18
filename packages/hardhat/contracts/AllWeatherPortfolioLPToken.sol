@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import "./RadiantArbitrumVault.sol";
+import "./radiant/IFeeDistribution.sol";
 
 interface IArbitrumUniswap {
     function swapExactTokensForTokens(
@@ -56,5 +57,9 @@ contract AllWeatherPortfolioLPToken is ERC20 {
 
     function claim(address _receiver, address[] memory _rRewardTokens) public {
         RadiantArbitrumVault(radiantVaultAddr).claim(_receiver, _rRewardTokens);
+    }
+
+    function claimableRewards() public view returns (IFeeDistribution.RewardData[] memory rewards) {
+        return RadiantArbitrumVault(radiantVaultAddr).claimableRewards(address(this));
     }
 }

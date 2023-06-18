@@ -32,11 +32,11 @@ describe("All Weather Protocol", function () {
     await portfolioContract.deployed();
 
     await (await weth.connect(wallet).approve(portfolioContract.address, amount, { gasLimit: 2057560 })).wait();
-    await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.5"), { gasLimit: 2057560 });
+    await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.1"), { gasLimit: 2057560 });
   });
 
   describe("Portfolio LP Contract Test", function () {
-    it("Should be able to claim Radiant dLP with fee", async function () {
+    it("Should be able to claim reward", async function () {
       await (await portfolioContract.connect(wallet).deposit(amount, { gasLimit: gasLimit})).wait();
 
       currentTimestamp += 12 * 31 * 24 * 60 * 60; // Increment timestamp
@@ -63,6 +63,13 @@ describe("All Weather Protocol", function () {
       const ethBalanceAfterClaim = await getUserEthBalance(randomWallet.address);
       expect(ethBalanceAfterClaim).to.gt(ethBalanceBeforeClaim);
     });
+    it("Should be able to check claimable rewards", async function () {
+      const claimableRewards = await portfolioContract.claimableRewards();
+      for (const claimableReward of claimableRewards) {
+        expect(claimableReward).to.have.property("token");
+        expect(claimableReward).to.have.property("amount");
+      }
+    })
   });
 });
 
