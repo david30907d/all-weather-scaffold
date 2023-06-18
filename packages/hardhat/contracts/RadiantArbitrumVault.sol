@@ -13,6 +13,8 @@ import "./radiant/ILendingPool.sol";
 import "./radiant/ILockZap.sol";
 import "./radiant/IFeeDistribution.sol";
 import "./radiant/IMultiFeeDistribution.sol";
+import "./radiant/IWETHGateway.sol";
+import "./radiant/IAToken.sol";
 import "./gmx-contracts/IRewardRouterV2.sol";
 
 
@@ -24,9 +26,9 @@ contract RadiantArbitrumVault is ERC4626 {
     ILendingPool public radiantLending;
     ILockZap public lockZap;
     IRewardRouterV2 public gmxRouter;
-    IMultiFeeDistribution public multiFeeDistribution;
-    IERC20 public constant weth = IERC20(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1);
-
+    IMultiFeeDistribution public immutable multiFeeDistribution = IMultiFeeDistribution(0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE);
+    IERC20 public immutable weth = IERC20(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1);
+    IWETHGateway public immutable wethGateway = IWETHGateway(0xBb5cA40b2F7aF3B1ff5dbce0E9cC78F8BFa817CE);
     constructor(IERC20Metadata asset_, address radiantLending_, address gmx_) 
         ERC4626(asset_)
         ERC20("AllWeatherLP-Radiant", "ALP-r") 
@@ -34,7 +36,6 @@ contract RadiantArbitrumVault is ERC4626 {
         _asset = asset_;
         radiantLending = ILendingPool(radiantLending_);
         lockZap = ILockZap(0x8991C4C347420E476F1cf09C03abA224A76E2997);
-        multiFeeDistribution = IMultiFeeDistribution(0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE);
         gmxRouter = IRewardRouterV2(gmx_);
     }
 
@@ -64,21 +65,39 @@ contract RadiantArbitrumVault is ERC4626 {
         return vaultShare;
     }
 
-    function claim(address _receiver, address[] memory _rRewardTokens, address[] memory _nativeRewardTokens) public {
+    function claim(address _receiver, address[] memory _rRewardTokens) public {
         multiFeeDistribution.getAllRewards();
-        // should withdraw rToken first!
-        for (uint256 i = 0; i < _rRewardTokens.length; i++) {
-            // if you want to redeem of of your rXXX token back to native
-            // then the amount should be 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-            radiantLending.withdraw(_rRewardTokens[i], 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, _receiver);
-        }
-        for (uint256 i = 0; i < _nativeRewardTokens.length; i++) {
-            IERC20 nativeToken = IERC20(_nativeRewardTokens[i]);
-            nativeToken.safeTransfer(_receiver, nativeToken.balanceOf(address(this)));
-        }
+        _claimERC20Rewards(_receiver, _rRewardTokens);
+        _claimETHReward(_receiver);
     }
 
     function claimableRewards(address _owner) public view returns (uint256) {
         return multiFeeDistribution.claimableRewards(_owner)[2].amount;
+    }
+
+    function _claimERC20Rewards(address _receiver, address[] memory _rRewardTokens) internal {
+        for (uint256 i = 0; i < _rRewardTokens.length; i++) {
+            radiantLending.withdraw(
+                _rRewardTokens[i],
+                _calculateClaimableERC20RewardForUser(_receiver, _rRewardTokens[i]),
+                _receiver);
+        }
+    }
+
+    function _claimETHReward(address _receiver) internal {
+		IAToken aWETH = IAToken(radiantLending.getReserveData(address(weth)).aTokenAddress);
+        SafeERC20.safeApprove(aWETH, address(wethGateway), type(uint256).max);
+        uint256 userBalance = aWETH.balanceOf(address(this));
+        wethGateway.withdrawETH(address(radiantLending), _calculateClaimableETHForUser(_receiver), _receiver);
+    }
+
+    function _calculateClaimableERC20RewardForUser(address _receiver, address _rRewardTokens) internal returns (uint256) {
+        // TODO(david): need to calculate the reward for user
+        return type(uint256).max;
+    }
+
+    function _calculateClaimableETHForUser(address _receiver) internal returns (uint256) {
+        // TODO(david): need to calculate the reward for user
+        return type(uint256).max;
     }
 }

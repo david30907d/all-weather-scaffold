@@ -3,7 +3,7 @@ const { expect } = require("chai");
 const myImpersonatedWalletAddress = "0xe4bac3e44e8080e1491c11119197d33e396ea82b";
 const wethAddress = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
 const radiantDlpAddress = "0x32dF62dc3aEd2cD6224193052Ce665DC18165841";
-const radiantLockZapAddress = "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1";
+const radiantLendingPoolAddress = "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1";
 const multiFeeDistributionAddress = "0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE";
 const gasLimit = 14575600;
 
@@ -20,11 +20,11 @@ describe("All Weather Protocol", function () {
     wallet = await ethers.getImpersonatedSigner(myImpersonatedWalletAddress);
     weth = await ethers.getContractAt('IWETH', wethAddress);
     dlpToken = await ethers.getContractAt("MockDAI", radiantDlpAddress);
-    radiantLockZap = await ethers.getContractAt("ILendingPool", radiantLockZapAddress);
+    radiantLockZap = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
     multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
 
     const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
-    radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLockZapAddress, radiantLockZapAddress);
+    radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLendingPoolAddress, radiantLendingPoolAddress);
     await radiantVault.deployed();
 
     const AllWeatherPortfolioLPToken = await ethers.getContractFactory("AllWeatherPortfolioLPToken");
