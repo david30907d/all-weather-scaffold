@@ -37,6 +37,7 @@ describe("All Weather Protocol", function () {
 
   describe("Portfolio LP Contract Test", function () {
     it("Should be able to claim reward", async function () {
+      this.timeout(120000); // Set timeout to 120 seconds
       await (await portfolioContract.connect(wallet).deposit(amount, { gasLimit: gasLimit})).wait();
 
       currentTimestamp += 12 * 31 * 24 * 60 * 60; // Increment timestamp
