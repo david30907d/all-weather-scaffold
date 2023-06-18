@@ -45,6 +45,15 @@ contract RadiantArbitrumVault is ERC4626 {
         return lockedBalances + _asset.balanceOf(address(this));
     }
 
+    function totalLockedAssets() public view returns (uint256) {
+        (uint256 lockedBalances,,,,) = IFeeDistribution(0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE).lockedBalances(address(this));
+        return lockedBalances;
+    }
+
+    function totalUnlockedAssets() public view returns (uint256) {
+        return _asset.balanceOf(address(this));
+    }
+
     function deposit(uint256 _amount, address _receiver) public override returns (uint256 shares) {
         // the reason why I cannot just call `super.deposit` is that user don't have dLP at the time they deposit.
         // need to take advantage of the zap to get dLP, so need to modity `super.deposit()`

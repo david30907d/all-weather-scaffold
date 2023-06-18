@@ -51,7 +51,7 @@ describe("All Weather Protocol", function () {
         const nativeToken = await ethers.getContractAt("MockDAI", nativeRewardToken);
         const balanceBeforeClaim = await nativeToken.balanceOf(randomWallet.address);
         balancesBeforeClaim.push(balanceBeforeClaim);
-        expect(balanceBeforeClaim).to.equal(0)
+        expect(balanceBeforeClaim).to.equal(0);
       }
       const ethBalanceBeforeClaim = await getUserEthBalance(randomWallet.address);
       expect(ethBalanceBeforeClaim).to.equal(0);
