@@ -10,6 +10,7 @@ import "hardhat/console.sol";
 import "./dpx/IMiniChefV2.sol";
 import "./dpx/ICloneRewarderTime.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 
 contract DpxArbitrumVault is ERC4626 {
     using SafeMath for uint;
@@ -52,8 +53,11 @@ contract DpxArbitrumVault is ERC4626 {
         sushiSwapMiniChef.harvest(pid, address(this));
         (uint256 sushiRewards, uint256 dpxRewards) = claimableRewards(address(this));
         uint256 percentageWithMultiplier = balanceOf(receiver).mul(percentageMultiplier).div(totalSupply());
-        SafeERC20.safeTransfer(sushiRewardToken, receiver, sushiRewards.mul(percentageWithMultiplier).div(percentageMultiplier));
-        SafeERC20.safeTransfer(dpxRewardToken, receiver, dpxRewards.mul(percentageWithMultiplier).div(percentageMultiplier));
+
+        uint256 sushiRewardsProRata = Math.mulDiv(sushiRewards, balanceOf(msg.sender), totalSupply());
+        uint256 dpxRewardsProRata = Math.mulDiv(dpxRewards, balanceOf(msg.sender), totalSupply());
+        SafeERC20.safeTransfer(sushiRewardToken, receiver, sushiRewardsProRata);
+        SafeERC20.safeTransfer(dpxRewardToken, receiver, dpxRewardsProRata);
     }
 
     function claimableRewards(address receiver) public view returns (uint256, uint256) {
