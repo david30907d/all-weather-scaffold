@@ -50,13 +50,13 @@ contract AllWeatherPortfolioLPToken is ERC20 {
         _mint(msg.sender, amount);
         emit Transfer(address(0), msg.sender, amount);
     }
-    function redeemAll(uint256 _shares, address _receiver) public {
-        _burn(msg.sender, _shares);
-        RadiantArbitrumVault(radiantVaultAddr).redeemAll(_shares, _receiver);
+    function redeemAll(uint256 shares, address receiver) public {
+        _burn(msg.sender, shares);
+        RadiantArbitrumVault(radiantVaultAddr).redeemAll(shares, receiver);
     }
 
-    function claim(address _receiver, address[] memory _rRewardTokens) public {
-        RadiantArbitrumVault(radiantVaultAddr).claim(_receiver, _rRewardTokens);
+    function claim(address receiver, address[] memory rRewardTokens) public {
+        RadiantArbitrumVault(radiantVaultAddr).claim(receiver, rRewardTokens);
     }
 
     function claimableRewards() public view returns (IFeeDistribution.RewardData[] memory rewards) {

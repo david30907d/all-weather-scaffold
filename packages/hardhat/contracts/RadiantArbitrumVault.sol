@@ -54,67 +54,67 @@ contract RadiantArbitrumVault is ERC4626 {
         return _asset.balanceOf(address(this));
     }
 
-    function deposit(uint256 _amount, address _receiver) public override returns (uint256 shares) {
+    function deposit(uint256 amount, address receiver) public override returns (uint256 shares) {
         // the reason why I cannot just call `super.deposit` is that user don't have dLP at the time they deposit.
         // need to take advantage of the zap to get dLP, so need to modity `super.deposit()`
-        require(_amount <= maxDeposit(_receiver), "ERC4626: deposit more than max");
+        require(amount <= maxDeposit(receiver), "ERC4626: deposit more than max");
 
-        SafeERC20.safeTransferFrom(weth, msg.sender, address(this), _amount);
-        SafeERC20.safeApprove(weth, address(lockZap), _amount);
-        uint256 shares = lockZap.zap(false, _amount, 0, 3);
-        _mint(_receiver, shares);
+        SafeERC20.safeTransferFrom(weth, msg.sender, address(this), amount);
+        SafeERC20.safeApprove(weth, address(lockZap), amount);
+        uint256 shares = lockZap.zap(false, amount, 0, 3);
+        _mint(receiver, shares);
 
-        emit Deposit(_msgSender(), _receiver, _amount, shares);
+        emit Deposit(_msgSender(), receiver, amount, shares);
         return shares;
     }
 
-    function redeemAll(uint256 _shares, address _receiver) public returns (uint256) {
+    function redeemAll(uint256 _shares, address receiver) public returns (uint256) {
         // TODO(david): should only redeem _shares amount of dLP
         uint256 radiantDlpShares = multiFeeDistribution.withdrawExpiredLocksForWithOptions(address(this), 1, true);
-        uint256 vaultShare = super.redeem(radiantDlpShares, _receiver, msg.sender);
+        uint256 vaultShare = super.redeem(radiantDlpShares, receiver, msg.sender);
         require(radiantDlpShares == vaultShare, "radiantDlpShares != vaultShare");
         return vaultShare;
     }
 
-    function claim(address _receiver, address[] memory _rRewardTokens) public {
+    function claim(address receiver, address[] memory rRewardTokens) public {
         multiFeeDistribution.getAllRewards();
-        _claimERC20Rewards(_receiver, _rRewardTokens);
-        _claimETHReward(_receiver);
+        _claimERC20Rewards(receiver, rRewardTokens);
+        _claimETHReward(receiver);
     }
 
-    function claimableRewards(address _portfolioAddress) public view returns (IFeeDistribution.RewardData[] memory rewards) {
+    function claimableRewards(address portfolioAddress) public view returns (IFeeDistribution.RewardData[] memory rewards) {
         IFeeDistribution.RewardData[] memory radiantRewardData = multiFeeDistribution.claimableRewards(address(this));
-        return _calculateClaimableRewards(_portfolioAddress, radiantRewardData);
+        return _calculateClaimableRewards(portfolioAddress, radiantRewardData);
     }
 
-    function _claimERC20Rewards(address _receiver, address[] memory _rRewardTokens) internal {
-        for (uint256 i = 0; i < _rRewardTokens.length; i++) {
+    function _claimERC20Rewards(address receiver, address[] memory rRewardTokens) internal {
+        for (uint256 i = 0; i < rRewardTokens.length; i++) {
             radiantLending.withdraw(
-                _rRewardTokens[i],
-                _calculateClaimableERC20RewardForUser(_receiver, _rRewardTokens[i]),
-                _receiver);
+                rRewardTokens[i],
+                _calculateClaimableERC20RewardForUser(receiver, rRewardTokens[i]),
+                receiver);
         }
     }
 
-    function _claimETHReward(address _receiver) internal {
+    function _claimETHReward(address receiver) internal {
 		IAToken aWETH = IAToken(radiantLending.getReserveData(address(weth)).aTokenAddress);
         SafeERC20.safeApprove(aWETH, address(wethGateway), type(uint256).max);
         uint256 userBalance = aWETH.balanceOf(address(this));
-        wethGateway.withdrawETH(address(radiantLending), _calculateClaimableETHForUser(_receiver, userBalance), _receiver);
+        wethGateway.withdrawETH(address(radiantLending), _calculateClaimableETHForUser(receiver, userBalance), receiver);
     }
 
-    function _calculateClaimableERC20RewardForUser(address _receiver, address _rRewardTokens) internal returns (uint256) {
+    function _calculateClaimableERC20RewardForUser(address receiver, address rRewardTokens) internal returns (uint256) {
         // TODO(david): need to calculate the reward for user
         return type(uint256).max;
     }
 
-    function _calculateClaimableETHForUser(address _receiver, uint256 _userBalance) internal returns (uint256) {
-        // TODO(david): need to calculate the reward for user by using _userBalance
+    function _calculateClaimableETHForUser(address receiver, uint256 userBalance) internal returns (uint256) {
+        // TODO(david): need to calculate the reward for user by using userBalance
         return type(uint256).max;
     }
 
-    function _calculateClaimableRewards(address _portfolioAddress, IFeeDistribution.RewardData[] memory _radiantRewardData) internal view returns (IFeeDistribution.RewardData[] memory rewards) {
-        // TODO(david): should use _portfolioAddress to calculate the reward, per the shares of this portfolio in this radiant vault
-        return _radiantRewardData;
+    function _calculateClaimableRewards(address portfolioAddress, IFeeDistribution.RewardData[] memory radiantRewardData) internal view returns (IFeeDistribution.RewardData[] memory rewards) {
+        // TODO(david): should use portfolioAddress to calculate the reward, per the shares of this portfolio in this radiant vault
+        return radiantRewardData;
     }
 }
