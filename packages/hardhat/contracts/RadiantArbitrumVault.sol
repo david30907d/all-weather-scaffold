@@ -59,9 +59,10 @@ contract RadiantArbitrumVault is ERC4626 {
         return shares;
     }
 
-    function redeemAll(address _receiver, address _owner) public returns (uint256) {
+    function redeemAll(uint256 _shares, address _receiver) public returns (uint256) {
+        // TODO(david): should only redeem _shares amount of dLP
         uint256 radiantDlpShares = multiFeeDistribution.withdrawExpiredLocksForWithOptions(address(this), 1, true);
-        uint256 vaultShare = super.redeem(radiantDlpShares, _receiver, _owner);
+        uint256 vaultShare = super.redeem(radiantDlpShares, _receiver, msg.sender);
         require(radiantDlpShares == vaultShare, "radiantDlpShares != vaultShare");
         return vaultShare;
     }

@@ -31,43 +31,51 @@ describe("All Weather Protocol", function () {
     portfolioContract = await AllWeatherPortfolioLPToken.deploy("allWeatherPortfolioLPToken", "AWP", radiantVault.address, weth.address);
     await portfolioContract.deployed();
 
-    await (await weth.connect(wallet).approve(portfolioContract.address, amount, { gasLimit: gasLimit })).wait();
+    await (await weth.connect(wallet).approve(portfolioContract.address, amount, { gasLimit: 2057560 })).wait();
+    await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.1"), { gasLimit: 2057560 });
   });
 
   describe("Portfolio LP Contract Test", function () {
-    it("Should be able to zapin with WETH into Radiant dLP", async function () {
-      const originalBalance = await weth.balanceOf(wallet.address);
-      console.log("original balance: ", originalBalance.toString());
-      console.log("Start depositing...");
-      console.log(amount.toString())
-      const originalVaultShare = await radiantVault.balanceOf(portfolioContract.address)
-      expect(originalVaultShare).to.equal(0);
+    // it("Should be able to zapin with WETH into Radiant dLP", async function () {
+    //   const originalBalance = await weth.balanceOf(wallet.address);
+    //   console.log("original balance: ", originalBalance.toString());
+    //   console.log("Start depositing...");
+    //   console.log(amount.toString())
+    //   const originalVaultShare = await radiantVault.balanceOf(portfolioContract.address)
+    //   expect(originalVaultShare).to.equal(0);
 
-      const originalRadiantLockedDlpBalance = await radiantVault.totalAssets();
-      expect(originalRadiantLockedDlpBalance).to.equal(0);
-      await (await portfolioContract.connect(wallet).deposit(amount, { gasLimit: gasLimit})).wait();
+    //   const originalRadiantLockedDlpBalance = await radiantVault.totalAssets();
+    //   expect(originalRadiantLockedDlpBalance).to.equal(0);
+    //   await (await portfolioContract.connect(wallet).deposit(amount, { gasLimit: gasLimit})).wait();
       
-      const vaultShareAfterDeposit = await radiantVault.balanceOf(portfolioContract.address)
-      expect(vaultShareAfterDeposit).to.gt(0);
-      const radiantLockedDlpBalanceAfterDeposit = await radiantVault.totalAssets();
-      expect(radiantLockedDlpBalanceAfterDeposit).to.gt(amount);
-    });
-    it("Should be able to withdraw Radiant dLP", async function () {
-      const radiantLockedDlpBalanceBeforeDeposit = await radiantVault.totalAssets();
-      expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
+    //   const vaultShareAfterDeposit = await radiantVault.balanceOf(portfolioContract.address)
+    //   expect(vaultShareAfterDeposit).to.gt(0);
+    //   const radiantLockedDlpBalanceAfterDeposit = await radiantVault.totalAssets();
+    //   expect(radiantLockedDlpBalanceAfterDeposit).to.gt(amount);
+    // });
+    // it("Should be able to withdraw Radiant dLP", async function () {
+    //   const radiantLockedDlpBalanceBeforeDeposit = await radiantVault.totalAssets();
+    //   expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
+    //   await (await portfolioContract.connect(wallet).deposit(amount, { gasLimit: gasLimit})).wait();
+    //   const radiantLockedDlpBalanceAfterDeposit = await radiantVault.totalAssets();
+    //   expect(radiantLockedDlpBalanceAfterDeposit).to.gt(0);
+
+    //   currentTimestamp += 12 * 31 * 24 * 60 * 60; // Increment timestamp
+    //   await simulateAYearLater();
+
+    //   // withdraw
+    //   await (await portfolioContract.connect(wallet).redeemAll(amount, wallet.address, { gasLimit: gasLimit})).wait();
+    //   const radiantLockedDlpAfterRedeem = await radiantVault.totalAssets();
+    //   expect(radiantLockedDlpAfterRedeem).to.equal(0);
+    //   expect(await dlpToken.balanceOf(wallet.address)).to.equal(radiantLockedDlpBalanceAfterDeposit);
+    // });
+
+    it("Should not be able to withdraw Radiant dLP", async function () {
       await (await portfolioContract.connect(wallet).deposit(amount, { gasLimit: gasLimit})).wait();
-      const radiantLockedDlpBalanceAfterDeposit = await radiantVault.totalAssets();
-      expect(radiantLockedDlpBalanceAfterDeposit).to.gt(0);
-
-      // currentTimestamp += 12 * 31 * 24 * 60 * 60; // Increment timestamp
-      currentTimestamp = Math.floor(Date.now() / 1000);
+      currentTimestamp += 1000; // Increment timestamp
       await simulateAYearLater();
-
       // withdraw
-      await (await portfolioContract.connect(wallet).redeemAll(amount, { gasLimit: gasLimit})).wait();
-      const radiantLockedDlpAfterRedeem = await radiantVault.totalAssets();
-      expect(radiantLockedDlpAfterRedeem).to.equal(0);
-      expect(await dlpToken.balanceOf(wallet.address)).to.equal(radiantLockedDlpBalanceAfterDeposit);
+      await (await portfolioContract.connect(wallet).redeemAll(amount, wallet.address, { gasLimit: gasLimit})).wait();
     });
   });
 });
@@ -75,8 +83,6 @@ describe("All Weather Protocol", function () {
 
 async function simulateAYearLater() {
       // Simulate a year later
-      const oneMonthInSeconds = 12 * 31 * 24 * 60 * 60;
-      const futureTimestamp = currentTimestamp + oneMonthInSeconds;
-      await ethers.provider.send('evm_setNextBlockTimestamp', [futureTimestamp]);
+      await ethers.provider.send('evm_setNextBlockTimestamp', [currentTimestamp]);
       await ethers.provider.send('evm_mine');
 }

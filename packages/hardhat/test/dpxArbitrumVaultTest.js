@@ -76,7 +76,7 @@ describe("All Weather Protocol", function () {
       expect(await sushiToken.balanceOf(dpxVault.address)).to.equal(0);
       expect(await dpxToken.balanceOf(dpxVault.address)).to.equal(0);
 
-      await (await portfolioContract.connect(wallet).redeemAll(amount, { gasLimit: gasLimit})).wait();
+      await (await portfolioContract.connect(wallet).redeemAll(amount, wallet.address, { gasLimit: gasLimit})).wait();
       expect((await miniChefV2.userInfo(sushiPid, dpxVault.address))[0]).to.equal(miniChefV2OriginalBalance);
       expect(await dpxSLP.balanceOf(wallet.address)).to.equal(originalBalance);
 

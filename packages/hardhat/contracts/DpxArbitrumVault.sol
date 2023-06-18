@@ -40,11 +40,11 @@ contract DpxArbitrumVault is ERC4626 {
         return shares;
     }
 
-    function redeemAll(uint256 shares, address receiver, address owner) public returns (uint256) {
+    function redeemAll(uint256 _shares, address _receiver) public returns (uint256) {
         // shares#1 stands for sushiSwap shares
         // shares#2 stands for erc4626 shares
-        sushiSwapMiniChef.withdrawAndHarvest(pid, shares, address(this));
-        uint256 shares = super.redeem(shares, receiver, owner);
+        sushiSwapMiniChef.withdrawAndHarvest(pid, _shares, address(this));
+        uint256 shares = super.redeem(_shares, _receiver, msg.sender);
         return shares;
     }
 
