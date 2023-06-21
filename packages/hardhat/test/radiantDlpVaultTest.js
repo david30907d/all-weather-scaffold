@@ -1,4 +1,5 @@
 const { expect } = require("chai");
+const fetch = require('node-fetch');
 
 const myImpersonatedWalletAddress = "0xe4bac3e44e8080e1491c11119197d33e396ea82b";
 const wethAddress = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
@@ -13,7 +14,9 @@ let radiantVault;
 let portfolioContract;
 let currentTimestamp = Math.floor(Date.now() / 1000);;
 const amount = ethers.utils.parseUnits('0.01', 18); // 100 DAI with 18 decimals
-
+async function fetch1InchSwapData() {
+  return await fetch(`https://api.1inch.io/v5.0/42161/swap?fromTokenAddress=${weth.address}&toTokenAddress=0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9&amount=${amount.toString()}&fromAddress=${wallet.address}&slippage=1&disableEstimate=true`)
+}
 
 describe("All Weather Protocol", function () {
   beforeEach(async () => {
@@ -28,7 +31,7 @@ describe("All Weather Protocol", function () {
     await radiantVault.deployed();
 
     const AllWeatherPortfolioLPToken = await ethers.getContractFactory("AllWeatherPortfolioLPToken");
-    portfolioContract = await AllWeatherPortfolioLPToken.deploy("allWeatherPortfolioLPToken", "AWP", radiantVault.address, weth.address);
+    portfolioContract = await AllWeatherPortfolioLPToken.deploy(weth.address, radiantVault.address, radiantVault.address);
     await portfolioContract.deployed();
 
     await (await weth.connect(wallet).approve(portfolioContract.address, amount, { gasLimit: 2057560 })).wait();
@@ -42,7 +45,8 @@ describe("All Weather Protocol", function () {
 
       const originalRadiantLockedDlpBalance = await radiantVault.totalAssets();
       expect(originalRadiantLockedDlpBalance).to.equal(0);
-      await (await portfolioContract.connect(wallet).deposit(amount, { gasLimit: gasLimit})).wait();
+      const oneInchSwapData = (await (await fetch1InchSwapData()).json()).tx.data;
+      await (await portfolioContract.connect(wallet).deposit(amount, oneInchSwapData, { gasLimit: gasLimit})).wait();
       
       const vaultShareAfterDeposit = await radiantVault.balanceOf(portfolioContract.address)
       expect(vaultShareAfterDeposit).to.gt(0);
@@ -52,7 +56,9 @@ describe("All Weather Protocol", function () {
     it("Should be able to withdraw Radiant dLP", async function () {
       const radiantLockedDlpBalanceBeforeDeposit = await radiantVault.totalAssets();
       expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
-      await (await portfolioContract.connect(wallet).deposit(amount, { gasLimit: gasLimit})).wait();
+      const oneInchSwapData = (await (await fetch1InchSwapData()).json()).tx.data;
+
+      await (await portfolioContract.connect(wallet).deposit(amount, oneInchSwapData, { gasLimit: gasLimit})).wait();
       const radiantLockedDlpBalanceAfterDeposit = await radiantVault.totalAssets();
       expect(radiantLockedDlpBalanceAfterDeposit).to.gt(0);
 
@@ -67,7 +73,8 @@ describe("All Weather Protocol", function () {
     });
     
     it("Should not be able to withdraw Radiant dLP", async function () {
-      await (await portfolioContract.connect(wallet).deposit(amount, { gasLimit: gasLimit})).wait();
+      const oneInchSwapData = (await (await fetch1InchSwapData()).json()).tx.data;
+      await (await portfolioContract.connect(wallet).deposit(amount, oneInchSwapData, { gasLimit: gasLimit})).wait();
       const totalAssets = await radiantVault.totalAssets();
       const totalLockedAssets = await radiantVault.totalLockedAssets();
       const totalUnlockedAssets = await radiantVault.totalUnlockedAssets();
