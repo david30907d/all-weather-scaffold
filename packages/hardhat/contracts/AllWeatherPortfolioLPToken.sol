@@ -8,7 +8,12 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import "./RadiantArbitrumVault.sol";
+import "./DpxArbitrumVault.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 import "./radiant/IFeeDistribution.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 interface IArbitrumUniswap {
     function swapExactTokensForTokens(
@@ -20,31 +25,56 @@ interface IArbitrumUniswap {
     ) external returns (uint256[] memory amounts);
 }
 
+struct PortfolioAllocationOfSingleCategory {
+    string protocol;
+    uint256 percentage;
+}
+
 contract AllWeatherPortfolioLPToken is ERC20 {
-    using SafeERC20 for ERC20;
+	using SafeERC20 for IERC20;
 
     IERC20 public immutable asset;
-    mapping(address => uint256) public balances;
     address public radiantVaultAddr;
-    constructor(string memory name_, string memory symbol_, address radiantVaultAddr_,  address asset_)
-        ERC20(name_, symbol_) 
+    address public dpxVaultAddr;
+    constructor(address asset_, address radiantVaultAddr_, address dpxVaultAddr_)
+        ERC20("AllWeatherVaultLP", "AWVLP") 
     {
         radiantVaultAddr = radiantVaultAddr_;
+        dpxVaultAddr = dpxVaultAddr_;
         asset = ERC20(asset_);
     }
 
-    function deposit(uint256 amount) public {
+    // function deposit(uint256 amount, PortfolioAllocationOfSingleCategory[] portfolioAllocation) public {
+    function deposit(uint256 amount, bytes calldata oneInchData) public {
+        PortfolioAllocationOfSingleCategory[] memory portfolioAllocation = new PortfolioAllocationOfSingleCategory[](1);
+        // portfolioAllocation[0] = PortfolioAllocationOfSingleCategory({ protocol: "dpx", percentage: 50 });
+        portfolioAllocation[0] = PortfolioAllocationOfSingleCategory({ protocol: "radiant", percentage: 50 });
+        // PortfolioAllocationOfSingleCategory[] memory portfolioAllocation = [
+        //     PortfolioAllocationOfSingleCategory({ protocol: "dpx", percentage: 50 }),
+        //     // PortfolioAllocationOfSingleCategory({ protocol: "radiant", percentage: 50 })
+        // ];
         require(amount > 0, "Token amount must be greater than 0");
         // Transfer tokens from the user to the contract
         require(
             asset.transferFrom(msg.sender, address(this), amount),
             "Token transfer failed"
         );
-        asset.approve(radiantVaultAddr, amount);
-        require(
-            RadiantArbitrumVault(radiantVaultAddr).deposit(amount, address(this)) > 0,
-            "Buying LP token failed"
-        );
+        for (uint idx=0; idx<portfolioAllocation.length; idx++) {
+            bytes32 protocolHash = keccak256(bytes(portfolioAllocation[idx].protocol));
+            if (protocolHash == keccak256(bytes("dpx"))) {
+                SafeERC20.safeApprove(asset, radiantVaultAddr, amount);
+                require(
+                    DpxArbitrumVault(radiantVaultAddr).deposit(amount, address(this), oneInchData) > 0,
+                    "Buying Dpx LP token failed"
+                );
+            } else if (protocolHash == keccak256(bytes("radiant"))) {
+                SafeERC20.safeApprove(asset, radiantVaultAddr, amount);
+                require(
+                    RadiantArbitrumVault(radiantVaultAddr).deposit(amount, address(this), oneInchData) > 0,
+                    "Buying Radiant LP token failed"
+                );
+            }
+        }
 
         // Mint tokens to the user making the deposit
         _mint(msg.sender, amount);
