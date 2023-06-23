@@ -35,8 +35,8 @@ contract AllWeatherPortfolioLPToken is ERC20 {
 
     IERC20 public immutable asset;
     address public radiantVaultAddr;
-    address public dpxVaultAddr;
-    constructor(address asset_, address radiantVaultAddr_, address dpxVaultAddr_)
+    address payable public dpxVaultAddr;
+    constructor(address asset_, address radiantVaultAddr_, address payable dpxVaultAddr_)
         ERC20("AllWeatherVaultLP", "AWVLP") 
     {
         radiantVaultAddr = radiantVaultAddr_;
@@ -47,28 +47,25 @@ contract AllWeatherPortfolioLPToken is ERC20 {
     // function deposit(uint256 amount, PortfolioAllocationOfSingleCategory[] portfolioAllocation) public {
     function deposit(uint256 amount, bytes calldata oneInchData) public {
         PortfolioAllocationOfSingleCategory[] memory portfolioAllocation = new PortfolioAllocationOfSingleCategory[](1);
-        // portfolioAllocation[0] = PortfolioAllocationOfSingleCategory({ protocol: "dpx", percentage: 50 });
-        portfolioAllocation[0] = PortfolioAllocationOfSingleCategory({ protocol: "radiant", percentage: 50 });
+        portfolioAllocation[0] = PortfolioAllocationOfSingleCategory({ protocol: "dpx", percentage: 50 });
+        // portfolioAllocation[1] = PortfolioAllocationOfSingleCategory({ protocol: "radiant", percentage: 50 });
         // PortfolioAllocationOfSingleCategory[] memory portfolioAllocation = [
         //     PortfolioAllocationOfSingleCategory({ protocol: "dpx", percentage: 50 }),
         //     // PortfolioAllocationOfSingleCategory({ protocol: "radiant", percentage: 50 })
         // ];
         require(amount > 0, "Token amount must be greater than 0");
         // Transfer tokens from the user to the contract
-        require(
-            asset.transferFrom(msg.sender, address(this), amount),
-            "Token transfer failed"
-        );
+        SafeERC20.safeTransferFrom(IERC20(asset), msg.sender, address(this), amount);
         for (uint idx=0; idx<portfolioAllocation.length; idx++) {
             bytes32 protocolHash = keccak256(bytes(portfolioAllocation[idx].protocol));
             if (protocolHash == keccak256(bytes("dpx"))) {
-                SafeERC20.safeApprove(asset, radiantVaultAddr, amount);
+                SafeERC20.safeApprove(IERC20(asset), dpxVaultAddr, amount);
                 require(
-                    DpxArbitrumVault(radiantVaultAddr).deposit(amount, address(this), oneInchData) > 0,
+                    DpxArbitrumVault(dpxVaultAddr).deposit(amount, address(this), oneInchData) > 0,
                     "Buying Dpx LP token failed"
                 );
             } else if (protocolHash == keccak256(bytes("radiant"))) {
-                SafeERC20.safeApprove(asset, radiantVaultAddr, amount);
+                SafeERC20.safeApprove(IERC20(asset), radiantVaultAddr, amount);
                 require(
                     RadiantArbitrumVault(radiantVaultAddr).deposit(amount, address(this), oneInchData) > 0,
                     "Buying Radiant LP token failed"

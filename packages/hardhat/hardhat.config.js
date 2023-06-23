@@ -64,7 +64,8 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: "https://arb-mainnet.g.alchemy.com/v2/WIcMNRX1L9IpsIwW_o_IUIdhOWwAnFiO",
+        // url: "https://arb-mainnet.g.alchemy.com/v2/WIcMNRX1L9IpsIwW_o_IUIdhOWwAnFiO",
+        url: "https://arbitrum-mainnet.infura.io/v3/5f2c1e51fadf404d8f04f620c58b71d9",
         // for radiant
         // blockNumber: 86630670,
         // for sushiswap dpx:
