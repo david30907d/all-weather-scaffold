@@ -16,7 +16,7 @@ import "./utils/IWETH.sol";
 
 contract DpxArbitrumVault is ERC4626 {
     using SafeMath for uint;
-    using SafeERC20 for ERC20;
+    using SafeERC20 for IERC20;
 
     /**
      * @dev Attempted to deposit more assets than the max amount for `receiver`.
@@ -27,11 +27,11 @@ contract DpxArbitrumVault is ERC4626 {
         uint256 max
     );
 
-    uint256 percentageMultiplier = 10000;
-    ERC20 public immutable dpxToken =
-        ERC20(0x6C2C06790b3E3E3c38e12Ee22F8183b37a13EE55);
-    ERC20 public immutable sushiToken =
-        ERC20(0xd4d42F0b6DEF4CE0383636770eF773390d85c61A);
+    IWETH public immutable weth = IWETH(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1);
+    IERC20 public immutable dpxToken =
+        IERC20(0x6C2C06790b3E3E3c38e12Ee22F8183b37a13EE55);
+    IERC20 public immutable sushiToken =
+        IERC20(0xd4d42F0b6DEF4CE0383636770eF773390d85c61A);
     address public immutable oneInchAggregatorAddress =
         0x1111111254fb6c44bAC0beD2854e76F90643097d;
     address public immutable sushiSwapRouterAddress =
@@ -65,7 +65,7 @@ contract DpxArbitrumVault is ERC4626 {
         }
 
         SafeERC20.safeTransferFrom(
-            IERC20(asset()),
+            weth,
             msg.sender,
             address(this),
             amount
@@ -81,8 +81,6 @@ contract DpxArbitrumVault is ERC4626 {
         uint256 shares,
         address receiver
     ) public returns (uint256) {
-        // shares#1 stands for sushiSwap shares
-        // shares#2 stands for erc4626 shares
         sushiSwapMiniChef.withdrawAndHarvest(pid, shares, address(this));
         uint256 shares = super.redeem(shares, receiver, msg.sender);
         return shares;
@@ -93,10 +91,6 @@ contract DpxArbitrumVault is ERC4626 {
         (uint256 sushiRewards, uint256 dpxRewards) = claimableRewards(
             address(this)
         );
-        uint256 percentageWithMultiplier = balanceOf(receiver)
-            .mul(percentageMultiplier)
-            .div(totalSupply());
-
         uint256 sushiRewardsProRata = Math.mulDiv(
             sushiRewards,
             balanceOf(msg.sender),
@@ -125,7 +119,7 @@ contract DpxArbitrumVault is ERC4626 {
         bytes calldata oneInchData
     ) internal returns (uint256) {
         SafeERC20.safeApprove(
-            IERC20(asset()),
+            weth,
             oneInchAggregatorAddress,
             Math.mulDiv(amount, 1, 2)
         );
@@ -140,7 +134,7 @@ contract DpxArbitrumVault is ERC4626 {
             sushiSwapRouterAddress,
             dpxReturnedAmount
         );
-        IWETH(asset()).withdraw(Math.mulDiv(amount, 1, 2));
+        weth.withdraw(Math.mulDiv(amount, 1, 2));
         // deadline = current time + 5 minutes;
         uint256 deadline = block.timestamp + 300;
         // // TODO(david): should return those token left after `addLiquidityETH` back to user

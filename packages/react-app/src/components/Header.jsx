@@ -34,5 +34,10 @@ Header.defaultProps = {
   
   Whether you're an experienced crypto investor or new to the world of Web3, our fund offers a simple and hassle-free way to gain diversified exposure to this rapidly growing market. With low fees, daily liquidity, and a proven investment strategy, the Web3 All-Weather Index Fund is the perfect choice for investors seeking to capitalize on the potential of Web3 while managing risk and achieving long-term growth.\n\n
   
-  Join the Web3 revolution today and invest in the All-Weather Index Fund.`,
+  Join the Web3 revolution today and invest in the All-Weather Index Fund.
+1. 多元分散
+2. 被動為主
+3. 降低成本
+4. 保持恆心
+5. 不懂不做`,
 };

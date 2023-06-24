@@ -25,6 +25,6 @@ jobs:
       - name: Test Coverage
         run: |
           # BLOCK_NUMBER=86630670 yarn test test/radiantArbitrumVaultTest.js
-          BLOCK_NUMBER=97022421 yarn test test/dpxArbitrumVaultTest.js
+          BLOCK_NUMBER=103733521 yarn test test/dpxArbitrumVaultTest.js
           BLOCK_NUMBER=101043121 yarn test test/radiantDlpVaultTest.js
           BLOCK_NUMBER=101043121  yarn test test/radiantDlpVaultRewardTest.js 
