@@ -43,7 +43,7 @@ describe("All Weather Protocol", function () {
 
       const originalRadiantLockedDlpBalance = await radiantVault.totalAssets();
       expect(originalRadiantLockedDlpBalance).to.equal(0);
-      const oneInchSwapDataForDpx = await fetch1InchSwapDat(weth.address, dpxTokenAddress, amount.div(2), wallet.address);
+      const oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxTokenAddress, amount.div(2), wallet.address);
       await (await portfolioContract.connect(wallet).deposit(amount, oneInchSwapDataForDpx, { gasLimit: gasLimit })).wait();
 
       const vaultShareAfterDeposit = await radiantVault.balanceOf(portfolioContract.address)
@@ -54,7 +54,7 @@ describe("All Weather Protocol", function () {
     it("Should be able to withdraw Radiant dLP", async function () {
       const radiantLockedDlpBalanceBeforeDeposit = await radiantVault.totalAssets();
       expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
-      const oneInchSwapDataForDpx = await fetch1InchSwapDat(weth.address, dpxTokenAddress, amount.div(2), wallet.address);
+      const oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxTokenAddress, amount.div(2), wallet.address);
       await (await portfolioContract.connect(wallet).deposit(amount, oneInchSwapDataForDpx, { gasLimit: gasLimit })).wait();
       const radiantLockedDlpBalanceAfterDeposit = await radiantVault.totalAssets();
       expect(radiantLockedDlpBalanceAfterDeposit).to.gt(0);
@@ -70,7 +70,7 @@ describe("All Weather Protocol", function () {
     });
 
     it("Should not be able to withdraw Radiant dLP", async function () {
-      const oneInchSwapDataForDpx = await fetch1InchSwapDat(weth.address, dpxTokenAddress, amount.div(2), wallet.address);
+      const oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxTokenAddress, amount.div(2), wallet.address);
       await (await portfolioContract.connect(wallet).deposit(amount, oneInchSwapDataForDpx, { gasLimit: gasLimit })).wait();
       const totalAssets = await radiantVault.totalAssets();
       const totalLockedAssets = await radiantVault.totalLockedAssets();

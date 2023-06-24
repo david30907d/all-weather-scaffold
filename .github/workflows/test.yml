@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: yarn
-      - name: Test Coverage
+      - name: Test
         run: |
           BLOCK_NUMBER=103733521 yarn test test/dpxArbitrumVaultTest.js
           BLOCK_NUMBER=101043121 yarn test test/radiantDlpVaultTest.js
