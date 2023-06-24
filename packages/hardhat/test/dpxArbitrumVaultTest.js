@@ -1,6 +1,5 @@
 const { expect } = require("chai");
-const { network } = require("hardhat");
-const fetch = require('node-fetch');
+const {fetch1InchSwapData, mineBlocks} = require("./utils");
 
 const myImpersonatedWalletAddress = "0x7ee54ab0f204bb3a83df90fdd824d8b4abe93222";
 const sushiSwapDpxLpTokenAddress = "0x0C1Cf6883efA1B496B01f654E247B9b419873054";
@@ -105,15 +104,3 @@ describe("All Weather Protocol", function () {
     })
   });
 });
-
-async function mineBlocks(numBlocks) {
-  for (let i = 0; i < numBlocks; i++) {
-    await network.provider.send("evm_mine");
-  }
-}
-
-async function fetch1InchSwapData(fromTokenAddress, toTOkenAddress, amount, fromAddress) {
-  const res = await fetch(`https://api.1inch.io/v5.0/42161/swap?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTOkenAddress}&amount=${amount.toString()}&fromAddress=${fromAddress}&slippage=10&disableEstimate=true`)
-  const resJson = await res.json();
-  return resJson.tx.data;
-}

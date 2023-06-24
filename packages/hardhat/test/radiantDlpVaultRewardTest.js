@@ -1,10 +1,12 @@
 const { expect } = require("chai");
-
+const {fetch1InchSwapData, getUserEthBalance} = require("./utils");
 const myImpersonatedWalletAddress = "0xe4bac3e44e8080e1491c11119197d33e396ea82b";
 const wethAddress = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
 const radiantDlpAddress = "0x32dF62dc3aEd2cD6224193052Ce665DC18165841";
 const radiantLockZapAddress = "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1";
 const multiFeeDistributionAddress = "0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE";
+
+const dpxTokenAddress = "0x6C2C06790b3E3E3c38e12Ee22F8183b37a13EE55";
 const gasLimit = 20575600;
 
 let wallet;
@@ -28,7 +30,7 @@ describe("All Weather Protocol", function () {
     await radiantVault.deployed();
 
     const AllWeatherPortfolioLPToken = await ethers.getContractFactory("AllWeatherPortfolioLPToken");
-    portfolioContract = await AllWeatherPortfolioLPToken.deploy("allWeatherPortfolioLPToken", "AWP", radiantVault.address, weth.address);
+    portfolioContract = await AllWeatherPortfolioLPToken.deploy(weth.address, radiantVault.address, radiantVault.address);
     await portfolioContract.deployed();
 
     await (await weth.connect(wallet).approve(portfolioContract.address, amount, { gasLimit: 2057560 })).wait();
@@ -38,7 +40,8 @@ describe("All Weather Protocol", function () {
   describe("Portfolio LP Contract Test", function () {
     it("Should be able to claim reward", async function () {
       this.timeout(120000); // Set timeout to 120 seconds
-      await (await portfolioContract.connect(wallet).deposit(amount, { gasLimit: gasLimit})).wait();
+      const oneInchSwapDataForDpxVault = await fetch1InchSwapData(weth.address, dpxTokenAddress, amount.div(2), wallet.address);
+      await (await portfolioContract.connect(wallet).deposit(amount, oneInchSwapDataForDpxVault, { gasLimit: gasLimit})).wait();
 
       currentTimestamp += 12 * 31 * 24 * 60 * 60; // Increment timestamp
       await simulateAYearLater();
@@ -81,9 +84,4 @@ async function simulateAYearLater() {
       const futureTimestamp = currentTimestamp + oneMonthInSeconds;
       await ethers.provider.send('evm_setNextBlockTimestamp', [futureTimestamp]);
       await ethers.provider.send('evm_mine');
-}
-
-async function getUserEthBalance(address) {
-  const provider = ethers.provider;
-  return await provider.getBalance(address);
 }
