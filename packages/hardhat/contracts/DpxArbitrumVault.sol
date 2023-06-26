@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// This is a Smart Contract written in Solidity. It represents a vault that allows users to deposit WETH and receive DPXV in return. The contract uses the functionalities of other smart contracts such as oneInch aggregator, SushiSwap, and MiniChefV2 to perform swaps and farming of SUSHI and DPX tokens. The contract has several functions including deposit(), redeemAll(), claim(), totalAssets(), totalLockedAssets(), totalStakedButWithoutLockedAssets(), and claimableRewards().
 
 pragma solidity ^0.8.4;
 
@@ -13,10 +14,13 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./sushiSwap/IUniswapV2Router01.sol";
 import "./utils/IWETH.sol";
+import "./interfaces/AbstractVault.sol";
+import "./radiant/IFeeDistribution.sol";
 
-contract DpxArbitrumVault is ERC4626 {
-    using SafeMath for uint;
+contract DpxArbitrumVault is ERC4626, AbstractVault {
+    using SafeMath for uint256;
     using SafeERC20 for IERC20;
+    error ERC4626ExceededMaxRedeem(address owner, uint256 shares, uint256 max);
 
     /**
      * @dev Attempted to deposit more assets than the max amount for `receiver`.
@@ -27,7 +31,8 @@ contract DpxArbitrumVault is ERC4626 {
         uint256 max
     );
 
-    IWETH public immutable weth = IWETH(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1);
+    IWETH public immutable weth =
+        IWETH(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1);
     IERC20 public immutable dpxToken =
         IERC20(0x6C2C06790b3E3E3c38e12Ee22F8183b37a13EE55);
     IERC20 public immutable sushiToken =
@@ -58,18 +63,13 @@ contract DpxArbitrumVault is ERC4626 {
         uint256 amount,
         address receiver,
         bytes calldata oneInchData
-    ) public returns (uint256) {
+    ) public override returns (uint256) {
         uint256 maxAssets = maxDeposit(receiver);
         if (amount > maxAssets) {
             revert ERC4626ExceededMaxDeposit(receiver, amount, maxAssets);
         }
 
-        SafeERC20.safeTransferFrom(
-            weth,
-            msg.sender,
-            address(this),
-            amount
-        );
+        SafeERC20.safeTransferFrom(weth, msg.sender, address(this), amount);
         uint256 shares = _zapIn(amount, oneInchData);
         _mint(receiver, shares);
 
@@ -80,38 +80,88 @@ contract DpxArbitrumVault is ERC4626 {
     function redeemAll(
         uint256 shares,
         address receiver
-    ) public returns (uint256) {
+    ) public override returns (uint256) {
         sushiSwapMiniChef.withdrawAndHarvest(pid, shares, address(this));
         uint256 shares = super.redeem(shares, receiver, msg.sender);
         return shares;
     }
 
-    function claim(address receiver) public {
+    function claim(
+        address receiver,
+        IFeeDistribution.RewardData[] memory claimableRewards
+    ) public override {
         sushiSwapMiniChef.harvest(pid, address(this));
-        (uint256 sushiRewards, uint256 dpxRewards) = claimableRewards(
-            address(this)
-        );
-        uint256 sushiRewardsProRata = Math.mulDiv(
-            sushiRewards,
-            balanceOf(msg.sender),
-            totalSupply()
-        );
-        uint256 dpxRewardsProRata = Math.mulDiv(
-            dpxRewards,
-            balanceOf(msg.sender),
-            totalSupply()
-        );
-        SafeERC20.safeTransfer(sushiToken, receiver, sushiRewardsProRata);
-        SafeERC20.safeTransfer(dpxToken, receiver, dpxRewardsProRata);
+        for (uint256 i = 0; i < claimableRewards.length; i++) {
+            SafeERC20.safeTransfer(
+                IERC20(claimableRewards[i].token),
+                receiver,
+                claimableRewards[i].amount
+            );
+        }
+    }
+
+    function totalAssets() public view override returns (uint256) {
+        return
+            totalLockedAssets() +
+            totalStakedButWithoutLockedAssets() +
+            totalUnstakedAssets();
+    }
+
+    function totalLockedAssets() public view override returns (uint256) {
+        return 0;
+    }
+
+    function totalStakedButWithoutLockedAssets()
+        public
+        view
+        override
+        returns (uint256)
+    {
+        /// `amount` LP token amount the user has provided.
+        /// `rewardDebt` The amount of SUSHI entitled to the user.
+        (uint256 amount, ) = sushiSwapMiniChef.userInfo(pid, address(this));
+        return amount;
+    }
+
+    function totalUnstakedAssets() public view returns (uint256) {
+        return IERC20(asset()).balanceOf(address(this));
     }
 
     function claimableRewards(
-        address receiver
-    ) public view returns (uint256, uint256) {
-        return (
-            sushiSwapMiniChef.pendingSushi(pid, receiver),
-            dpxRewarder.pendingToken(pid, receiver)
-        );
+        address receiver,
+        uint256 userShares,
+        uint256 portfolioShares
+    )
+        public
+        view
+        override
+        returns (IFeeDistribution.RewardData[] memory rewards)
+    {
+        // pro rata: user's share divided by total shares, is the ratio of the reward
+        uint256 portfolioSharesInThisVault = balanceOf(msg.sender);
+        uint256 totalVaultShares = totalSupply();
+        if (portfolioSharesInThisVault == 0 || totalVaultShares == 0) {
+            return new IFeeDistribution.RewardData[](0);
+        }
+        uint256 ratioWithoutDivideByPortfolioShares = Math.mulDiv(userShares, portfolioSharesInThisVault, totalVaultShares);
+        rewards = new IFeeDistribution.RewardData[](2);
+        rewards[0] = IFeeDistribution.RewardData({
+            token: address(sushiToken),
+            amount: Math.mulDiv(
+                sushiSwapMiniChef.pendingSushi(pid, address(this)),
+                ratioWithoutDivideByPortfolioShares,
+                portfolioShares
+            )
+        });
+        rewards[1] = IFeeDistribution.RewardData({
+            token: address(dpxToken),
+            amount: Math.mulDiv(
+                dpxRewarder.pendingToken(pid, address(this)),
+                ratioWithoutDivideByPortfolioShares,
+                portfolioShares
+            )
+        });
+        return rewards;
     }
 
     function _zapIn(

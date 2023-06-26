@@ -11,21 +11,20 @@ import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "hardhat/console.sol";
 import "./radiant/ILendingPool.sol";
 import "./radiant/ILockZap.sol";
-import "./radiant/IFeeDistribution.sol";
 import "./radiant/IMultiFeeDistribution.sol";
 import "./radiant/IWETHGateway.sol";
 import "./radiant/IAToken.sol";
 import "./radiant/IFeeDistribution.sol";
 import "./gmx-contracts/IRewardRouterV2.sol";
+import "./interfaces/AbstractVault.sol";
 
-contract RadiantArbitrumVault is ERC4626 {
+contract RadiantArbitrumVault is ERC4626, AbstractVault {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
     IERC20 private immutable _asset;
     ILendingPool public radiantLending;
     ILockZap public lockZap;
-    IRewardRouterV2 public gmxRouter;
     IMultiFeeDistribution public immutable multiFeeDistribution =
         IMultiFeeDistribution(0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE);
     IERC20 public immutable weth =
@@ -35,30 +34,25 @@ contract RadiantArbitrumVault is ERC4626 {
 
     constructor(
         IERC20Metadata asset_,
-        address radiantLending_,
-        address gmx_
+        address radiantLending_
     ) ERC4626(asset_) ERC20("AllWeatherLP-Radiant", "ALP-r") {
         _asset = asset_;
         radiantLending = ILendingPool(radiantLending_);
         lockZap = ILockZap(0x8991C4C347420E476F1cf09C03abA224A76E2997);
-        gmxRouter = IRewardRouterV2(gmx_);
     }
 
-    function totalAssets() public view override returns (uint256) {
-        (uint256 lockedBalances, , , , ) = IFeeDistribution(
-            0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE
-        ).lockedBalances(address(this));
-        return lockedBalances + _asset.balanceOf(address(this));
+    function totalAssets() public override view returns (uint256) {
+        return totalLockedAssets() + totalStakedButWithoutLockedAssets();
     }
 
-    function totalLockedAssets() public view returns (uint256) {
+    function totalLockedAssets() public override view returns (uint256) {
         (uint256 lockedBalances, , , , ) = IFeeDistribution(
             0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE
         ).lockedBalances(address(this));
         return lockedBalances;
     }
 
-    function totalUnlockedAssets() public view returns (uint256) {
+    function totalStakedButWithoutLockedAssets() public override view returns (uint256) {
         return _asset.balanceOf(address(this));
     }
 
@@ -66,7 +60,7 @@ contract RadiantArbitrumVault is ERC4626 {
         uint256 amount,
         address receiver,
         bytes calldata oneInchData
-    ) public returns (uint256) {
+    ) public override returns (uint256) {
         // the reason why I cannot just call `super.deposit` is that user don't have dLP at the time they deposit.
         // need to take advantage of the zap to get dLP, so need to modity `super.deposit()`
         require(
@@ -86,7 +80,7 @@ contract RadiantArbitrumVault is ERC4626 {
     function redeemAll(
         uint256 _shares,
         address receiver
-    ) public returns (uint256) {
+    ) public override returns (uint256) {
         // TODO(david): should only redeem _shares amount of dLP
         uint256 radiantDlpShares = multiFeeDistribution
             .withdrawExpiredLocksForWithOptions(address(this), 1, true);
@@ -102,15 +96,26 @@ contract RadiantArbitrumVault is ERC4626 {
         return vaultShare;
     }
 
-    function claim(address receiver, address[] memory rRewardTokens) public {
+    function claim(address receiver, IFeeDistribution.RewardData[] memory claimableRewards, address[] memory rRewardTokens) public {
         multiFeeDistribution.getAllRewards();
-        _claimERC20Rewards(receiver, rRewardTokens);
-        _claimETHReward(receiver);
+        // _claimERC20Rewards(receiver, rRewardTokens);
+        // _claimETHReward(receiver);
+    }
+
+    function claim(address receiver, IFeeDistribution.RewardData[] memory claimableRewards) public pure override {
+        revert("Not implemented");
     }
 
     function claimableRewards(
-        address portfolioAddress
-    ) public view returns (IFeeDistribution.RewardData[] memory rewards) {
+        address portfolioAddress, uint256 userShares, uint256 totalShares
+    ) public override view returns (IFeeDistribution.RewardData[] memory rewards) {
+        // pro rata: user's share divided by total shares, is the ratio of the reward
+        uint256 portfolioSharesInThisVault = balanceOf(msg.sender);
+        uint256 totalVaultShares = totalSupply();
+        if (portfolioSharesInThisVault == 0 || totalVaultShares == 0) {
+            return new IFeeDistribution.RewardData[](0);
+        }
+
         IFeeDistribution.RewardData[]
             memory radiantRewardData = multiFeeDistribution.claimableRewards(
                 address(this)
