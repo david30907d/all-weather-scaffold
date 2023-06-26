@@ -118,7 +118,7 @@ export default function BasicSunburst(props) {
     if (data !== defaultData) {
       setTimeout(() => {
         setIsChartReady(true);
-      }, 16000); // Adjust the delay as needed
+      }, 180000); // Adjust the delay as needed
     }
   }, [data]);
 
