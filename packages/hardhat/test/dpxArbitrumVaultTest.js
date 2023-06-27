@@ -1,22 +1,20 @@
 const { expect } = require("chai");
-const {fetch1InchSwapData, mineBlocks} = require("./utils");
-
-const myImpersonatedWalletAddress = "0xe4bac3e44e8080e1491c11119197d33e396ea82b";
-const sushiSwapDpxLpTokenAddress = "0x0C1Cf6883efA1B496B01f654E247B9b419873054";
-const sushiMiniChefV2Address = "0xF4d73326C13a4Fc5FD7A064217e12780e9Bd62c3";
-const dpxTokenAddress = "0x6C2C06790b3E3E3c38e12Ee22F8183b37a13EE55";
-const sushiTokenAddress = "0xd4d42F0b6DEF4CE0383636770eF773390d85c61A";
-const wethAddress = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
-const radiantDlpAddress = "0x32dF62dc3aEd2cD6224193052Ce665DC18165841";
-const radiantLockZapAddress = "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1";
-const sushiPid = 17;
-const gasLimit = 2675600;
-const rRewardTokens = ["0x912ce59144191c1204e64559fe8253a0e49e6548","0x5979d7b546e38e414f7e9822514be443a4800529","0xda10009cbd5d07dd0cecc66161fc93d7c9000da1","0xff970a61a04b1ca14834a43f5de4533ebddb5cc8","0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9","0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f"];
+const { fetch1InchSwapData, mineBlocks, myImpersonatedWalletAddress,
+  sushiSwapDpxLpTokenAddress,
+  sushiMiniChefV2Address,
+  dpxTokenAddress,
+  sushiTokenAddress,
+  wethAddress,
+  radiantDlpAddress,
+  radiantLockZapAddress,
+  sushiPid,
+  gasLimit,
+  rRewardTokens,
+  amount } = require("./utils");
 
 let wallet;
 let dpxVault;
 let portfolioContract;
-const amount = ethers.utils.parseUnits('0.001', 18);
 
 
 describe("All Weather Protocol", function () {
@@ -64,7 +62,10 @@ describe("All Weather Protocol", function () {
     });
     it("Should be able to claim rewards", async function () {
       // deposit
-      const oneInchSwapData = await fetch1InchSwapData(weth.address, dpxTokenAddress, amount.div(2), dpxVault.address);
+      const oneInchSwapData = await fetch1InchSwapData(weth.address,
+        dpxTokenAddress,
+        amount.div(2),
+        dpxVault.address);
       await (await portfolioContract.connect(wallet).deposit(amount, oneInchSwapData, { gasLimit: gasLimit })).wait();
       await mineBlocks(100); // Mine 1 blocks
       const originalSushiBalance = await sushiToken.balanceOf(wallet.address);
@@ -74,7 +75,7 @@ describe("All Weather Protocol", function () {
       const dpxClaimableReward = claimableRewards[0].claimableRewards[1].amount;
       expect(sushiClaimableReward).to.be.gt(0);
       expect(dpxClaimableReward).to.be.gt(0);
-      
+
       await portfolioContract.connect(wallet).claim(wallet.address, rRewardTokens);
       // NOTE: using `to.be.gt` instead of `to.equal` because the reward would somehow be increased after claim(). My hunch is that sushiswap would trigger some reward distribution after the claim() tx is mined.
       expect((await sushiToken.balanceOf(wallet.address)).sub(originalSushiBalance)).to.be.gt(sushiClaimableReward);

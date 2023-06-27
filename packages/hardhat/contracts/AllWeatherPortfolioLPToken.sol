@@ -44,19 +44,11 @@ contract AllWeatherPortfolioLPToken is ERC20 {
     asset = ERC20(asset_);
   }
 
-  // function deposit(uint256 amount, PortfolioAllocationOfSingleCategory[] portfolioAllocation) public {
-  function deposit(uint256 amount, bytes calldata oneInchData) public {
-    PortfolioAllocationOfSingleCategory[]
-      memory portfolioAllocation = new PortfolioAllocationOfSingleCategory[](1);
-    portfolioAllocation[0] = PortfolioAllocationOfSingleCategory({
-      protocol: "dpx",
-      percentage: 50
-    });
-    // portfolioAllocation[1] = PortfolioAllocationOfSingleCategory({ protocol: "radiant", percentage: 50 });
-    // PortfolioAllocationOfSingleCategory[] memory portfolioAllocation = [
-    //     PortfolioAllocationOfSingleCategory({ protocol: "dpx", percentage: 50 }),
-    //     // PortfolioAllocationOfSingleCategory({ protocol: "radiant", percentage: 50 })
-    // ];
+  function deposit(
+    uint256 amount,
+    PortfolioAllocationOfSingleCategory[] memory portfolioAllocation,
+    bytes calldata oneInchData
+  ) public {
     require(amount > 0, "Token amount must be greater than 0");
     // Transfer tokens from the user to the contract
     SafeERC20.safeTransferFrom(
@@ -104,7 +96,7 @@ contract AllWeatherPortfolioLPToken is ERC20 {
       totalSupply()
     );
     DpxArbitrumVault(dpxVaultAddr).redeemAll(dpxShares, receiver);
-    // RadiantArbitrumVault(radiantVaultAddr).redeemAll(shares, receiver);
+    RadiantArbitrumVault(radiantVaultAddr).redeemAll(shares, receiver);
     _burn(msg.sender, shares);
   }
 

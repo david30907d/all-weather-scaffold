@@ -6,18 +6,15 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import "../radiant/IFeeDistribution.sol";
 
 abstract contract AbstractVault {
-  function totalLockedAssets() public view virtual returns (uint256) {
-    return 0;
-  }
+  function totalLockedAssets() public view virtual returns (uint256);
 
   function totalStakedButWithoutLockedAssets()
     public
     view
     virtual
-    returns (uint256)
-  {
-    return 0;
-  }
+    returns (uint256);
+
+  function totalUnstakedAssets() public view virtual returns (uint256);
 
   function claimableRewards(
     address portfolioAddress,

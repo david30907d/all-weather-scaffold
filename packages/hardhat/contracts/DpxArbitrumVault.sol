@@ -123,7 +123,7 @@ contract DpxArbitrumVault is ERC4626, AbstractVault {
     return amount;
   }
 
-  function totalUnstakedAssets() public view returns (uint256) {
+  function totalUnstakedAssets() public view override returns (uint256) {
     return IERC20(asset()).balanceOf(address(this));
   }
 

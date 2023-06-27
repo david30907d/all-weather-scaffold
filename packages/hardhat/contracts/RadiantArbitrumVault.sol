@@ -22,7 +22,6 @@ contract RadiantArbitrumVault is ERC4626, AbstractVault {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
-  IERC20 private immutable _asset;
   ILendingPool public radiantLending;
   ILockZap public lockZap;
   IMultiFeeDistribution public immutable multiFeeDistribution =
@@ -36,13 +35,15 @@ contract RadiantArbitrumVault is ERC4626, AbstractVault {
     IERC20Metadata asset_,
     address radiantLending_
   ) ERC4626(asset_) ERC20("AllWeatherLP-Radiant", "ALP-r") {
-    _asset = asset_;
     radiantLending = ILendingPool(radiantLending_);
     lockZap = ILockZap(0x8991C4C347420E476F1cf09C03abA224A76E2997);
   }
 
   function totalAssets() public view override returns (uint256) {
-    return totalLockedAssets() + totalStakedButWithoutLockedAssets();
+    return
+      totalLockedAssets() +
+      totalStakedButWithoutLockedAssets() +
+      totalUnstakedAssets();
   }
 
   function totalLockedAssets() public view override returns (uint256) {
@@ -58,7 +59,11 @@ contract RadiantArbitrumVault is ERC4626, AbstractVault {
     override
     returns (uint256)
   {
-    return _asset.balanceOf(address(this));
+    return 0;
+  }
+
+  function totalUnstakedAssets() public view override returns (uint256) {
+    return IERC20(asset()).balanceOf(address(this));
   }
 
   function deposit(
