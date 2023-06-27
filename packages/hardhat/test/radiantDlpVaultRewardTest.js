@@ -1,47 +1,51 @@
 const { expect } = require("chai");
-const {fetch1InchSwapData, getUserEthBalance} = require("./utils");
-const myImpersonatedWalletAddress = "0xe4bac3e44e8080e1491c11119197d33e396ea82b";
-const wethAddress = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
-const radiantDlpAddress = "0x32dF62dc3aEd2cD6224193052Ce665DC18165841";
-const radiantLockZapAddress = "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1";
-const multiFeeDistributionAddress = "0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE";
-
-const dpxTokenAddress = "0x6C2C06790b3E3E3c38e12Ee22F8183b37a13EE55";
-const gasLimit = 20575600;
+const {fetch1InchSwapData, getUserEthBalance, sushiSwapDpxLpTokenAddress, sushiMiniChefV2Address, sushiPid,
+  myImpersonatedWalletAddress,
+wethAddress,
+radiantDlpAddress,
+radiantLockZapAddress,
+multiFeeDistributionAddress,
+radiantAmount,
+dpxTokenAddress
+} = require("./utils");
 
 let wallet;
 let weth;
 let radiantVault;
 let portfolioContract;
 let currentTimestamp = Math.floor(Date.now() / 1000);;
-const amount = ethers.utils.parseUnits('0.01', 18); // 100 DAI with 18 decimals
 
 
 describe("All Weather Protocol", function () {
   beforeEach(async () => {
     wallet = await ethers.getImpersonatedSigner(myImpersonatedWalletAddress);
     weth = await ethers.getContractAt('IWETH', wethAddress);
+    dpxSLP = await ethers.getContractAt('IERC20Uniswap', sushiSwapDpxLpTokenAddress);
     dlpToken = await ethers.getContractAt("MockDAI", radiantDlpAddress);
     radiantLockZap = await ethers.getContractAt("ILendingPool", radiantLockZapAddress);
     multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
 
     const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
-    radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLockZapAddress, radiantLockZapAddress);
+    radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLockZapAddress);
     await radiantVault.deployed();
 
+    const DpxArbitrumVault = await ethers.getContractFactory("DpxArbitrumVault");
+    dpxVault = await DpxArbitrumVault.deploy(dpxSLP.address, sushiMiniChefV2Address, sushiPid);
+    await dpxVault.deployed();
+
     const AllWeatherPortfolioLPToken = await ethers.getContractFactory("AllWeatherPortfolioLPToken");
-    portfolioContract = await AllWeatherPortfolioLPToken.deploy(weth.address, radiantVault.address, radiantVault.address);
+    portfolioContract = await AllWeatherPortfolioLPToken.deploy(weth.address, radiantVault.address, dpxVault.address);
     await portfolioContract.deployed();
 
-    await (await weth.connect(wallet).approve(portfolioContract.address, amount, { gasLimit: 2057560 })).wait();
+    await (await weth.connect(wallet).approve(portfolioContract.address, radiantAmount, { gasLimit: 2057560 })).wait();
     await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.1"), { gasLimit: 2057560 });
   });
 
   describe("Portfolio LP Contract Test", function () {
     it("Should be able to claim reward", async function () {
       this.timeout(120000); // Set timeout to 120 seconds
-      const oneInchSwapDataForDpxVault = await fetch1InchSwapData(weth.address, dpxTokenAddress, amount.div(2), wallet.address);
-      await (await portfolioContract.connect(wallet).deposit(amount, oneInchSwapDataForDpxVault, { gasLimit: gasLimit})).wait();
+      const oneInchSwapDataForDpxVault = await fetch1InchSwapData(weth.address, dpxTokenAddress, radiantAmount.div(2), wallet.address);
+      await (await portfolioContract.connect(wallet).deposit(radiantAmount, [{protocol: "radiant", percentage: 100}], oneInchSwapDataForDpxVault, { gasLimit: 20575600})).wait();
 
       currentTimestamp += 12 * 31 * 24 * 60 * 60; // Increment timestamp
       await simulateAYearLater();
@@ -58,7 +62,7 @@ describe("All Weather Protocol", function () {
       }
       const ethBalanceBeforeClaim = await getUserEthBalance(randomWallet.address);
       expect(ethBalanceBeforeClaim).to.equal(0);
-      await (await portfolioContract.connect(wallet).claim(randomWallet.address, rRewardTokens, { gasLimit: gasLimit})).wait();
+      await (await portfolioContract.connect(wallet).claim(randomWallet.address, rRewardTokens, { gasLimit: 20575600})).wait();
       for (const nativeRewardToken of nativeRewardTokens) {
         const nativeToken = await ethers.getContractAt("MockDAI", nativeRewardToken);
         const balanceAfterClaim = await nativeToken.balanceOf(randomWallet.address);
@@ -68,11 +72,8 @@ describe("All Weather Protocol", function () {
       expect(ethBalanceAfterClaim).to.gt(ethBalanceBeforeClaim);
     });
     it("Should be able to check claimable rewards", async function () {
-      const claimableRewards = await portfolioContract.claimableRewards();
-      for (const claimableReward of claimableRewards) {
-        expect(claimableReward).to.have.property("token");
-        expect(claimableReward).to.have.property("amount");
-      }
+      const claimableRewards = await portfolioContract.claimableRewards(wallet.address);
+      expect(claimableRewards).to.deep.equal([]);
     })
   });
 });

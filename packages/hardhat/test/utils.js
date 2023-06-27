@@ -22,7 +22,7 @@ async function getUserEthBalance(address) {
 const myImpersonatedWalletAddress = "0xe4bac3e44e8080e1491c11119197d33e396ea82b";
 const wethAddress = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
 const gasLimit = 2675600;
-const amount = ethers.utils.parseUnits('0.01', 18);
+const radiantAmount = ethers.utils.parseUnits('0.01', 18);
 const dpxAmount = ethers.utils.parseUnits('0.001', 18);
 
 // sushi dpx
@@ -59,6 +59,6 @@ module.exports = {
   rRewardTokens,
   radiantLendingPoolAddress,
   multiFeeDistributionAddress,
-  amount,
+  radiantAmount,
   dpxAmount
 };

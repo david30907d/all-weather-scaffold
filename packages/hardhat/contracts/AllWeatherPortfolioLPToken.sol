@@ -14,6 +14,7 @@ import "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import "./RadiantArbitrumVault.sol";
 import "./DpxArbitrumVault.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "hardhat/console.sol";
 
 import "./radiant/IFeeDistribution.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
@@ -102,7 +103,7 @@ contract AllWeatherPortfolioLPToken is ERC20 {
 
   function claim(address receiver, address[] memory rRewardTokens) public {
     ClaimableRewardOfAProtocol[]
-      memory totalClaimableRewards = claimableRewards(receiver);
+      memory totalClaimableRewards = claimableRewards(msg.sender);
     for (uint idx = 0; idx < totalClaimableRewards.length; idx++) {
       bytes32 protocolHash = keccak256(
         bytes(totalClaimableRewards[idx].protocol)
@@ -125,7 +126,7 @@ contract AllWeatherPortfolioLPToken is ERC20 {
   function claimableRewards(
     address receiver
   ) public view returns (ClaimableRewardOfAProtocol[] memory) {
-    uint256 userShares = balanceOf(msg.sender);
+    uint256 userShares = balanceOf(receiver);
     uint256 portfolioShares = totalSupply();
     if (userShares == 0 || portfolioShares == 0) {
       return new ClaimableRewardOfAProtocol[](0);

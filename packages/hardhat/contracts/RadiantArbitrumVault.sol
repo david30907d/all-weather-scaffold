@@ -102,8 +102,8 @@ contract RadiantArbitrumVault is ERC4626, AbstractVault {
     address[] memory rRewardTokens
   ) public {
     multiFeeDistribution.getAllRewards();
-    // _claimERC20Rewards(receiver, rRewardTokens);
-    // _claimETHReward(receiver);
+    _claimERC20Rewards(receiver, rRewardTokens);
+    _claimETHReward(receiver);
   }
 
   function claim(
@@ -148,6 +148,7 @@ contract RadiantArbitrumVault is ERC4626, AbstractVault {
         receiver
       );
     }
+    console.log("claimERC20Rewards");
   }
 
   function _claimETHReward(address receiver) internal {
