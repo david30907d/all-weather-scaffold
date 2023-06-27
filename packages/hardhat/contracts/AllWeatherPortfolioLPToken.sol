@@ -105,6 +105,9 @@ contract AllWeatherPortfolioLPToken is ERC20 {
     ClaimableRewardOfAProtocol[]
       memory totalClaimableRewards = claimableRewards(msg.sender);
     for (uint idx = 0; idx < totalClaimableRewards.length; idx++) {
+      if (totalClaimableRewards[idx].claimableRewards.length == 0) {
+        continue;
+      }
       bytes32 protocolHash = keccak256(
         bytes(totalClaimableRewards[idx].protocol)
       );
