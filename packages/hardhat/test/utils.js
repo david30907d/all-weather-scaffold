@@ -23,6 +23,7 @@ const myImpersonatedWalletAddress = "0xe4bac3e44e8080e1491c11119197d33e396ea82b"
 const wethAddress = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
 const gasLimit = 2675600;
 const amount = ethers.utils.parseUnits('0.01', 18);
+const dpxAmount = ethers.utils.parseUnits('0.001', 18);
 
 // sushi dpx
 const sushiSwapDpxLpTokenAddress = "0x0C1Cf6883efA1B496B01f654E247B9b419873054";
@@ -59,4 +60,5 @@ module.exports = {
   radiantLendingPoolAddress,
   multiFeeDistributionAddress,
   amount,
+  dpxAmount
 };
