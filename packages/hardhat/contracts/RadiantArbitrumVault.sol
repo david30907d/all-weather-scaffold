@@ -18,7 +18,7 @@ import "./radiant/IFeeDistribution.sol";
 import "./gmx-contracts/IRewardRouterV2.sol";
 import "./interfaces/AbstractVault.sol";
 
-contract RadiantArbitrumVault is ERC4626, AbstractVault {
+contract RadiantArbitrumVault is AbstractVault {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
@@ -37,13 +37,6 @@ contract RadiantArbitrumVault is ERC4626, AbstractVault {
   ) ERC4626(asset_) ERC20("AllWeatherLP-Radiant", "ALP-r") {
     radiantLending = ILendingPool(radiantLending_);
     lockZap = ILockZap(0x8991C4C347420E476F1cf09C03abA224A76E2997);
-  }
-
-  function totalAssets() public view override returns (uint256) {
-    return
-      totalLockedAssets() +
-      totalStakedButWithoutLockedAssets() +
-      totalUnstakedAssets();
   }
 
   function totalLockedAssets() public view override returns (uint256) {

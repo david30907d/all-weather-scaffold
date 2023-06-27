@@ -5,7 +5,7 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import "../radiant/IFeeDistribution.sol";
 
-abstract contract AbstractVault {
+abstract contract AbstractVault is ERC4626 {
   function totalLockedAssets() public view virtual returns (uint256);
 
   function totalStakedButWithoutLockedAssets()
@@ -15,6 +15,13 @@ abstract contract AbstractVault {
     returns (uint256);
 
   function totalUnstakedAssets() public view virtual returns (uint256);
+
+  function totalAssets() public view override returns (uint256) {
+    return
+      totalLockedAssets() +
+      totalStakedButWithoutLockedAssets() +
+      totalUnstakedAssets();
+  }
 
   function claimableRewards(
     address portfolioAddress,

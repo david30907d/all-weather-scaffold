@@ -17,7 +17,7 @@ import "./utils/IWETH.sol";
 import "./interfaces/AbstractVault.sol";
 import "./radiant/IFeeDistribution.sol";
 
-contract DpxArbitrumVault is ERC4626, AbstractVault {
+contract DpxArbitrumVault is AbstractVault {
   using SafeMath for uint256;
   using SafeERC20 for IERC20;
   error ERC4626ExceededMaxRedeem(address owner, uint256 shares, uint256 max);
@@ -98,13 +98,6 @@ contract DpxArbitrumVault is ERC4626, AbstractVault {
         claimableRewards[i].amount
       );
     }
-  }
-
-  function totalAssets() public view override returns (uint256) {
-    return
-      totalLockedAssets() +
-      totalStakedButWithoutLockedAssets() +
-      totalUnstakedAssets();
   }
 
   function totalLockedAssets() public view override returns (uint256) {
