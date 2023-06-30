@@ -4,8 +4,12 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import "../radiant/IFeeDistribution.sol";
+import "../utils/IWETH.sol";
 
 abstract contract AbstractVault is ERC4626 {
+  IWETH public immutable weth =
+    IWETH(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1);
+
   function totalLockedAssets() public view virtual returns (uint256);
 
   function totalStakedButWithoutLockedAssets()

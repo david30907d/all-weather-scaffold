@@ -15,7 +15,6 @@ import "./radiant/IMultiFeeDistribution.sol";
 import "./radiant/IWETHGateway.sol";
 import "./radiant/IAToken.sol";
 import "./radiant/IFeeDistribution.sol";
-import "./gmx-contracts/IRewardRouterV2.sol";
 import "./interfaces/AbstractVault.sol";
 
 contract RadiantArbitrumVault is AbstractVault {
@@ -26,8 +25,6 @@ contract RadiantArbitrumVault is AbstractVault {
   ILockZap public lockZap;
   IMultiFeeDistribution public immutable multiFeeDistribution =
     IMultiFeeDistribution(0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE);
-  IERC20 public immutable weth =
-    IERC20(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1);
   IWETHGateway public immutable wethGateway =
     IWETHGateway(0xBb5cA40b2F7aF3B1ff5dbce0E9cC78F8BFa817CE);
 
@@ -109,7 +106,7 @@ contract RadiantArbitrumVault is AbstractVault {
   function claimableRewards(
     address portfolioAddress,
     uint256 userShares,
-    uint256 totalShares
+    uint256 portfolioShares
   )
     public
     view

@@ -31,8 +31,6 @@ contract DpxArbitrumVault is AbstractVault {
     uint256 max
   );
 
-  IWETH public immutable weth =
-    IWETH(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1);
   IERC20 public immutable dpxToken =
     IERC20(0x6C2C06790b3E3E3c38e12Ee22F8183b37a13EE55);
   IERC20 public immutable sushiToken =

@@ -1,5 +1,8 @@
-const { network } = require("hardhat");
+const { config } = require('dotenv');
+const { network, ethers } = require("hardhat");
 const fetch = require('node-fetch');
+const { Router, toAddress } = require('@pendle/sdk-v2');
+config();
 
 async function mineBlocks(numBlocks) {
   for (let i = 0; i < numBlocks; i++) {
@@ -16,6 +19,29 @@ async function fetch1InchSwapData(fromTokenAddress, toTOkenAddress, amount, from
 async function getUserEthBalance(address) {
   const provider = ethers.provider;
   return await provider.getBalance(address);
+}
+
+async function getPendleZapInData(chainId, poolAddress, amount, slippage){
+  const provider = new ethers.providers.JsonRpcProvider(process.env.API_URL);
+  const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+  const router = Router.getRouterWithKyberAggregator({
+    chainId: chainId,
+    provider,
+    signer,
+  });
+  
+  const GLP_POOL_ADDRESS = toAddress(poolAddress);
+  const WETH_ADDRESS = toAddress("0x82aF49447D8a07e3bd95BD0d56f35241523fBab1");
+  // const WETH_DECIMALS = BigInt(decimals);
+  // const AMOUNT_IN = BigInt(amount) * 10n ** WETH_DECIMALS;
+  
+  return await router.addLiquiditySingleToken(
+      GLP_POOL_ADDRESS,
+      WETH_ADDRESS,
+      amount,
+      slippage,
+      { method: 'extractParams' }
+  );
 }
 
 // common config
@@ -39,7 +65,11 @@ const radiantLendingPoolAddress = "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1";
 const radiantLockZapAddress = "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1";
 const multiFeeDistributionAddress = "0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE";
 
+// GLP
+const fsGLPAddress = "0x1aDDD80E6039594eE970E5872D247bf0414C8903";
 
+// Pendle
+const glpMarketPoolAddress = "0x7D49E5Adc0EAAD9C027857767638613253eF125f";
 
 
 module.exports = {
@@ -60,5 +90,8 @@ module.exports = {
   radiantLendingPoolAddress,
   multiFeeDistributionAddress,
   radiantAmount,
-  dpxAmount
+  dpxAmount,
+  fsGLPAddress,
+  getPendleZapInData,
+  glpMarketPoolAddress
 };

@@ -11,6 +11,7 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/interfaces/IERC4626.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./RadiantArbitrumVault.sol";
 import "./DpxArbitrumVault.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -19,8 +20,10 @@ import "hardhat/console.sol";
 import "./radiant/IFeeDistribution.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "./pendle/IPendleRouter.sol";
+import "./vaults/EquilibriaGlpVault.sol";
 
-contract AllWeatherPortfolioLPToken is ERC20 {
+contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   using SafeERC20 for IERC20;
   struct PortfolioAllocationOfSingleCategory {
     string protocol;
@@ -34,21 +37,42 @@ contract AllWeatherPortfolioLPToken is ERC20 {
   IERC20 public immutable asset;
   address public radiantVaultAddr;
   address payable public dpxVaultAddr;
+  address public equilibriaVaultAddr;
+
+  PortfolioAllocationOfSingleCategory[] public portfolioAllocation;
 
   constructor(
     address asset_,
     address radiantVaultAddr_,
-    address payable dpxVaultAddr_
+    address payable dpxVaultAddr_,
+    address equilibriaVaultAddr_
   ) ERC20("AllWeatherVaultLP", "AWVLP") {
     radiantVaultAddr = radiantVaultAddr_;
     dpxVaultAddr = dpxVaultAddr_;
+    equilibriaVaultAddr = equilibriaVaultAddr_;
     asset = ERC20(asset_);
+  }
+
+  function setVaultAllocations(
+    PortfolioAllocationOfSingleCategory[] memory portfolioAllocation_
+  ) public onlyOwner {
+    uint256 length = portfolioAllocation_.length;
+
+    // Clear existing storage array
+    delete portfolioAllocation;
+
+    // Assign each element individually
+    for (uint256 i = 0; i < length; i++) {
+      portfolioAllocation.push(portfolioAllocation_[i]);
+    }
   }
 
   function deposit(
     uint256 amount,
-    PortfolioAllocationOfSingleCategory[] memory portfolioAllocation,
-    bytes calldata oneInchData
+    bytes calldata oneInchData,
+    uint256 minLpOut,
+    IPendleRouter.ApproxParams calldata guessPtReceivedFromSy,
+    IPendleRouter.TokenInput calldata input
   ) public {
     require(amount > 0, "Token amount must be greater than 0");
     // Transfer tokens from the user to the contract
@@ -62,6 +86,11 @@ contract AllWeatherPortfolioLPToken is ERC20 {
       bytes32 protocolHash = keccak256(
         bytes(portfolioAllocation[idx].protocol)
       );
+      uint256 zapInAmountForThisVault = Math.mulDiv(
+        amount,
+        portfolioAllocation[idx].percentage,
+        100
+      );
       if (protocolHash == keccak256(bytes("dpx"))) {
         SafeERC20.safeApprove(IERC20(asset), dpxVaultAddr, amount);
         require(
@@ -72,7 +101,7 @@ contract AllWeatherPortfolioLPToken is ERC20 {
           ) > 0,
           "Buying Dpx LP token failed"
         );
-      } else if (protocolHash == keccak256(bytes("radiant"))) {
+      } else if (protocolHash == keccak256(bytes("radiant-arbitrum"))) {
         SafeERC20.safeApprove(IERC20(asset), radiantVaultAddr, amount);
         require(
           RadiantArbitrumVault(radiantVaultAddr).deposit(
@@ -82,10 +111,30 @@ contract AllWeatherPortfolioLPToken is ERC20 {
           ) > 0,
           "Buying Radiant LP token failed"
         );
+      } else if (protocolHash == keccak256(bytes("radiant-bsc"))) {
+        // need li.fi SDK
+        // (bool succ, bytes memory data) = address(oneInchAggregatorAddress).call(
+        //   oneInchData
+        // );
+      } else if (protocolHash == keccak256(bytes("equilibria-glp"))) {
+        SafeERC20.safeApprove(
+          IERC20(asset),
+          equilibriaVaultAddr,
+          zapInAmountForThisVault
+        );
+        require(
+          EquilibriaGlpVault(equilibriaVaultAddr).deposit(
+            zapInAmountForThisVault,
+            address(this),
+            minLpOut,
+            guessPtReceivedFromSy,
+            input
+          ) > 0,
+          "Buying Radiant LP token failed"
+        );
       }
     }
 
-    // Mint tokens to the user making the deposit
     _mint(msg.sender, amount);
     emit Transfer(address(0), msg.sender, amount);
   }
