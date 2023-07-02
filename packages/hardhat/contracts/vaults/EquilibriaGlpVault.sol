@@ -21,6 +21,7 @@ contract EquilibriaGlpVault is AbstractVault {
 
   IEqbZap public eqbZap;
   IPendleBooster public pendleBooster;
+  IPendleRouter public pendleRouter;
   IERC20 public fsGLP;
   uint256 public pid = 1;
 
@@ -29,6 +30,7 @@ contract EquilibriaGlpVault is AbstractVault {
   ) ERC4626(asset_) ERC20("AllWeatherLP-Equilibria-GLP", "ALP-EQB-GLP") {
     eqbZap = IEqbZap(0xc7517f481Cc0a645e63f870830A4B2e580421e32);
     pendleBooster = IPendleBooster(0x4D32C8Ff2fACC771eC7Efc70d6A8468bC30C26bF);
+    pendleRouter = IPendleRouter(0x0000000001E4ef00d069e71d6bA041b0A16F7eA0);
     fsGLP = IERC20(0x1aDDD80E6039594eE970E5872D247bf0414C8903);
   }
 
@@ -64,12 +66,25 @@ contract EquilibriaGlpVault is AbstractVault {
     uint256 originalShares = totalStakedButWithoutLockedAssets();
     // Error: VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xfa711db2)
     // It means the swap would exceed the max slippage
+    // pendle
+    // SafeERC20.safeApprove(weth, address(pendleRouter), amount);
+    // (uint256 netLpOut, ) = pendleRouter.addLiquiditySingleToken(
+    // receiver,
+    // 0x7D49E5Adc0EAAD9C027857767638613253eF125f,
+    // minLpOut,
+    // guessPtReceivedFromSy,
+    // input);
+
     eqbZap.zapIn(pid, minLpOut, guessPtReceivedFromSy, input, true);
     uint256 shares = totalStakedButWithoutLockedAssets().sub(originalShares);
     _mint(receiver, shares);
 
     emit Deposit(_msgSender(), receiver, amount, shares);
     return shares;
+    // pendle
+    // emit Deposit(_msgSender(), receiver, amount, netLpOut);
+    // netLpOut only exists in Pendle contract
+    // return netLpOut;
   }
 
   function deposit(
@@ -81,16 +96,36 @@ contract EquilibriaGlpVault is AbstractVault {
   }
 
   function redeemAll(
-    uint256 _shares,
+    uint256 shares,
+    address receiver,
+    IPendleRouter.TokenOutput calldata output
+  ) public returns (uint256) {
+    (, , address rewardPool, ) = pendleBooster.poolInfo(pid);
+    SafeERC20.safeApprove(
+      IBaseRewardPool(rewardPool).stakingToken(),
+      address(eqbZap),
+      shares
+    );
+    // pendle
+    // pendleRouter.removeLiquiditySingleToken(
+    // receiver,
+    // 0x7D49E5Adc0EAAD9C027857767638613253eF125f,
+    // shares,
+    // output);
+
+    // TODO(david): use pendle's removeLiquiditySingleToken instead of eqbZap
+    // removeLiquiditySingleToken
+    eqbZap.zapOut(pid, 1, output, false);
+    uint256 shares = super.redeem(shares, receiver, msg.sender);
+    return shares;
+    // return 1;
+  }
+
+  function redeemAll(
+    uint256 shares,
     address receiver
   ) public override returns (uint256) {
-    return 0;
-    // // TODO(david): should only redeem _shares amount of dLP
-    // uint256 radiantDlpShares = multiFeeDistribution
-    //   .withdrawExpiredLocksForWithOptions(address(this), 1, true);
-    // uint256 vaultShare = super.redeem(radiantDlpShares, receiver, msg.sender);
-    // require(radiantDlpShares == vaultShare, "radiantDlpShares != vaultShare");
-    // return vaultShare;
+    revert("Not implemented");
   }
 
   function claim(address receiver, uint256[] memory pids_) public {

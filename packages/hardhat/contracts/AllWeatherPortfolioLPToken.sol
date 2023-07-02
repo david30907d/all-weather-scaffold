@@ -130,7 +130,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
             guessPtReceivedFromSy,
             input
           ) > 0,
-          "Buying Radiant LP token failed"
+          "Zap Into Equilibria GLP failed"
         );
       }
     }
@@ -139,13 +139,33 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     emit Transfer(address(0), msg.sender, amount);
   }
 
-  function redeemAll(uint256 shares, address receiver) public {
+  function redeemAll(
+    uint256 shares,
+    address receiver,
+    IPendleRouter.TokenOutput calldata output
+  ) public {
     uint256 dpxShares = Math.mulDiv(
       DpxArbitrumVault(dpxVaultAddr).balanceOf(address(this)),
       shares,
       totalSupply()
     );
+    uint256 equilibriaGlpShares = Math.mulDiv(
+      EquilibriaGlpVault(equilibriaVaultAddr).balanceOf(address(this)),
+      shares,
+      totalSupply()
+    );
+    console.log(
+      "balanceOf",
+      EquilibriaGlpVault(equilibriaVaultAddr).balanceOf(address(this))
+    );
+    console.log("shares", shares);
+    console.log("totalSupply", totalSupply());
     DpxArbitrumVault(dpxVaultAddr).redeemAll(dpxShares, receiver);
+    EquilibriaGlpVault(equilibriaVaultAddr).redeemAll(
+      equilibriaGlpShares,
+      receiver,
+      output
+    );
     RadiantArbitrumVault(radiantVaultAddr).redeemAll(shares, receiver);
     _burn(msg.sender, shares);
   }

@@ -1,7 +1,8 @@
 const { config } = require('dotenv');
 const { network, ethers } = require("hardhat");
 const fetch = require('node-fetch');
-const { Router, toAddress } = require('@pendle/sdk-v2');
+const { Router, toAddress, MarketEntity } = require('@pendle/sdk-v2');
+
 config();
 
 async function mineBlocks(numBlocks) {
@@ -32,15 +33,37 @@ async function getPendleZapInData(chainId, poolAddress, amount, slippage){
   
   const GLP_POOL_ADDRESS = toAddress(poolAddress);
   const WETH_ADDRESS = toAddress("0x82aF49447D8a07e3bd95BD0d56f35241523fBab1");
-  // const WETH_DECIMALS = BigInt(decimals);
-  // const AMOUNT_IN = BigInt(amount) * 10n ** WETH_DECIMALS;
-  
   return await router.addLiquiditySingleToken(
       GLP_POOL_ADDRESS,
       WETH_ADDRESS,
       amount,
       slippage,
       { method: 'extractParams' }
+  );
+}
+async function getPendleZapOutData(chainId, poolAddress, tokenOutAddress, amount, slippage){
+  const provider = new ethers.providers.JsonRpcProvider(process.env.API_URL);
+  const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+  const marketContract = new MarketEntity(poolAddress, {
+      chainId: chainId,
+      provider,
+      signer: signer
+  });
+  const router = Router.getRouterWithKyberAggregator({
+    chainId: chainId,
+    provider,
+    signer,
+  });
+  // TODO(david): ask pendle team about this. Is it possible to extract Param before approving contract?
+  // await marketContract.approve(router.address, amount).then((tx) => tx.wait());
+  
+  const WETH_DECIMALS = 16n;
+  return await router.removeLiquiditySingleToken(
+    poolAddress,
+    amount,
+    tokenOutAddress,
+    slippage,
+    { method: 'extractParams' }
   );
 }
 
@@ -93,5 +116,6 @@ module.exports = {
   dpxAmount,
   fsGLPAddress,
   getPendleZapInData,
+  getPendleZapOutData,
   glpMarketPoolAddress
 };
