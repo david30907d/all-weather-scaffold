@@ -149,17 +149,22 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       shares,
       totalSupply()
     );
+    if (dpxShares > 0) {
+      DpxArbitrumVault(dpxVaultAddr).redeemAll(dpxShares, receiver);
+    }
+
     uint256 equilibriaGlpShares = Math.mulDiv(
       EquilibriaGlpVault(equilibriaVaultAddr).balanceOf(address(this)),
       shares,
       totalSupply()
     );
-    DpxArbitrumVault(dpxVaultAddr).redeemAll(dpxShares, receiver);
-    EquilibriaGlpVault(equilibriaVaultAddr).redeemAll(
-      equilibriaGlpShares,
-      receiver,
-      output
-    );
+    if (equilibriaGlpShares > 0) {
+      EquilibriaGlpVault(equilibriaVaultAddr).redeemAll(
+        equilibriaGlpShares,
+        receiver,
+        output
+      );
+    }
     RadiantArbitrumVault(radiantVaultAddr).redeemAll(shares, receiver);
     _burn(msg.sender, shares);
   }

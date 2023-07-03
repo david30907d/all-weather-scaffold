@@ -10,12 +10,14 @@ const { fetch1InchSwapData, mineBlocks, myImpersonatedWalletAddress,
   sushiPid,
   gasLimit,
   rRewardTokens,
-dpxAmount } = require("./utils");
+  glpMarketPoolAddress,
+  getPendleZapInData,
+  getPendleZapOutData,
+  dpxAmount } = require("./utils");
 
 let wallet;
 let dpxVault;
 let portfolioContract;
-
 
 describe("All Weather Protocol", function () {
   beforeEach(async () => {
@@ -25,6 +27,7 @@ describe("All Weather Protocol", function () {
     dpxToken = await ethers.getContractAt('MockDAI', dpxTokenAddress);
     dlpToken = await ethers.getContractAt("MockDAI", radiantDlpAddress);
     sushiToken = await ethers.getContractAt('MockDAI', sushiTokenAddress);
+    pendleGlpMarketLPT = await ethers.getContractAt("IERC20", glpMarketPoolAddress);
     weth = await ethers.getContractAt('IWETH', wethAddress);
 
     const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
@@ -36,17 +39,26 @@ describe("All Weather Protocol", function () {
     dpxVault = await DpxArbitrumVault.deploy(dpxSLP.address, sushiMiniChefV2Address, sushiPid);
     await dpxVault.deployed();
 
+    const EquilibriaGlpVault = await ethers.getContractFactory("EquilibriaGlpVault");
+    equilibriaGlpVault = await EquilibriaGlpVault.deploy(pendleGlpMarketLPT.address);
+    await equilibriaGlpVault.deployed();
+
     const AllWeatherPortfolioLPToken = await ethers.getContractFactory("AllWeatherPortfolioLPToken");
-    portfolioContract = await AllWeatherPortfolioLPToken.deploy(weth.address, radiantVault.address, dpxVault.address);
-    await portfolioContract.deployed();
+    portfolioContract = await AllWeatherPortfolioLPToken.connect(wallet).deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address);
+    await portfolioContract.connect(wallet).deployed();
+    await portfolioContract.setVaultAllocations([{protocol: "dpx", percentage: 100}], { gasLimit: 1057560 }).then((tx) => tx.wait());
 
     await (await weth.connect(wallet).approve(portfolioContract.address, dpxAmount, { gasLimit: gasLimit })).wait();
-    await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.01"), { gasLimit: 2057560 });
+    await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.02"), { gasLimit: 1057560 });
   });
   describe("Portfolio LP Contract Test", function () {
     it("Should be able to deposit SLP to portfolio contract", async function () {
-      const oneInchSwapData = await fetch1InchSwapData(weth.address, dpxTokenAddress, dpxAmount.div(2), dpxVault.address);
-      const receipt = await (await portfolioContract.connect(wallet).deposit(dpxAmount, [{protocol: "dpx", percentage: 100}], oneInchSwapData, { gasLimit: gasLimit })).wait();
+      const oneInchSwapData = await fetch1InchSwapData(weth.address,
+        dpxTokenAddress,
+        dpxAmount.div(2),
+        dpxVault.address);
+      const pendleZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, dpxAmount, 0.99);      
+      const receipt = await (await portfolioContract.connect(wallet).deposit(dpxAmount, oneInchSwapData, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], { gasLimit: 1692137 })).wait();
 
       // Iterate over the events and find the Deposit event
       for (const event of receipt.events) {
@@ -66,17 +78,19 @@ describe("All Weather Protocol", function () {
         dpxTokenAddress,
         dpxAmount.div(2),
         dpxVault.address);
-      await (await portfolioContract.connect(wallet).deposit(dpxAmount, [{protocol: "dpx", percentage: 100}], oneInchSwapData, { gasLimit: gasLimit })).wait();
+      const pendleZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, dpxAmount, 0.99);      
+      await (await portfolioContract.deposit(dpxAmount, oneInchSwapData, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], { gasLimit: 10692137 })).wait();
       await mineBlocks(100); // Mine 1 blocks
       const originalSushiBalance = await sushiToken.balanceOf(wallet.address);
       const originalDpxBalance = await dpxToken.balanceOf(wallet.address);
       const claimableRewards = await portfolioContract.connect(wallet).claimableRewards(wallet.address);
+      expect(claimableRewards[0].protocol).to.equal("dpx");
       const sushiClaimableReward = claimableRewards[0].claimableRewards[0].amount;
       const dpxClaimableReward = claimableRewards[0].claimableRewards[1].amount;
       expect(sushiClaimableReward).to.be.gt(0);
       expect(dpxClaimableReward).to.be.gt(0);
 
-      await portfolioContract.connect(wallet).claim(wallet.address, rRewardTokens);
+      await portfolioContract.connect(wallet).claim(wallet.address, rRewardTokens, []);
       // NOTE: using `to.be.gt` instead of `to.equal` because the reward would somehow be increased after claim(). My hunch is that sushiswap would trigger some reward distribution after the claim() tx is mined.
       expect((await sushiToken.balanceOf(wallet.address)).sub(originalSushiBalance)).to.be.gt(sushiClaimableReward);
       expect((await dpxToken.balanceOf(wallet.address)).sub(originalDpxBalance)).to.be.gt(dpxClaimableReward);
@@ -86,8 +100,12 @@ describe("All Weather Protocol", function () {
     })
 
     it("Should be able to redeemAll dpx deposit", async function () {
-      const oneInchSwapData = await fetch1InchSwapData(weth.address, dpxTokenAddress, dpxAmount.div(2), dpxVault.address);
-      const receipt = await (await portfolioContract.connect(wallet).deposit(dpxAmount, [{protocol: "dpx", percentage: 100}], oneInchSwapData, { gasLimit: gasLimit })).wait();
+      const oneInchSwapData = await fetch1InchSwapData(weth.address,
+        dpxTokenAddress,
+        dpxAmount.div(2),
+        dpxVault.address);
+      const pendleZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, dpxAmount, 0.99);      
+      const receipt = await (await portfolioContract.deposit(dpxAmount, oneInchSwapData, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], { gasLimit: 10692137 })).wait();
       // Iterate over the events and find the Deposit event
       for (const event of receipt.events) {
         if (event.topics.includes(dpxVault.interface.getEventTopic('Deposit'))) {
@@ -101,7 +119,22 @@ describe("All Weather Protocol", function () {
 
           // check dpxSLP balance
           const portfolioShares = await portfolioContract.balanceOf(wallet.address);
-          await (await portfolioContract.connect(wallet).redeemAll(portfolioShares, wallet.address, { gasLimit: gasLimit })).wait();
+          const fakePendleZapOut = {
+            // Token/Sy data
+            tokenOut: wallet.address, // address
+            minTokenOut: 0, // uint256
+            tokenRedeemSy: wallet.address, // address
+            bulk: wallet.address, // address
+            // aggregator data
+            pendleSwap: wallet.address, // address
+            swapData: {
+              swapType: 0, // SwapType enum
+              extRouter: wallet.address, // address
+              extCalldata: '0x', // bytes
+              needScale: false
+            }
+          }
+          await (await portfolioContract.connect(wallet).redeemAll(portfolioShares, wallet.address, fakePendleZapOut, { gasLimit: gasLimit })).wait();
           expect((await miniChefV2.userInfo(sushiPid, dpxVault.address))[0]).to.equal(0);
           expect(await dpxSLP.balanceOf(dpxVault.address)).to.equal(0);
           expect(await dpxSLP.balanceOf(wallet.address)).to.equal(decodedEvent.shares);
@@ -109,7 +142,7 @@ describe("All Weather Protocol", function () {
         }
       }
       // rewards should be claimed
-      const remainingClaimableRewards = await portfolioContract.connect(wallet).claimableRewards(wallet.address);
+      const remainingClaimableRewards = await portfolioContract.claimableRewards(wallet.address);
       expect(remainingClaimableRewards).to.deep.equal([]);
     })
   });

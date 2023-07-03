@@ -89,13 +89,7 @@ contract DpxArbitrumVault is AbstractVault {
     IFeeDistribution.RewardData[] memory claimableRewards
   ) public override {
     sushiSwapMiniChef.harvest(pid, address(this));
-    for (uint256 i = 0; i < claimableRewards.length; i++) {
-      SafeERC20.safeTransfer(
-        IERC20(claimableRewards[i].token),
-        receiver,
-        claimableRewards[i].amount
-      );
-    }
+    super.claim(receiver, claimableRewards);
   }
 
   function totalLockedAssets() public view override returns (uint256) {

@@ -11,7 +11,8 @@ const { fetch1InchSwapData,
   gasLimit,
   radiantLendingPoolAddress,
   multiFeeDistributionAddress,
-  radiantAmount
+  radiantAmount,
+  glpMarketPoolAddress
 } = require("./utils");
 
 
@@ -29,6 +30,7 @@ describe("All Weather Protocol", function () {
     dlpToken = await ethers.getContractAt("MockDAI", radiantDlpAddress);
     radiantLockZap = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
     multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
+    pendleGlpMarketLPT = await ethers.getContractAt("IERC20", glpMarketPoolAddress);
 
     const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
     radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLockZapAddress);
@@ -38,9 +40,15 @@ describe("All Weather Protocol", function () {
     dpxVault = await DpxArbitrumVault.deploy(dpxSLP.address, sushiMiniChefV2Address, sushiPid);
     await dpxVault.deployed();
 
+    const EquilibriaGlpVault = await ethers.getContractFactory("EquilibriaGlpVault");
+    // equilibriaGlpVault = await EquilibriaGlpVault.deploy(fsGLP.address);
+    equilibriaGlpVault = await EquilibriaGlpVault.deploy(pendleGlpMarketLPT.address);
+    await equilibriaGlpVault.deployed();
+    await portfolioContract.setVaultAllocations([{protocol: "radiant", percentage: 100}]).then((tx) => tx.wait());
+
     const AllWeatherPortfolioLPToken = await ethers.getContractFactory("AllWeatherPortfolioLPToken");
-    portfolioContract = await AllWeatherPortfolioLPToken.deploy(weth.address, radiantVault.address, dpxVault.address);
-    await portfolioContract.deployed();
+    portfolioContract = await AllWeatherPortfolioLPToken.deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address);
+    await portfolioContract.connect(wallet).deployed();
 
 
     await (await weth.connect(wallet).approve(portfolioContract.address, radiantAmount, { gasLimit: 2057560 })).wait();
