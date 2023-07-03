@@ -49,7 +49,9 @@ contract EquilibriaGlpVault is AbstractVault {
   }
 
   function totalUnstakedAssets() public view override returns (uint256) {
-    return fsGLP.balanceOf(address(this));
+    // ideally, the asset() of this vault should be fsGLP
+    // return fsGLP.balanceOf(address(this));
+    return IERC20(asset()).balanceOf(address(this));
   }
 
   function deposit(
@@ -66,14 +68,6 @@ contract EquilibriaGlpVault is AbstractVault {
     uint256 originalShares = totalStakedButWithoutLockedAssets();
     // Error: VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xfa711db2)
     // It means the swap would exceed the max slippage
-    // pendle
-    // SafeERC20.safeApprove(weth, address(pendleRouter), amount);
-    // (uint256 netLpOut, ) = pendleRouter.addLiquiditySingleToken(
-    // receiver,
-    // 0x7D49E5Adc0EAAD9C027857767638613253eF125f,
-    // minLpOut,
-    // guessPtReceivedFromSy,
-    // input);
 
     eqbZap.zapIn(pid, minLpOut, guessPtReceivedFromSy, input, true);
     uint256 shares = totalStakedButWithoutLockedAssets().sub(originalShares);
@@ -81,10 +75,6 @@ contract EquilibriaGlpVault is AbstractVault {
 
     emit Deposit(_msgSender(), receiver, amount, shares);
     return shares;
-    // pendle
-    // emit Deposit(_msgSender(), receiver, amount, netLpOut);
-    // netLpOut only exists in Pendle contract
-    // return netLpOut;
   }
 
   function deposit(
@@ -106,19 +96,22 @@ contract EquilibriaGlpVault is AbstractVault {
       address(eqbZap),
       shares
     );
-    // pendle
-    // pendleRouter.removeLiquiditySingleToken(
-    // receiver,
-    // 0x7D49E5Adc0EAAD9C027857767638613253eF125f,
-    // shares,
-    // output);
+    // this would only withdraw GLP-LPT, not fsGLP
+    eqbZap.withdraw(pid, shares);
 
-    // TODO(david): use pendle's removeLiquiditySingleToken instead of eqbZap
-    // removeLiquiditySingleToken
-    eqbZap.zapOut(pid, 1, output, false);
+    // ideal solution: use eqbZap.zapOut
+    // eqbZap.zapOut(pid, 1, output, false);
+
+    // alternative: use pendleRouter.removeLiquiditySingleToken
+    // _approveTokenIfNeeded(0x7D49E5Adc0EAAD9C027857767638613253eF125f, address(pendleRouter), shares);
+    // pendleRouter.removeLiquiditySingleToken(
+    //     address(this),
+    //     0x7D49E5Adc0EAAD9C027857767638613253eF125f,
+    //     shares,
+    //     output
+    // );
     uint256 shares = super.redeem(shares, receiver, msg.sender);
     return shares;
-    // return 1;
   }
 
   function redeemAll(
@@ -144,7 +137,7 @@ contract EquilibriaGlpVault is AbstractVault {
   }
 
   function claimableRewards(
-    address portfolioAddress,
+    address receiver,
     uint256 userShares,
     uint256 portfolioShares
   )
@@ -164,21 +157,23 @@ contract EquilibriaGlpVault is AbstractVault {
       portfolioSharesInThisVault,
       totalVaultShares
     );
-    (, , address rewardpool, ) = pendleBooster.poolInfo(pid);
-    address[] memory rewardTokens = IBaseRewardPool(rewardpool)
-      .getRewardTokens();
-    // TODO(david): need to get reward of EQB and xEQB
-    rewards = new IFeeDistribution.RewardData[](4);
-    for (uint256 i = 0; i < rewardTokens.length; i++) {
-      rewards[i] = IFeeDistribution.RewardData({
-        token: rewardTokens[i],
-        amount: Math.mulDiv(
-          IBaseRewardPool(rewardpool).earned(address(this), rewardTokens[i]),
-          ratioWithoutDivideByPortfolioShares,
-          portfolioShares
-        )
-      });
-    }
+    rewards = new IFeeDistribution.RewardData[](2);
+    rewards[0] = IFeeDistribution.RewardData({
+      token: address(sushiToken),
+      amount: Math.mulDiv(
+        sushiSwapMiniChef.pendingSushi(pid, address(this)),
+        ratioWithoutDivideByPortfolioShares,
+        portfolioShares
+      )
+    });
+    rewards[1] = IFeeDistribution.RewardData({
+      token: address(dpxToken),
+      amount: Math.mulDiv(
+        dpxRewarder.pendingToken(pid, address(this)),
+        ratioWithoutDivideByPortfolioShares,
+        portfolioShares
+      )
+    });
     return rewards;
   }
 

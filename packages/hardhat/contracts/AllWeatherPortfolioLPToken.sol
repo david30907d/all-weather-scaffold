@@ -154,12 +154,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       shares,
       totalSupply()
     );
-    console.log(
-      "balanceOf",
-      EquilibriaGlpVault(equilibriaVaultAddr).balanceOf(address(this))
-    );
-    console.log("shares", shares);
-    console.log("totalSupply", totalSupply());
     DpxArbitrumVault(dpxVaultAddr).redeemAll(dpxShares, receiver);
     EquilibriaGlpVault(equilibriaVaultAddr).redeemAll(
       equilibriaGlpShares,
@@ -205,7 +199,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     }
 
     ClaimableRewardOfAProtocol[]
-      memory totalClaimableRewards = new ClaimableRewardOfAProtocol[](2);
+      memory totalClaimableRewards = new ClaimableRewardOfAProtocol[](3);
     totalClaimableRewards[0] = ClaimableRewardOfAProtocol({
       protocol: "dpx",
       claimableRewards: DpxArbitrumVault(dpxVaultAddr).claimableRewards(
@@ -221,6 +215,11 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         userShares,
         portfolioShares
       )
+    });
+    totalClaimableRewards[2] = ClaimableRewardOfAProtocol({
+      protocol: "radiant",
+      claimableRewards: EquilibriaGlpVault(equilibriaVaultAddr_)
+        .claimableRewards(receiver, userShares, portfolioShares)
     });
     return totalClaimableRewards;
   }
