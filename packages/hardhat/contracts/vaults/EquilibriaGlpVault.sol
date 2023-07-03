@@ -158,22 +158,22 @@ contract EquilibriaGlpVault is AbstractVault {
       totalVaultShares
     );
     rewards = new IFeeDistribution.RewardData[](2);
-    rewards[0] = IFeeDistribution.RewardData({
-      token: address(sushiToken),
-      amount: Math.mulDiv(
-        sushiSwapMiniChef.pendingSushi(pid, address(this)),
-        ratioWithoutDivideByPortfolioShares,
-        portfolioShares
-      )
-    });
-    rewards[1] = IFeeDistribution.RewardData({
-      token: address(dpxToken),
-      amount: Math.mulDiv(
-        dpxRewarder.pendingToken(pid, address(this)),
-        ratioWithoutDivideByPortfolioShares,
-        portfolioShares
-      )
-    });
+    // rewards[0] = IFeeDistribution.RewardData({
+    //   token: address(sushiToken),
+    //   amount: Math.mulDiv(
+    //     sushiSwapMiniChef.pendingSushi(pid, address(this)),
+    //     ratioWithoutDivideByPortfolioShares,
+    //     portfolioShares
+    //   )
+    // });
+    // rewards[1] = IFeeDistribution.RewardData({
+    //   token: address(dpxToken),
+    //   amount: Math.mulDiv(
+    //     dpxRewarder.pendingToken(pid, address(this)),
+    //     ratioWithoutDivideByPortfolioShares,
+    //     portfolioShares
+    //   )
+    // });
     return rewards;
   }
 

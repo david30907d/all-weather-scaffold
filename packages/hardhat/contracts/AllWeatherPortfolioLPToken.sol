@@ -218,7 +218,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     });
     totalClaimableRewards[2] = ClaimableRewardOfAProtocol({
       protocol: "radiant",
-      claimableRewards: EquilibriaGlpVault(equilibriaVaultAddr_)
+      claimableRewards: EquilibriaGlpVault(equilibriaVaultAddr)
         .claimableRewards(receiver, userShares, portfolioShares)
     });
     return totalClaimableRewards;
