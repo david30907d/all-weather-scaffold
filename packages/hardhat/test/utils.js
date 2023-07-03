@@ -57,15 +57,33 @@ async function getPendleZapOutData(chainId, poolAddress, tokenOutAddress, amount
   // TODO(david): ask pendle team about this. Is it possible to extract Param before approving contract?
   // await marketContract.approve(router.address, amount).then((tx) => tx.wait());
   
-  const WETH_DECIMALS = 16n;
   return await router.removeLiquiditySingleToken(
     poolAddress,
     amount,
     tokenOutAddress,
+    // "0x5402B5F40310bDED796c7D0F3FF6683f5C0cFfdf", // sGLP
     slippage,
     { method: 'extractParams' }
   );
 }
+
+const getLiFiCrossChainContractCallCallData = async (fromChain, fromToken, fromAddress, toChain, toToken, toAmount, crossChainTransaction, toContractGasLimit, contractOutputsToken) => {
+  const quoteRequest = {
+      fromChain,
+      fromToken,
+      fromAddress,
+      toChain,
+      toToken,
+      toAmount,
+      toContractAddress: crossChainTransaction.to,
+      toContractCallData: crossChainTransaction.data,
+      toContractGasLimit,
+      contractOutputsToken,
+    };
+  
+  const response = await axios.post('https://li.quest/v1/quote/contractCall', quoteRequest);
+  return response.data.transactionRequest.data;
+};
 
 // common config
 const myImpersonatedWalletAddress = "0xe4bac3e44e8080e1491c11119197d33e396ea82b";
@@ -92,6 +110,7 @@ const multiFeeDistributionAddress = "0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE"
 const fsGLPAddress = "0x1aDDD80E6039594eE970E5872D247bf0414C8903";
 
 // Pendle
+const pendleTokenAddress = "0x0c880f6761F1af8d9Aa9C466984b80DAb9a8c9e8";
 const glpMarketPoolAddress = "0x7D49E5Adc0EAAD9C027857767638613253eF125f";
 
 
@@ -117,5 +136,7 @@ module.exports = {
   fsGLPAddress,
   getPendleZapInData,
   getPendleZapOutData,
-  glpMarketPoolAddress
+  glpMarketPoolAddress,
+  getLiFiCrossChainContractCallCallData,
+  pendleTokenAddress
 };

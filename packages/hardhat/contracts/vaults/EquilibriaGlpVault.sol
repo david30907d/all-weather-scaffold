@@ -121,12 +121,13 @@ contract EquilibriaGlpVault is AbstractVault {
     revert("Not implemented");
   }
 
-  function claim(address receiver, uint256[] memory pids_) public {
-    eqbZap.claimRewards(pids_);
-    // TODO(david): transfer to user;
-    // _transferRewardsToUser(receiver);
-    // _claimERC20Rewards(receiver, rRewardTokens);
-    // _claimETHReward(receiver);
+  function claim(
+    address receiver,
+    IFeeDistribution.RewardData[] memory claimableRewards,
+    uint256[] memory pids
+  ) public {
+    eqbZap.claimRewards(pids);
+    super.claim(receiver, claimableRewards);
   }
 
   function claim(
@@ -158,36 +159,19 @@ contract EquilibriaGlpVault is AbstractVault {
       totalVaultShares
     );
     rewards = new IFeeDistribution.RewardData[](2);
-    // rewards[0] = IFeeDistribution.RewardData({
-    //   token: address(sushiToken),
-    //   amount: Math.mulDiv(
-    //     sushiSwapMiniChef.pendingSushi(pid, address(this)),
-    //     ratioWithoutDivideByPortfolioShares,
-    //     portfolioShares
-    //   )
-    // });
-    // rewards[1] = IFeeDistribution.RewardData({
-    //   token: address(dpxToken),
-    //   amount: Math.mulDiv(
-    //     dpxRewarder.pendingToken(pid, address(this)),
-    //     ratioWithoutDivideByPortfolioShares,
-    //     portfolioShares
-    //   )
-    // });
+    (, , address rewardpool, ) = pendleBooster.poolInfo(pid);
+    address[] memory rewardTokens = IBaseRewardPool(rewardpool)
+      .getRewardTokens();
+    for (uint256 i = 0; i < rewardTokens.length; i++) {
+      rewards[i] = IFeeDistribution.RewardData({
+        token: rewardTokens[i],
+        amount: Math.mulDiv(
+          IBaseRewardPool(rewardpool).earned(address(this), rewardTokens[i]),
+          ratioWithoutDivideByPortfolioShares,
+          portfolioShares
+        )
+      });
+    }
     return rewards;
-  }
-
-  function _transferRewardsToUser(
-    address receiver,
-    address[] memory rRewardTokens
-  ) internal {
-    // for (uint256 i = 0; i < rRewardTokens.length; i++) {
-    //   radiantLending.withdraw(
-    //     rRewardTokens[i],
-    //     _calculateClaimableERC20RewardForUser(receiver, rRewardTokens[i]),
-    //     receiver
-    //   );
-    // }
-    // console.log("claimERC20Rewards");
   }
 }

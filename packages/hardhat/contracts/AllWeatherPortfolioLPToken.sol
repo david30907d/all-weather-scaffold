@@ -164,7 +164,11 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     _burn(msg.sender, shares);
   }
 
-  function claim(address receiver, address[] memory rRewardTokens) public {
+  function claim(
+    address receiver,
+    address[] memory rRewardTokens,
+    uint256[] memory equilibriaPids
+  ) public {
     ClaimableRewardOfAProtocol[]
       memory totalClaimableRewards = claimableRewards(msg.sender);
     for (uint idx = 0; idx < totalClaimableRewards.length; idx++) {
@@ -184,6 +188,12 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
           receiver,
           totalClaimableRewards[idx].claimableRewards,
           rRewardTokens
+        );
+      } else if (protocolHash == keccak256(bytes("equilibria-glp"))) {
+        EquilibriaGlpVault(equilibriaVaultAddr).claim(
+          receiver,
+          totalClaimableRewards[idx].claimableRewards,
+          equilibriaPids
         );
       }
     }
@@ -217,7 +227,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       )
     });
     totalClaimableRewards[2] = ClaimableRewardOfAProtocol({
-      protocol: "radiant",
+      protocol: "equilibria-glp",
       claimableRewards: EquilibriaGlpVault(equilibriaVaultAddr)
         .claimableRewards(receiver, userShares, portfolioShares)
     });
