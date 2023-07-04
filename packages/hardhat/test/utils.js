@@ -1,4 +1,4 @@
-const { config } = require('dotenv');
+require("dotenv").config();
 const { network, ethers } = require("hardhat");
 const fetch = require('node-fetch');
 const { Router, toAddress, MarketEntity } = require('@pendle/sdk-v2');
