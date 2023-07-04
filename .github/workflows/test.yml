@@ -8,9 +8,10 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
+    env:
+      API_URL: ${{ secrets.API_URL }}
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
     strategy:
       matrix:
         node-version: [16.x]
