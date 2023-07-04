@@ -20,7 +20,7 @@
     "@nomicfoundation/hardhat-toolbox": "^1.0.2",
     "@nomiclabs/hardhat-etherscan": "^3.1.5",
     "@openzeppelin/contracts": "^4.7.3",
-    "@pendle/sdk-v2": "^2.4.1",
+    "@pendle/sdk-v2": "^2.4.2",
     "@tenderly/hardhat-tenderly": "^1.0.10",
     "@typechain/ethers-v5": "^10.1.0",
     "@typechain/hardhat": "^6.1.2",
