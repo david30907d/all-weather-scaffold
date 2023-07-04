@@ -119,7 +119,6 @@ contract RadiantArbitrumVault is AbstractVault {
     if (portfolioSharesInThisVault == 0 || totalVaultShares == 0) {
       return new IFeeDistribution.RewardData[](0);
     }
-
     IFeeDistribution.RewardData[]
       memory radiantRewardData = multiFeeDistribution.claimableRewards(
         address(this)
@@ -138,7 +137,6 @@ contract RadiantArbitrumVault is AbstractVault {
         receiver
       );
     }
-    console.log("claimERC20Rewards");
   }
 
   function _claimETHReward(address receiver) internal {

@@ -86,7 +86,7 @@ const getLiFiCrossChainContractCallCallData = async (fromChain, fromToken, fromA
 };
 
 // common config
-const myImpersonatedWalletAddress = "0xe4bac3e44e8080e1491c11119197d33e396ea82b";
+const myImpersonatedWalletAddress = "0x7ee54ab0f204bb3a83df90fdd824d8b4abe93222";
 const wethAddress = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
 const gasLimit = 2675600;
 const radiantAmount = ethers.utils.parseUnits('0.01', 18);
@@ -112,6 +112,22 @@ const fsGLPAddress = "0x1aDDD80E6039594eE970E5872D247bf0414C8903";
 // Pendle
 const pendleTokenAddress = "0x0c880f6761F1af8d9Aa9C466984b80DAb9a8c9e8";
 const glpMarketPoolAddress = "0x7D49E5Adc0EAAD9C027857767638613253eF125f";
+const fakePendleZapOut = {
+  // Token/Sy data
+  tokenOut: "0x1aDDD80E6039594eE970E5872D247bf0414C8903", // address
+  minTokenOut: 0, // uint256
+  tokenRedeemSy: "0x1aDDD80E6039594eE970E5872D247bf0414C8903", // address
+  bulk: "0x1aDDD80E6039594eE970E5872D247bf0414C8903", // address
+  // aggregator data
+  pendleSwap: "0x1aDDD80E6039594eE970E5872D247bf0414C8903", // address
+  swapData: {
+    swapType: 0, // SwapType enum
+    extRouter: "0x1aDDD80E6039594eE970E5872D247bf0414C8903", // address
+    extCalldata: '0x', // bytes
+    needScale: false
+  }
+}
+
 
 
 module.exports = {
@@ -138,5 +154,6 @@ module.exports = {
   getPendleZapOutData,
   glpMarketPoolAddress,
   getLiFiCrossChainContractCallCallData,
-  pendleTokenAddress
+  pendleTokenAddress,
+  fakePendleZapOut
 };

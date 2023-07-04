@@ -42,7 +42,7 @@ describe("All Weather Protocol", function () {
     glpRewardPool = await ethers.getContractAt("IERC20", "0x245f1d70AcAaCD219564FCcB75f108917037A960");
     radiantLockZap = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
     multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
-    await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.1"), { gasLimit: 2057560 });
+    await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.025"), { gasLimit: 2057560 });
     
     const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
     radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLockZapAddress);
@@ -66,7 +66,8 @@ describe("All Weather Protocol", function () {
   });
 
   describe("Portfolio LP Contract Test", function () {
-    it("Should be able to zapin with WETH into Radiant dLP", async function () {
+    it("Should be able to zapin with WETH into equilibria GLP", async function () {
+      this.timeout(120000); // Set timeout to 120 seconds
       const oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxTokenAddress, radiantAmount.div(2), wallet.address);
       const pendleZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, dpxAmount, 0.99);
       const receipt = await (await portfolioContract.deposit(dpxAmount, oneInchSwapDataForDpx, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], { gasLimit: 10692137 })).wait();

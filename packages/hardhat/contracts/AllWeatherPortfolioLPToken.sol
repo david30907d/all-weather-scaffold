@@ -132,6 +132,8 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
           ) > 0,
           "Zap Into Equilibria GLP failed"
         );
+      } else {
+        revert("Protocol not supported");
       }
     }
 
@@ -188,7 +190,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
           receiver,
           totalClaimableRewards[idx].claimableRewards
         );
-      } else if (protocolHash == keccak256(bytes("radiant"))) {
+      } else if (protocolHash == keccak256(bytes("radiant-arbitrum"))) {
         RadiantArbitrumVault(radiantVaultAddr).claim(
           receiver,
           totalClaimableRewards[idx].claimableRewards,
@@ -200,6 +202,8 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
           totalClaimableRewards[idx].claimableRewards,
           equilibriaPids
         );
+      } else {
+        revert("Protocol not supported");
       }
     }
   }
@@ -224,7 +228,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       )
     });
     totalClaimableRewards[1] = ClaimableRewardOfAProtocol({
-      protocol: "radiant",
+      protocol: "radiant-arbitrum",
       claimableRewards: RadiantArbitrumVault(radiantVaultAddr).claimableRewards(
         receiver,
         userShares,

@@ -13,6 +13,7 @@ const { fetch1InchSwapData, mineBlocks, myImpersonatedWalletAddress,
   glpMarketPoolAddress,
   getPendleZapInData,
   getPendleZapOutData,
+  fakePendleZapOut,
   dpxAmount } = require("./utils");
 
 let wallet;
@@ -49,7 +50,7 @@ describe("All Weather Protocol", function () {
     await portfolioContract.setVaultAllocations([{protocol: "dpx", percentage: 100}], { gasLimit: 1057560 }).then((tx) => tx.wait());
 
     await (await weth.connect(wallet).approve(portfolioContract.address, dpxAmount, { gasLimit: gasLimit })).wait();
-    await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.02"), { gasLimit: 1057560 });
+    await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.03"), { gasLimit: 1057560 });
   });
   describe("Portfolio LP Contract Test", function () {
     it("Should be able to deposit SLP to portfolio contract", async function () {
@@ -57,7 +58,7 @@ describe("All Weather Protocol", function () {
         dpxTokenAddress,
         dpxAmount.div(2),
         dpxVault.address);
-      const pendleZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, dpxAmount, 0.99);      
+      const pendleZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, dpxAmount, 0.99);
       const receipt = await (await portfolioContract.connect(wallet).deposit(dpxAmount, oneInchSwapData, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], { gasLimit: 1692137 })).wait();
 
       // Iterate over the events and find the Deposit event
@@ -119,21 +120,6 @@ describe("All Weather Protocol", function () {
 
           // check dpxSLP balance
           const portfolioShares = await portfolioContract.balanceOf(wallet.address);
-          const fakePendleZapOut = {
-            // Token/Sy data
-            tokenOut: wallet.address, // address
-            minTokenOut: 0, // uint256
-            tokenRedeemSy: wallet.address, // address
-            bulk: wallet.address, // address
-            // aggregator data
-            pendleSwap: wallet.address, // address
-            swapData: {
-              swapType: 0, // SwapType enum
-              extRouter: wallet.address, // address
-              extCalldata: '0x', // bytes
-              needScale: false
-            }
-          }
           await (await portfolioContract.connect(wallet).redeemAll(portfolioShares, wallet.address, fakePendleZapOut, { gasLimit: gasLimit })).wait();
           expect((await miniChefV2.userInfo(sushiPid, dpxVault.address))[0]).to.equal(0);
           expect(await dpxSLP.balanceOf(dpxVault.address)).to.equal(0);
