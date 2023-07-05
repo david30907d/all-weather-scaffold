@@ -28,7 +28,6 @@ abstract contract AbstractVault is ERC4626 {
   }
 
   function claimableRewards(
-    address portfolioAddress,
     uint256 userShares,
     uint256 totalShares
   )

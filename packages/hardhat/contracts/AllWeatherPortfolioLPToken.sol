@@ -18,13 +18,15 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
 import "./radiant/IFeeDistribution.sol";
-import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./pendle/IPendleRouter.sol";
 import "./vaults/EquilibriaGlpVault.sol";
 
 contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   using SafeERC20 for IERC20;
+  using SafeMath for uint256;
+
   struct PortfolioAllocationOfSingleCategory {
     string protocol;
     uint256 percentage;
@@ -172,10 +174,14 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   }
 
   function claim(
-    address receiver,
-    address[] memory rRewardTokens,
+    address payable receiver,
     uint256[] memory equilibriaPids
   ) public {
+    uint256 userShares = balanceOf(msg.sender);
+    uint256 portfolioShares = totalSupply();
+    if (userShares == 0 || portfolioShares == 0) {
+      return;
+    }
     ClaimableRewardOfAProtocol[]
       memory totalClaimableRewards = claimableRewards(msg.sender);
     for (uint idx = 0; idx < totalClaimableRewards.length; idx++) {
@@ -191,11 +197,8 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
           totalClaimableRewards[idx].claimableRewards
         );
       } else if (protocolHash == keccak256(bytes("radiant-arbitrum"))) {
-        RadiantArbitrumVault(radiantVaultAddr).claim(
-          receiver,
-          totalClaimableRewards[idx].claimableRewards,
-          rRewardTokens
-        );
+        RadiantArbitrumVault(radiantVaultAddr).claim();
+        _distributeUserRewardProRata(receiver, userShares, portfolioShares);
       } else if (protocolHash == keccak256(bytes("equilibria-glp"))) {
         EquilibriaGlpVault(equilibriaVaultAddr).claim(
           receiver,
@@ -222,15 +225,14 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     totalClaimableRewards[0] = ClaimableRewardOfAProtocol({
       protocol: "dpx",
       claimableRewards: DpxArbitrumVault(dpxVaultAddr).claimableRewards(
-        receiver,
         userShares,
         portfolioShares
       )
     });
     totalClaimableRewards[1] = ClaimableRewardOfAProtocol({
       protocol: "radiant-arbitrum",
-      claimableRewards: RadiantArbitrumVault(radiantVaultAddr).claimableRewards(
-        receiver,
+      claimableRewards: _multiplyProRataRatioToClaimableRewards(
+        RadiantArbitrumVault(radiantVaultAddr).claimableRewards(),
         userShares,
         portfolioShares
       )
@@ -238,8 +240,86 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     totalClaimableRewards[2] = ClaimableRewardOfAProtocol({
       protocol: "equilibria-glp",
       claimableRewards: EquilibriaGlpVault(equilibriaVaultAddr)
-        .claimableRewards(receiver, userShares, portfolioShares)
+        .claimableRewards(userShares, portfolioShares)
     });
     return totalClaimableRewards;
   }
+
+  function _multiplyProRataRatioToClaimableRewards(
+    IFeeDistribution.RewardData[] memory claimableRewards,
+    uint256 userShares,
+    uint256 portfolioShares
+  ) internal pure returns (IFeeDistribution.RewardData[] memory) {
+    for (uint i = 0; i < claimableRewards.length; i++) {
+      claimableRewards[i].amount = Math.mulDiv(
+        claimableRewards[i].amount,
+        userShares,
+        portfolioShares
+      );
+    }
+    return claimableRewards;
+  }
+
+  function _distributeUserRewardProRata(
+    address payable receiver,
+    uint256 userShares,
+    uint256 portfolioShares
+  ) internal {
+    // rToken
+    _distributeRtokenRewardProRata(receiver, userShares, portfolioShares);
+    // weth
+    _distributeEthRewardProRata(receiver, userShares, portfolioShares);
+  }
+
+  function _distributeRtokenRewardProRata(
+    address payable receiver,
+    uint256 userShares,
+    uint256 portfolioShares
+  ) internal {
+    address[] memory radiantRewardNativeTokenAddresses = RadiantArbitrumVault(
+      radiantVaultAddr
+    ).getRadiantRewardNativeTokenAddresses();
+    // rToken
+    for (uint i = 0; i < radiantRewardNativeTokenAddresses.length; i++) {
+      uint256 userReward = _checkUserRewardPerTokenPaid(
+        IERC20(radiantRewardNativeTokenAddresses[i]).balanceOf(address(this)),
+        userShares,
+        portfolioShares
+      );
+      SafeERC20.safeTransfer(
+        IERC20(radiantRewardNativeTokenAddresses[i]),
+        receiver,
+        userReward
+      );
+    }
+  }
+
+  function _distributeEthRewardProRata(
+    address payable receiver,
+    uint256 userShares,
+    uint256 portfolioShares
+  ) internal {
+    uint256 amountOfEthToTransfer = _checkUserRewardPerTokenPaid(
+      address(this).balance,
+      userShares,
+      portfolioShares
+    );
+    require(
+      address(this).balance >= amountOfEthToTransfer,
+      "Insufficient eth balance in contract"
+    );
+    receiver.transfer(amountOfEthToTransfer);
+  }
+
+  function _checkUserRewardPerTokenPaid(
+    uint256 tokenOfPortfolio,
+    uint256 userShares,
+    uint256 portfolioShares
+  ) internal view returns (uint256) {
+    // TODO: current implementation is not accurate
+    // need to implement the user reward per token paid like what convex and equilibria do
+    return Math.mulDiv(tokenOfPortfolio, userShares, portfolioShares);
+  }
+
+  receive() external payable {}
 }

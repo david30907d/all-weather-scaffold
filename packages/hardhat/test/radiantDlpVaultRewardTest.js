@@ -8,7 +8,8 @@ const { fetch1InchSwapData, getUserEthBalance, sushiSwapDpxLpTokenAddress, sushi
   radiantAmount,
   dpxTokenAddress,
   glpMarketPoolAddress,
-  getPendleZapInData
+  getPendleZapInData,
+  mineBlocks
 } = require("./utils");
 
 let wallet;
@@ -27,7 +28,7 @@ describe("All Weather Protocol", function () {
     radiantLockZap = await ethers.getContractAt("ILendingPool", radiantLockZapAddress);
     multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
     pendleGlpMarketLPT = await ethers.getContractAt("IERC20", glpMarketPoolAddress);
-    await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.04"), { gasLimit: 1057560 });
+    await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.05"), { gasLimit: 1057560 });
     
     const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
     radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLockZapAddress);
@@ -56,13 +57,13 @@ describe("All Weather Protocol", function () {
       const oneInchSwapDataForDpxVault = await fetch1InchSwapData(weth.address, dpxTokenAddress, radiantAmount.div(2), wallet.address);
       const pendleZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, radiantAmount, 0.99);
       await (await portfolioContract.connect(wallet).deposit(radiantAmount, oneInchSwapDataForDpxVault, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], { gasLimit: 3057560 })).wait();
+      await mineBlocks(100); // Mine 100 blocks
 
       currentTimestamp += 12 * 31 * 24 * 60 * 60; // Increment timestamp
       await simulateAYearLater();
 
       const randomWallet = ethers.Wallet.createRandom();
-      const rRewardTokens = ["0x912ce59144191c1204e64559fe8253a0e49e6548", "0x5979d7b546e38e414f7e9822514be443a4800529", "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1", "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8", "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9", "0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f"];
-      const nativeRewardTokens = ["0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f", "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9", "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8", "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1", "0x5979D7b546E38E414F7E9822514be443A4800529", "0x912CE59144191C1204E64559FE8253a0e49E6548"];
+      const nativeRewardTokens = await radiantVault.getRadiantRewardNativeTokenAddresses();
       let balancesBeforeClaim = [];
       for (const nativeRewardToken of nativeRewardTokens) {
         const nativeToken = await ethers.getContractAt("MockDAI", nativeRewardToken);
@@ -74,9 +75,11 @@ describe("All Weather Protocol", function () {
       expect(ethBalanceBeforeClaim).to.equal(0);
 
       const claimableRewards = await portfolioContract.connect(wallet).claimableRewards(wallet.address);
+
       expect(claimableRewards[1].protocol).to.equal("radiant-arbitrum");
       // Error: VM Exception while processing transaction: reverted with reason string 'SafeERC20: low-level call failed'
-      await (await portfolioContract.connect(wallet).claim(randomWallet.address, rRewardTokens, [], { gasLimit: 20575600 })).wait();
+      // means you probably transfer a pretty weird token
+      await (await portfolioContract.connect(wallet).claim(randomWallet.address, [], { gasLimit: 30000000 })).wait();
       for (const nativeRewardToken of nativeRewardTokens) {
         const nativeToken = await ethers.getContractAt("MockDAI", nativeRewardToken);
         const balanceAfterClaim = await nativeToken.balanceOf(randomWallet.address);

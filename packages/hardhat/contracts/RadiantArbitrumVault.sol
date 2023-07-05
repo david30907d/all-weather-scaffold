@@ -27,6 +27,14 @@ contract RadiantArbitrumVault is AbstractVault {
     IMultiFeeDistribution(0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE);
   IWETHGateway public immutable wethGateway =
     IWETHGateway(0xBb5cA40b2F7aF3B1ff5dbce0E9cC78F8BFa817CE);
+  address[] public radiantRewardNativeTokenAddresses = [
+    0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f, // wbtc
+    0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9, // usdt
+    0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8, // usdc.e
+    0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1, // dai
+    0x5979D7b546E38E414F7E9822514be443A4800529, // wsteth
+    0x912CE59144191C1204E64559FE8253a0e49E6548 //  arb
+  ];
 
   constructor(
     IERC20Metadata asset_,
@@ -54,6 +62,14 @@ contract RadiantArbitrumVault is AbstractVault {
 
   function totalUnstakedAssets() public view override returns (uint256) {
     return IERC20(asset()).balanceOf(address(this));
+  }
+
+  function getRadiantRewardNativeTokenAddresses()
+    external
+    view
+    returns (address[] memory)
+  {
+    return radiantRewardNativeTokenAddresses;
   }
 
   function deposit(
@@ -86,34 +102,18 @@ contract RadiantArbitrumVault is AbstractVault {
     return vaultShare;
   }
 
-  function claim(
-    address receiver,
-    IFeeDistribution.RewardData[] memory claimableRewards,
-    address[] memory rRewardTokens
-  ) public {
+  function claim() public {
     multiFeeDistribution.getAllRewards();
-    _claimERC20Rewards(receiver, rRewardTokens);
-    _claimETHReward(receiver);
+    _withdrawRTokenToReceiver();
+    _withdrawETHRewardToReceiver();
   }
 
-  function claim(
-    address receiver,
-    IFeeDistribution.RewardData[] memory claimableRewards
-  ) public pure override {
-    revert("Not implemented");
-  }
-
-  function claimableRewards(
-    address portfolioAddress,
-    uint256 userShares,
-    uint256 portfolioShares
-  )
+  function claimableRewards()
     public
     view
-    override
     returns (IFeeDistribution.RewardData[] memory rewards)
   {
-    // pro rata: user's share divided by total shares, is the ratio of the reward
+    // pro rata: portfolio's share / total shares in this vault
     uint256 portfolioSharesInThisVault = balanceOf(msg.sender);
     uint256 totalVaultShares = totalSupply();
     if (portfolioSharesInThisVault == 0 || totalVaultShares == 0) {
@@ -123,56 +123,63 @@ contract RadiantArbitrumVault is AbstractVault {
       memory radiantRewardData = multiFeeDistribution.claimableRewards(
         address(this)
       );
-    return _calculateClaimableRewards(portfolioAddress, radiantRewardData);
+    return
+      _calculateClaimableRewards(
+        radiantRewardData,
+        portfolioSharesInThisVault,
+        totalVaultShares
+      );
   }
 
-  function _claimERC20Rewards(
-    address receiver,
-    address[] memory rRewardTokens
-  ) internal {
-    for (uint256 i = 0; i < rRewardTokens.length; i++) {
+  function _withdrawRTokenToReceiver() internal {
+    for (uint256 i = 0; i < radiantRewardNativeTokenAddresses.length; i++) {
       radiantLending.withdraw(
-        rRewardTokens[i],
-        _calculateClaimableERC20RewardForUser(receiver, rRewardTokens[i]),
-        receiver
+        radiantRewardNativeTokenAddresses[i],
+        type(uint256).max,
+        msg.sender
       );
     }
   }
 
-  function _claimETHReward(address receiver) internal {
+  function _withdrawETHRewardToReceiver() internal {
     IAToken aWETH = IAToken(
       radiantLending.getReserveData(address(weth)).aTokenAddress
     );
     SafeERC20.safeApprove(aWETH, address(wethGateway), type(uint256).max);
-    uint256 userBalance = aWETH.balanceOf(address(this));
     wethGateway.withdrawETH(
       address(radiantLending),
-      _calculateClaimableETHForUser(receiver, userBalance),
-      receiver
+      type(uint256).max,
+      msg.sender
     );
   }
 
-  function _calculateClaimableERC20RewardForUser(
-    address receiver,
-    address rRewardTokens
-  ) internal returns (uint256) {
-    // TODO(david): need to calculate the reward for user
-    return type(uint256).max;
-  }
-
-  function _calculateClaimableETHForUser(
-    address receiver,
-    uint256 userBalance
-  ) internal returns (uint256) {
-    // TODO(david): need to calculate the reward for user by using userBalance
-    return type(uint256).max;
-  }
-
   function _calculateClaimableRewards(
-    address portfolioAddress,
-    IFeeDistribution.RewardData[] memory radiantRewardData
+    IFeeDistribution.RewardData[] memory radiantRewardData,
+    uint256 portfolioSharesInThisVault,
+    uint256 totalVaultShares
   ) internal view returns (IFeeDistribution.RewardData[] memory rewards) {
-    // TODO(david): should use portfolioAddress to calculate the reward, per the shares of this portfolio in this radiant vault
+    for (uint256 i = 0; i < radiantRewardData.length; i++) {
+      if (radiantRewardData[i].amount == 0) {
+        continue;
+      }
+      radiantRewardData[i].amount = Math.mulDiv(
+        radiantRewardData[i].amount,
+        portfolioSharesInThisVault,
+        totalVaultShares
+      );
+    }
     return radiantRewardData;
+  }
+
+  function claimableRewards(
+    uint256 userShares,
+    uint256 totalShares
+  )
+    public
+    view
+    override
+    returns (IFeeDistribution.RewardData[] memory claimableRewards)
+  {
+    revert("not implemented");
   }
 }
