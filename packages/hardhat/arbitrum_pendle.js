@@ -59,7 +59,8 @@ async function exampleOnArbitrum() {
   const zapOutTx = await router.removeLiquiditySingleToken(
     PT_GLP_POOL_ADDRESS,
     BigInt(100000000) * 10n ** WETH_DECIMALS,
-    WETH_ADDRESS, // works
+    // WETH_ADDRESS, // works
+    toAddress("0x5402B5F40310bDED796c7D0F3FF6683f5C0cFfdf"), // sGLP
     // GLP_SY_ADDRESS, // doesn't work
     // SGLP_ADDRESS, // doesn't work
     0.4,
