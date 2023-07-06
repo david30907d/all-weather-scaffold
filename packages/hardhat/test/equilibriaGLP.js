@@ -117,7 +117,7 @@ describe("All Weather Protocol", function () {
       await mineBlocks(100); // Mine 100 blocks
       const originalPendleToken = await pendleToken.balanceOf(wallet.address);
       const originalWethBalance = await weth.balanceOf(wallet.address);
-      const claimableRewards = await portfolioContract.claimableRewards(wallet.address);
+      const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
       for (const claimableReward of claimableRewards) {
         if (claimableReward.protocol !== "equilibria-glp") {
           expect(claimableReward.claimableRewards).to.deep.equal([]);
@@ -131,17 +131,17 @@ describe("All Weather Protocol", function () {
       expect(wethClaimableReward).to.be.gt(0);
 
       const equilibriaPids = [1];
-      await portfolioContract.connect(wallet).claim(wallet.address, [], equilibriaPids);
+      await portfolioContract.connect(wallet).claim(wallet.address, equilibriaPids);
       // NOTE: using `to.be.gt` instead of `to.equal` because the reward would somehow be increased after claim(). My hunch is that `claim()` would also claim the reward for the current block.
       expect((await pendleToken.balanceOf(wallet.address)).sub(originalPendleToken)).to.be.gt(pendleClaimableReward);
       expect((await weth.balanceOf(wallet.address)).sub(originalWethBalance)).to.be.gt(wethClaimableReward);
-      const remainingClaimableRewards = await portfolioContract.connect(wallet).claimableRewards(wallet.address);
+      const remainingClaimableRewards = await portfolioContract.connect(wallet).getClaimableRewards(wallet.address);
       // index 2 stands for equilibria-glp
       expect(remainingClaimableRewards[2].claimableRewards[0].amount).to.equal(0);
       expect(remainingClaimableRewards[2].claimableRewards[1].amount).to.equal(0);
     })
     it("Should be able to check claimable rewards", async function () {
-      const claimableRewards = await portfolioContract.claimableRewards(wallet.address);
+      const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
       expect(claimableRewards).to.deep.equal([]);
     })
   });

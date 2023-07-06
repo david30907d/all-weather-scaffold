@@ -105,12 +105,11 @@ contract RadiantArbitrumVault is AbstractVault {
   function claim() public {
     IFeeDistribution.RewardData[]
       memory claimableRewards = getClaimableRewards();
-    if (claimableRewards.length == 0) {
-      return;
+    if (claimableRewards.length != 0) {
+      multiFeeDistribution.getAllRewards();
+      _withdrawRTokenToReceiver();
+      _withdrawETHRewardToReceiver();
     }
-    multiFeeDistribution.getAllRewards();
-    _withdrawRTokenToReceiver();
-    _withdrawETHRewardToReceiver();
   }
 
   function getClaimableRewards()

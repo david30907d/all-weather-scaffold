@@ -122,26 +122,18 @@ contract EquilibriaGlpVault is AbstractVault {
   }
 
   function claim(
-    address receiver,
-    IFeeDistribution.RewardData[] memory claimableRewards,
     uint256[] memory pids
-  ) public {
-    eqbZap.claimRewards(pids);
-    super.claim(receiver, claimableRewards);
+  ) public returns (IFeeDistribution.RewardData[] memory) {
+    IFeeDistribution.RewardData[]
+      memory claimableRewards = getClaimableRewards();
+    if (claimableRewards.length != 0) {
+      eqbZap.claimRewards(pids);
+      super.claim(claimableRewards);
+    }
+    return claimableRewards;
   }
 
-  function claim(
-    address receiver,
-    IFeeDistribution.RewardData[] memory claimableRewards
-  ) public pure override {
-    revert("Not implemented");
-  }
-
-  function claimableRewards(
-    address receiver,
-    uint256 userShares,
-    uint256 portfolioShares
-  )
+  function getClaimableRewards()
     public
     view
     override
@@ -153,11 +145,6 @@ contract EquilibriaGlpVault is AbstractVault {
     if (portfolioSharesInThisVault == 0 || totalVaultShares == 0) {
       return new IFeeDistribution.RewardData[](0);
     }
-    uint256 ratioWithoutDivideByPortfolioShares = Math.mulDiv(
-      userShares,
-      portfolioSharesInThisVault,
-      totalVaultShares
-    );
     rewards = new IFeeDistribution.RewardData[](2);
     (, , address rewardpool, ) = pendleBooster.poolInfo(pid);
     address[] memory rewardTokens = IBaseRewardPool(rewardpool)
@@ -167,8 +154,8 @@ contract EquilibriaGlpVault is AbstractVault {
         token: rewardTokens[i],
         amount: Math.mulDiv(
           IBaseRewardPool(rewardpool).earned(address(this), rewardTokens[i]),
-          ratioWithoutDivideByPortfolioShares,
-          portfolioShares
+          portfolioSharesInThisVault,
+          totalVaultShares
         )
       });
     }
