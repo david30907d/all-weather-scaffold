@@ -84,18 +84,18 @@ describe("All Weather Protocol", function () {
       await mineBlocks(100); // Mine 1 blocks
       const originalSushiBalance = await sushiToken.balanceOf(wallet.address);
       const originalDpxBalance = await dpxToken.balanceOf(wallet.address);
-      const claimableRewards = await portfolioContract.connect(wallet).claimableRewards(wallet.address);
+      const claimableRewards = await portfolioContract.connect(wallet).getClaimableRewards(wallet.address);
       expect(claimableRewards[0].protocol).to.equal("dpx");
       const sushiClaimableReward = claimableRewards[0].claimableRewards[0].amount;
       const dpxClaimableReward = claimableRewards[0].claimableRewards[1].amount;
       expect(sushiClaimableReward).to.be.gt(0);
       expect(dpxClaimableReward).to.be.gt(0);
 
-      await portfolioContract.connect(wallet).claim(wallet.address, rRewardTokens, []);
+      await portfolioContract.connect(wallet).claim(wallet.address, []);
       // NOTE: using `to.be.gt` instead of `to.equal` because the reward would somehow be increased after claim(). My hunch is that sushiswap would trigger some reward distribution after the claim() tx is mined.
       expect((await sushiToken.balanceOf(wallet.address)).sub(originalSushiBalance)).to.be.gt(sushiClaimableReward);
       expect((await dpxToken.balanceOf(wallet.address)).sub(originalDpxBalance)).to.be.gt(dpxClaimableReward);
-      const remainingClaimableRewards = await portfolioContract.connect(wallet).claimableRewards(wallet.address);
+      const remainingClaimableRewards = await portfolioContract.connect(wallet).getClaimableRewards(wallet.address);
       expect(remainingClaimableRewards[0].claimableRewards[0].amount).to.equal(0);
       expect(remainingClaimableRewards[0].claimableRewards[1].amount).to.equal(0);
     })
@@ -128,7 +128,7 @@ describe("All Weather Protocol", function () {
         }
       }
       // rewards should be claimed
-      const remainingClaimableRewards = await portfolioContract.claimableRewards(wallet.address);
+      const remainingClaimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
       expect(remainingClaimableRewards).to.deep.equal([]);
     })
   });

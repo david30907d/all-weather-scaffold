@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// This is a Smart Contract written in Solidity. It represents a vault that allows users to deposit WETH and receive DPXV in return. The contract uses the functionalities of other smart contracts such as oneInch aggregator, SushiSwap, and MiniChefV2 to perform swaps and farming of SUSHI and DPX tokens. The contract has several functions including deposit(), redeemAll(), claim(), totalAssets(), totalLockedAssets(), totalStakedButWithoutLockedAssets(), and claimableRewards().
+// This is a Smart Contract written in Solidity. It represents a vault that allows users to deposit WETH and receive DPXV in return. The contract uses the functionalities of other smart contracts such as oneInch aggregator, SushiSwap, and MiniChefV2 to perform swaps and farming of SUSHI and DPX tokens. The contract has several functions including deposit(), redeemAll(), claim(), totalAssets(), totalLockedAssets(), totalStakedButWithoutLockedAssets(), and getClaimableRewards().
 
 pragma solidity ^0.8.4;
 
@@ -84,12 +84,15 @@ contract DpxArbitrumVault is AbstractVault {
     return shares;
   }
 
-  function claim(
-    address receiver,
-    IFeeDistribution.RewardData[] memory claimableRewards
-  ) public override {
+  function claim() public returns (IFeeDistribution.RewardData[] memory) {
+    IFeeDistribution.RewardData[]
+      memory claimableRewards = getClaimableRewards();
+    if (claimableRewards.length == 0) {
+      return claimableRewards;
+    }
     sushiSwapMiniChef.harvest(pid, address(this));
-    super.claim(receiver, claimableRewards);
+    super.claim(claimableRewards);
+    return claimableRewards;
   }
 
   function totalLockedAssets() public view override returns (uint256) {
@@ -112,11 +115,7 @@ contract DpxArbitrumVault is AbstractVault {
     return IERC20(asset()).balanceOf(address(this));
   }
 
-  function claimableRewards(
-    address receiver,
-    uint256 userShares,
-    uint256 portfolioShares
-  )
+  function getClaimableRewards()
     public
     view
     override
@@ -128,26 +127,21 @@ contract DpxArbitrumVault is AbstractVault {
     if (portfolioSharesInThisVault == 0 || totalVaultShares == 0) {
       return new IFeeDistribution.RewardData[](0);
     }
-    uint256 ratioWithoutDivideByPortfolioShares = Math.mulDiv(
-      userShares,
-      portfolioSharesInThisVault,
-      totalVaultShares
-    );
     rewards = new IFeeDistribution.RewardData[](2);
     rewards[0] = IFeeDistribution.RewardData({
       token: address(sushiToken),
       amount: Math.mulDiv(
         sushiSwapMiniChef.pendingSushi(pid, address(this)),
-        ratioWithoutDivideByPortfolioShares,
-        portfolioShares
+        portfolioSharesInThisVault,
+        totalVaultShares
       )
     });
     rewards[1] = IFeeDistribution.RewardData({
       token: address(dpxToken),
       amount: Math.mulDiv(
         dpxRewarder.pendingToken(pid, address(this)),
-        ratioWithoutDivideByPortfolioShares,
-        portfolioShares
+        portfolioSharesInThisVault,
+        totalVaultShares
       )
     });
     return rewards;

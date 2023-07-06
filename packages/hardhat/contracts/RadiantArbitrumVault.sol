@@ -103,14 +103,20 @@ contract RadiantArbitrumVault is AbstractVault {
   }
 
   function claim() public {
+    IFeeDistribution.RewardData[]
+      memory claimableRewards = getClaimableRewards();
+    if (claimableRewards.length == 0) {
+      return;
+    }
     multiFeeDistribution.getAllRewards();
     _withdrawRTokenToReceiver();
     _withdrawETHRewardToReceiver();
   }
 
-  function claimableRewards()
+  function getClaimableRewards()
     public
     view
+    override
     returns (IFeeDistribution.RewardData[] memory rewards)
   {
     // pro rata: portfolio's share / total shares in this vault
@@ -132,6 +138,8 @@ contract RadiantArbitrumVault is AbstractVault {
   }
 
   function _withdrawRTokenToReceiver() internal {
+    // Error: VM Exception while processing transaction: reverted with reason string '1'
+    // means there's no rToken for you to withdraw
     for (uint256 i = 0; i < radiantRewardNativeTokenAddresses.length; i++) {
       radiantLending.withdraw(
         radiantRewardNativeTokenAddresses[i],
@@ -169,17 +177,5 @@ contract RadiantArbitrumVault is AbstractVault {
       );
     }
     return radiantRewardData;
-  }
-
-  function claimableRewards(
-    uint256 userShares,
-    uint256 totalShares
-  )
-    public
-    view
-    override
-    returns (IFeeDistribution.RewardData[] memory claimableRewards)
-  {
-    revert("not implemented");
   }
 }

@@ -182,36 +182,30 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     if (userShares == 0 || portfolioShares == 0) {
       return;
     }
-    ClaimableRewardOfAProtocol[]
-      memory totalClaimableRewards = claimableRewards(msg.sender);
-    for (uint idx = 0; idx < totalClaimableRewards.length; idx++) {
-      if (totalClaimableRewards[idx].claimableRewards.length == 0) {
-        continue;
-      }
-      bytes32 protocolHash = keccak256(
-        bytes(totalClaimableRewards[idx].protocol)
-      );
-      if (protocolHash == keccak256(bytes("dpx"))) {
-        DpxArbitrumVault(dpxVaultAddr).claim(
-          receiver,
-          totalClaimableRewards[idx].claimableRewards
-        );
-      } else if (protocolHash == keccak256(bytes("radiant-arbitrum"))) {
-        RadiantArbitrumVault(radiantVaultAddr).claim();
-        _distributeUserRewardProRata(receiver, userShares, portfolioShares);
-      } else if (protocolHash == keccak256(bytes("equilibria-glp"))) {
-        EquilibriaGlpVault(equilibriaVaultAddr).claim(
-          receiver,
-          totalClaimableRewards[idx].claimableRewards,
-          equilibriaPids
-        );
-      } else {
-        revert("Protocol not supported");
-      }
-    }
+    // dpx
+    IFeeDistribution.RewardData[] memory dpxRewards = DpxArbitrumVault(
+      dpxVaultAddr
+    ).claim();
+    _distributeDpxUserRewardProRata(
+      receiver,
+      userShares,
+      portfolioShares,
+      dpxRewards
+    );
+
+    // radiant-arbitrum
+    RadiantArbitrumVault(radiantVaultAddr).claim();
+    _distributeRadiantUserRewardProRata(receiver, userShares, portfolioShares);
+
+    // // equilibria-glp
+    // EquilibriaGlpVault(equilibriaVaultAddr).claim(
+    //   receiver,
+    //   totalClaimableRewards[idx].claimableRewards,
+    //   equilibriaPids
+    // );
   }
 
-  function claimableRewards(
+  function getClaimableRewards(
     address receiver
   ) public view returns (ClaimableRewardOfAProtocol[] memory) {
     uint256 userShares = balanceOf(receiver);
@@ -224,15 +218,12 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       memory totalClaimableRewards = new ClaimableRewardOfAProtocol[](3);
     totalClaimableRewards[0] = ClaimableRewardOfAProtocol({
       protocol: "dpx",
-      claimableRewards: DpxArbitrumVault(dpxVaultAddr).claimableRewards(
-        userShares,
-        portfolioShares
-      )
+      claimableRewards: DpxArbitrumVault(dpxVaultAddr).getClaimableRewards()
     });
     totalClaimableRewards[1] = ClaimableRewardOfAProtocol({
       protocol: "radiant-arbitrum",
       claimableRewards: _multiplyProRataRatioToClaimableRewards(
-        RadiantArbitrumVault(radiantVaultAddr).claimableRewards(),
+        RadiantArbitrumVault(radiantVaultAddr).getClaimableRewards(),
         userShares,
         portfolioShares
       )
@@ -240,7 +231,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     totalClaimableRewards[2] = ClaimableRewardOfAProtocol({
       protocol: "equilibria-glp",
       claimableRewards: EquilibriaGlpVault(equilibriaVaultAddr)
-        .claimableRewards(userShares, portfolioShares)
+        .getClaimableRewards()
     });
     return totalClaimableRewards;
   }
@@ -260,7 +251,22 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     return claimableRewards;
   }
 
-  function _distributeUserRewardProRata(
+  function _distributeDpxUserRewardProRata(
+    address receiver,
+    uint256 userShares,
+    uint256 portfolioShares,
+    IFeeDistribution.RewardData[] memory dpxRewards
+  ) internal {
+    for (uint i = 0; i < dpxRewards.length; i++) {
+      SafeERC20.safeTransfer(
+        IERC20(dpxRewards[i].token),
+        receiver,
+        dpxRewards[i].amount
+      );
+    }
+  }
+
+  function _distributeRadiantUserRewardProRata(
     address payable receiver,
     uint256 userShares,
     uint256 portfolioShares

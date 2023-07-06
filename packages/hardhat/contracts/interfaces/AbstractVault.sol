@@ -27,10 +27,7 @@ abstract contract AbstractVault is ERC4626 {
       totalUnstakedAssets();
   }
 
-  function claimableRewards(
-    uint256 userShares,
-    uint256 totalShares
-  )
+  function getClaimableRewards()
     public
     view
     virtual
@@ -48,13 +45,12 @@ abstract contract AbstractVault is ERC4626 {
   ) public virtual returns (uint256);
 
   function claim(
-    address receiver,
     IFeeDistribution.RewardData[] memory claimableRewards
   ) public virtual {
     for (uint256 i = 0; i < claimableRewards.length; i++) {
       SafeERC20.safeTransfer(
         IERC20(claimableRewards[i].token),
-        receiver,
+        msg.sender,
         claimableRewards[i].amount
       );
     }

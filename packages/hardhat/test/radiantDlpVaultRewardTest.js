@@ -74,7 +74,7 @@ describe("All Weather Protocol", function () {
       const ethBalanceBeforeClaim = await getUserEthBalance(randomWallet.address);
       expect(ethBalanceBeforeClaim).to.equal(0);
 
-      const claimableRewards = await portfolioContract.connect(wallet).claimableRewards(wallet.address);
+      const claimableRewards = await portfolioContract.connect(wallet).getClaimableRewards(wallet.address);
 
       expect(claimableRewards[1].protocol).to.equal("radiant-arbitrum");
       // Error: VM Exception while processing transaction: reverted with reason string 'SafeERC20: low-level call failed'
@@ -89,7 +89,7 @@ describe("All Weather Protocol", function () {
       expect(ethBalanceAfterClaim).to.gt(ethBalanceBeforeClaim);
     });
     it("Should be able to check claimable rewards", async function () {
-      const claimableRewards = await portfolioContract.claimableRewards(wallet.address);
+      const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
       expect(claimableRewards).to.deep.equal([]);
     })
   });
