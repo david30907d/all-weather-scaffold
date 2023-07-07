@@ -7,6 +7,7 @@ import "./BaseEquilibriaVault.sol";
 contract EquilibriaGDAIVault is BaseEquilibriaVault {
   address public immutable oneInchAggregatorAddress =
     0x1111111254fb6c44bAC0beD2854e76F90643097d;
+  IERC20 public immutable DAI;
 
   constructor(
     IERC20Metadata asset_,
@@ -19,7 +20,7 @@ contract EquilibriaGDAIVault is BaseEquilibriaVault {
     pendleRouter = IPendleRouter(0x0000000001E4ef00d069e71d6bA041b0A16F7eA0);
 
     // // asset
-    // DAI = IERC20(0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1);
+    DAI = IERC20(0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1);
     // gDAI = IERC20(0xd85E038593d7A098614721EaE955EC2022B9B91B);
   }
 
@@ -38,7 +39,7 @@ contract EquilibriaGDAIVault is BaseEquilibriaVault {
       guessPtReceivedFromSy,
       input
     );
-    return _mintShares(shares, amount);
+    return _mintShares(shares, shares);
   }
 
   function _zapIn(
@@ -49,7 +50,7 @@ contract EquilibriaGDAIVault is BaseEquilibriaVault {
     IPendleRouter.TokenInput calldata input
   ) internal returns (uint256) {
     // swap weth to DAI with 1inch
-    uint256 originalDaiBalance = totalUnstakedAssets();
+    uint256 originalDaiBalance = DAI.balanceOf(address(this));
     SafeERC20.safeApprove(weth, oneInchAggregatorAddress, amount);
     (bool succ, bytes memory data) = address(oneInchAggregatorAddress).call(
       oneInchData
@@ -58,12 +59,13 @@ contract EquilibriaGDAIVault is BaseEquilibriaVault {
     // TODO(david): need to figure out how to decode
     // (uint256 returnAmount, uint256, uint256) = abi.decode(data, (uint256, uint256, uint256));
     uint256 swappedDaiAmount = SafeMath.sub(
-      totalUnstakedAssets(),
+      DAI.balanceOf(address(this)),
       originalDaiBalance
     );
+    // zap into pendle
     return
       super._zapIn(
-        IERC20(asset()),
+        DAI,
         swappedDaiAmount,
         minLpOut,
         guessPtReceivedFromSy,

@@ -19,7 +19,8 @@ const { fetch1InchSwapData,
   mineBlocks,
   pendleTokenAddress,
   gasLimit,
-  daiAddress
+  daiAddress,
+  gDAIRewardPoolAddress
 } = require("./utils");
 
 
@@ -41,7 +42,7 @@ describe("All Weather Protocol", function () {
     pendleToken = await ethers.getContractAt("IERC20", pendleTokenAddress);
     daiToken = await ethers.getContractAt("IERC20", daiAddress);
     // we can check our balance in equilibria with this reward pool
-    glpRewardPool = await ethers.getContractAt("IERC20", "0x245f1d70AcAaCD219564FCcB75f108917037A960");
+    dGDAIRewardPool = await ethers.getContractAt("IERC20", gDAIRewardPoolAddress);
     radiantLockZap = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
     multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
     await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.025"), { gasLimit: 2057560 });
@@ -55,7 +56,7 @@ describe("All Weather Protocol", function () {
     await dpxVault.deployed();
     
     const EquilibriaGDAIVault = await ethers.getContractFactory("EquilibriaGDAIVault");
-    equilibriaGDAIVault = await EquilibriaGDAIVault.deploy(daiToken.address, "AllWeatherLP-Equilibria-GDAI", "ALP-EQB-GDAI");
+    equilibriaGDAIVault = await EquilibriaGDAIVault.deploy(pendleGDAIMarketLPT.address, "AllWeatherLP-Equilibria-GDAI", "ALP-EQB-GDAI");
     await equilibriaGDAIVault.deployed();
     
     const AllWeatherPortfolioLPToken = await ethers.getContractFactory("AllWeatherPortfolioLPToken");
@@ -74,17 +75,18 @@ describe("All Weather Protocol", function () {
       const pendleZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, dpxAmount, 0.99, daiAddress);
       const receipt = await (await portfolioContract.deposit(dpxAmount, oneInchSwapDataForDpx, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI, { gasLimit: 10692137 })).wait();
       // Iterate over the events and find the Deposit event
-      // for (const event of receipt.events) {
-      //   if (event.topics.includes(equilibriaGDAIVault.interface.getEventTopic('Deposit'))) {
-      //     const decodedEvent = equilibriaGDAIVault.interface.decodeEventLog('Deposit', event.data, event.topics);
+      for (const event of receipt.events) {
+        if (event.topics.includes(equilibriaGDAIVault.interface.getEventTopic('Deposit'))) {
+          const decodedEvent = equilibriaGDAIVault.interface.decodeEventLog('Deposit', event.data, event.topics);
 
-      //     expect(await equilibriaGDAIVault.balanceOf(portfolioContract.address)).to.equal(decodedEvent.shares);
-      //     expect((await equilibriaGDAIVault.totalAssets())).to.equal(decodedEvent.shares);
-      //     expect(await portfolioContract.balanceOf(wallet.address)).to.equal(dpxAmount);
-      //     expect((await glpRewardPool.balanceOf(equilibriaGDAIVault.address))).to.equal(decodedEvent.shares);
-      //   }
-      // }
-
+          console.log("decodedEvent.shares", decodedEvent.shares.toString());
+          expect(await equilibriaGDAIVault.balanceOf(portfolioContract.address)).to.equal(decodedEvent.shares);
+          console.log("total assets()", await equilibriaGDAIVault.totalAssets());
+          expect((await equilibriaGDAIVault.totalAssets())).to.equal(decodedEvent.shares);
+          expect(await portfolioContract.balanceOf(wallet.address)).to.equal(dpxAmount);
+          expect((await dGDAIRewardPool.balanceOf(equilibriaGDAIVault.address))).to.equal(decodedEvent.shares);
+        }
+      }
     });
     // it("Should be able to withdraw GLP from equilibria", async function () {
     //   this.timeout(120000); // Set timeout to 120 seconds

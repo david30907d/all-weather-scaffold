@@ -113,6 +113,7 @@ const fsGLPAddress = "0x1aDDD80E6039594eE970E5872D247bf0414C8903";
 const pendleTokenAddress = "0x0c880f6761F1af8d9Aa9C466984b80DAb9a8c9e8";
 const glpMarketPoolAddress = "0x7D49E5Adc0EAAD9C027857767638613253eF125f";
 const gDAIMarketPoolAddress = "0xa0192f6567f8f5DC38C53323235FD08b318D2dcA";
+const gDAIRewardPoolAddress = "0x03b86b5b4f49FD2059c813B3f928c0b276C88E4E";
 const fakePendleZapOut = {
   // Token/Sy data
   tokenOut: "0x1aDDD80E6039594eE970E5872D247bf0414C8903", // address
@@ -161,5 +162,6 @@ module.exports = {
   getLiFiCrossChainContractCallCallData,
   pendleTokenAddress,
   fakePendleZapOut,
-  daiAddress
+  daiAddress,
+  gDAIRewardPoolAddress
 };
