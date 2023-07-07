@@ -61,7 +61,7 @@ contract DpxArbitrumVault is AbstractVault {
     uint256 amount,
     address receiver,
     bytes calldata oneInchData
-  ) public override returns (uint256) {
+  ) public returns (uint256) {
     uint256 maxAssets = maxDeposit(receiver);
     if (amount > maxAssets) {
       revert ERC4626ExceededMaxDeposit(receiver, amount, maxAssets);
@@ -149,7 +149,7 @@ contract DpxArbitrumVault is AbstractVault {
   function _zapIn(
     uint256 amount,
     bytes calldata oneInchData
-  ) internal returns (uint256) {
+  ) internal override returns (uint256) {
     SafeERC20.safeApprove(
       weth,
       oneInchAggregatorAddress,

@@ -76,7 +76,7 @@ contract RadiantArbitrumVault is AbstractVault {
     uint256 amount,
     address receiver,
     bytes calldata oneInchData
-  ) public override returns (uint256) {
+  ) public returns (uint256) {
     // the reason why I cannot just call `super.deposit` is that user don't have dLP at the time they deposit.
     // need to take advantage of the zap to get dLP, so need to modity `super.deposit()`
     require(amount <= maxDeposit(receiver), "ERC4626: deposit more than max");

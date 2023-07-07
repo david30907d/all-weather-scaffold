@@ -22,6 +22,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./pendle/IPendleRouter.sol";
 import "./vaults/EquilibriaGlpVault.sol";
+import "./vaults/Equilibria/EquilibriaGDAIVault.sol";
 
 contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   using SafeERC20 for IERC20;
@@ -40,6 +41,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   address public radiantVaultAddr;
   address payable public dpxVaultAddr;
   address public equilibriaVaultAddr;
+  address public equilibriaGDAIVaultAddr;
 
   PortfolioAllocationOfSingleCategory[] public portfolioAllocation;
 
@@ -47,11 +49,13 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     address asset_,
     address radiantVaultAddr_,
     address payable dpxVaultAddr_,
-    address equilibriaVaultAddr_
+    address equilibriaVaultAddr_,
+    address equilibriaGDAIVaultAddr_
   ) ERC20("AllWeatherVaultLP", "AWVLP") {
     radiantVaultAddr = radiantVaultAddr_;
     dpxVaultAddr = dpxVaultAddr_;
     equilibriaVaultAddr = equilibriaVaultAddr_;
+    equilibriaGDAIVaultAddr = equilibriaGDAIVaultAddr_;
     asset = ERC20(asset_);
   }
 
@@ -71,10 +75,11 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
 
   function deposit(
     uint256 amount,
-    bytes calldata oneInchData,
+    bytes calldata oneInchDataDpx,
     uint256 minLpOut,
     IPendleRouter.ApproxParams calldata guessPtReceivedFromSy,
-    IPendleRouter.TokenInput calldata input
+    IPendleRouter.TokenInput calldata input,
+    bytes calldata oneInchDataGDAI
   ) public {
     require(amount > 0, "Token amount must be greater than 0");
     // Transfer tokens from the user to the contract
@@ -99,7 +104,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
           DpxArbitrumVault(dpxVaultAddr).deposit(
             amount,
             address(this),
-            oneInchData
+            oneInchDataDpx
           ) > 0,
           "Buying Dpx LP token failed"
         );
@@ -109,7 +114,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
           RadiantArbitrumVault(radiantVaultAddr).deposit(
             amount,
             address(this),
-            oneInchData
+            oneInchDataDpx
           ) > 0,
           "Buying Radiant LP token failed"
         );
@@ -128,6 +133,22 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
           EquilibriaGlpVault(equilibriaVaultAddr).deposit(
             zapInAmountForThisVault,
             address(this),
+            minLpOut,
+            guessPtReceivedFromSy,
+            input
+          ) > 0,
+          "Zap Into Equilibria GLP failed"
+        );
+      } else if (protocolHash == keccak256(bytes("equilibria-gdai"))) {
+        SafeERC20.safeApprove(
+          IERC20(asset),
+          equilibriaGDAIVaultAddr,
+          zapInAmountForThisVault
+        );
+        require(
+          EquilibriaGDAIVault(equilibriaGDAIVaultAddr).deposit(
+            zapInAmountForThisVault,
+            oneInchDataGDAI,
             minLpOut,
             guessPtReceivedFromSy,
             input

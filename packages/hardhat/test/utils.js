@@ -11,8 +11,8 @@ async function mineBlocks(numBlocks) {
   }
 }
 
-async function fetch1InchSwapData(fromTokenAddress, toTOkenAddress, amount, fromAddress) {
-  const res = await fetch(`https://api.1inch.io/v5.0/42161/swap?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTOkenAddress}&amount=${amount.toString()}&fromAddress=${fromAddress}&slippage=10&disableEstimate=true`)
+async function fetch1InchSwapData(fromTokenAddress, toTOkenAddress, amount, fromAddress, slippage) {
+  const res = await fetch(`https://api.1inch.io/v5.0/42161/swap?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTOkenAddress}&amount=${amount.toString()}&fromAddress=${fromAddress}&slippage=${slippage}&disableEstimate=true`)
   const resJson = await res.json();
   return resJson.tx.data;
 }
@@ -22,7 +22,7 @@ async function getUserEthBalance(address) {
   return await provider.getBalance(address);
 }
 
-async function getPendleZapInData(chainId, poolAddress, amount, slippage){
+async function getPendleZapInData(chainId, poolAddress, amount, slippage, tokenInAddress="0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"){
   const provider = new ethers.providers.JsonRpcProvider(process.env.API_URL);
   const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
   const router = Router.getRouterWithKyberAggregator({
@@ -32,10 +32,10 @@ async function getPendleZapInData(chainId, poolAddress, amount, slippage){
   });
   
   const GLP_POOL_ADDRESS = toAddress(poolAddress);
-  const WETH_ADDRESS = toAddress("0x82aF49447D8a07e3bd95BD0d56f35241523fBab1");
+  const TOKEN_IN_ADDRESS = toAddress(tokenInAddress);
   return await router.addLiquiditySingleToken(
       GLP_POOL_ADDRESS,
-      WETH_ADDRESS,
+      TOKEN_IN_ADDRESS,
       amount,
       slippage,
       { method: 'extractParams' }
@@ -60,8 +60,8 @@ async function getPendleZapOutData(chainId, poolAddress, tokenOutAddress, amount
   return await router.removeLiquiditySingleToken(
     poolAddress,
     amount,
-    tokenOutAddress,
-    // "0x5402B5F40310bDED796c7D0F3FF6683f5C0cFfdf", // sGLP
+    // tokenOutAddress,
+    toAddress("0x5402B5F40310bDED796c7D0F3FF6683f5C0cFfdf"), // sGLP
     slippage,
     { method: 'extractParams' }
   );
@@ -112,6 +112,7 @@ const fsGLPAddress = "0x1aDDD80E6039594eE970E5872D247bf0414C8903";
 // Pendle
 const pendleTokenAddress = "0x0c880f6761F1af8d9Aa9C466984b80DAb9a8c9e8";
 const glpMarketPoolAddress = "0x7D49E5Adc0EAAD9C027857767638613253eF125f";
+const gDAIMarketPoolAddress = "0xa0192f6567f8f5DC38C53323235FD08b318D2dcA";
 const fakePendleZapOut = {
   // Token/Sy data
   tokenOut: "0x1aDDD80E6039594eE970E5872D247bf0414C8903", // address
@@ -127,6 +128,9 @@ const fakePendleZapOut = {
     needScale: false
   }
 }
+
+// equilibria gDAI
+const daiAddress = '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1';
 
 
 
@@ -153,7 +157,9 @@ module.exports = {
   getPendleZapInData,
   getPendleZapOutData,
   glpMarketPoolAddress,
+  gDAIMarketPoolAddress,
   getLiFiCrossChainContractCallCallData,
   pendleTokenAddress,
-  fakePendleZapOut
+  fakePendleZapOut,
+  daiAddress
 };
