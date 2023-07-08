@@ -48,10 +48,6 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     return IERC20(rewardpool).balanceOf(address(this));
   }
 
-  function totalUnstakedAssets() public view override returns (uint256) {
-    return IERC20(asset()).balanceOf(address(this));
-  }
-
   function _zapIn(
     IERC20 zapInToken,
     uint256 amount,

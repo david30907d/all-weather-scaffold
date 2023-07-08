@@ -13,8 +13,7 @@ async function mineBlocks(numBlocks) {
 
 async function fetch1InchSwapData(fromTokenAddress, toTOkenAddress, amount, fromAddress, slippage) {
   const res = await fetch(`https://api.1inch.io/v5.0/42161/swap?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTOkenAddress}&amount=${amount.toString()}&fromAddress=${fromAddress}&slippage=${slippage}&disableEstimate=true`)
-  const resJson = await res.json();
-  return resJson.tx.data;
+  return await res.json();
 }
 
 async function getUserEthBalance(address) {

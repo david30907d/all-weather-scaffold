@@ -24,6 +24,11 @@ contract EquilibriaGDAIVault is BaseEquilibriaVault {
     // gDAI = IERC20(0xd85E038593d7A098614721EaE955EC2022B9B91B);
   }
 
+  function totalUnstakedAssets() public view override returns (uint256) {
+    // dai or gdai, depends on wether pendle can zap out dai or not
+    return DAI.balanceOf(address(this));
+  }
+
   function deposit(
     uint256 amount,
     bytes calldata oneInchData,
@@ -63,14 +68,18 @@ contract EquilibriaGDAIVault is BaseEquilibriaVault {
       originalDaiBalance
     );
     // zap into pendle
-    return
-      super._zapIn(
-        DAI,
-        swappedDaiAmount,
-        minLpOut,
-        guessPtReceivedFromSy,
-        input
-      );
+    uint256 shares = super._zapIn(
+      DAI,
+      swappedDaiAmount,
+      minLpOut,
+      guessPtReceivedFromSy,
+      input
+    );
+    // return the remaining DAI back to user
+    // it's meant to have some dust left, since zapIn Data is pre-computed before 1inch swap
+    // so cannot be 100% accurate
+    SafeERC20.safeTransfer(DAI, msg.sender, DAI.balanceOf(address(this)));
+    return shares;
   }
 
   function redeemAll(
