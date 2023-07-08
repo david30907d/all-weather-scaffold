@@ -26,7 +26,7 @@ contract EquilibriaGDAIVault is BaseEquilibriaVault {
 
   function totalUnstakedAssets() public view override returns (uint256) {
     // dai or gdai, depends on wether pendle can zap out dai or not
-    return DAI.balanceOf(address(this));
+    return IERC20(asset()).balanceOf(address(this));
   }
 
   function deposit(
@@ -79,35 +79,6 @@ contract EquilibriaGDAIVault is BaseEquilibriaVault {
     // it's meant to have some dust left, since zapIn Data is pre-computed before 1inch swap
     // so cannot be 100% accurate
     SafeERC20.safeTransfer(DAI, msg.sender, DAI.balanceOf(address(this)));
-    return shares;
-  }
-
-  function redeemAll(
-    uint256 shares,
-    address receiver,
-    IPendleRouter.TokenOutput calldata output
-  ) public override returns (uint256) {
-    (, , address rewardPool, ) = pendleBooster.poolInfo(pid);
-    SafeERC20.safeApprove(
-      IBaseRewardPool(rewardPool).stakingToken(),
-      address(eqbZap),
-      shares
-    );
-    // this would only withdraw GLP-LPT, not fsGLP
-    eqbZap.withdraw(pid, shares);
-
-    // ideal solution: use eqbZap.zapOut
-    // eqbZap.zapOut(pid, 1, output, false);
-
-    // alternative: use pendleRouter.removeLiquiditySingleToken
-    // _approveTokenIfNeeded(0x7D49E5Adc0EAAD9C027857767638613253eF125f, address(pendleRouter), shares);
-    // pendleRouter.removeLiquiditySingleToken(
-    //     address(this),
-    //     0x7D49E5Adc0EAAD9C027857767638613253eF125f,
-    //     shares,
-    //     output
-    // );
-    uint256 shares = super.redeem(shares, receiver, msg.sender);
     return shares;
   }
 

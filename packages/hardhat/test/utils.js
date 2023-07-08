@@ -59,8 +59,7 @@ async function getPendleZapOutData(chainId, poolAddress, tokenOutAddress, amount
   return await router.removeLiquiditySingleToken(
     poolAddress,
     amount,
-    // tokenOutAddress,
-    toAddress("0x5402B5F40310bDED796c7D0F3FF6683f5C0cFfdf"), // sGLP
+    toAddress(tokenOutAddress),
     slippage,
     { method: 'extractParams' }
   );
@@ -131,6 +130,7 @@ const fakePendleZapOut = {
 
 // equilibria gDAI
 const daiAddress = '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1';
+const gDAIAddress = '0xd85E038593d7A098614721EaE955EC2022B9B91B';
 
 
 
@@ -162,5 +162,6 @@ module.exports = {
   pendleTokenAddress,
   fakePendleZapOut,
   daiAddress,
-  gDAIRewardPoolAddress
+  gDAIRewardPoolAddress,
+  gDAIAddress
 };

@@ -79,11 +79,15 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     // eqbZap.zapOut(pid, 1, output, false);
 
     // alternative: use pendleRouter.removeLiquiditySingleToken
-    // _approveTokenIfNeeded(0x7D49E5Adc0EAAD9C027857767638613253eF125f, address(pendleRouter), shares);
+    // SafeERC20.safeApprove(
+    //   IERC20(asset()),
+    //   address(pendleRouter),
+    //   shares
+    // );
     // pendleRouter.removeLiquiditySingleToken(
     //     address(this),
-    //     0x7D49E5Adc0EAAD9C027857767638613253eF125f,
-    //     shares,
+    //     asset(),
+    //     1,
     //     output
     // );
     uint256 shares = super.redeem(shares, receiver, msg.sender);
