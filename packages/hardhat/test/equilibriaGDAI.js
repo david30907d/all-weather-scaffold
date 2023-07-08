@@ -75,8 +75,8 @@ describe("All Weather Protocol", function () {
       const oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount.div(2), wallet.address, 50);
       const oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount, wallet.address, 50);
       // console.log("oneInchSwapDataForDpx", oneInchSwapDataForDpx);
-      const pendleZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount), 1, daiToken.address);
-      const receipt = await (await portfolioContract.deposit(dpxAmount, oneInchSwapDataForDpx.tx.data, 1, pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 10692137 })).wait();
+      const pendleZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount), 0.2, daiToken.address);
+      const receipt = await (await portfolioContract.deposit(dpxAmount, oneInchSwapDataForDpx.tx.data, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 10692137 })).wait();
       // Iterate over the events and find the Deposit event
       for (const event of receipt.events) {
         if (event.topics.includes(equilibriaGDAIVault.interface.getEventTopic('Deposit'))) {
@@ -95,8 +95,8 @@ describe("All Weather Protocol", function () {
       expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
       const oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount.div(2), wallet.address, 50);
       const oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount, wallet.address, 50);
-      const pendleZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount), 1, daiToken.address);
-      const receipt = await (await portfolioContract.deposit(dpxAmount, oneInchSwapDataForDpx.tx.data, 1, pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 10692137 })).wait();
+      const pendleZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount), 0.2, daiToken.address);
+      const receipt = await (await portfolioContract.deposit(dpxAmount, oneInchSwapDataForDpx.tx.data, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 10692137 })).wait();
       let shares;
       for (const event of receipt.events) {
         if (event.topics.includes(equilibriaGDAIVault.interface.getEventTopic('Deposit'))) {
@@ -117,8 +117,8 @@ describe("All Weather Protocol", function () {
       expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
       const oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount.div(2), wallet.address, 50);
       const oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount, wallet.address, 50);
-      const pendleZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount), 1, daiToken.address);
-      const receipt = await (await portfolioContract.deposit(dpxAmount, oneInchSwapDataForDpx.tx.data, 1, pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 10692137 })).wait();
+      const pendleZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount), 0.2, daiToken.address);
+      const receipt = await (await portfolioContract.deposit(dpxAmount, oneInchSwapDataForDpx.tx.data, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 10692137 })).wait();
       await mineBlocks(100); // Mine 100 blocks
     //   const originalPendleToken = await pendleToken.balanceOf(wallet.address);
     //   const originalWethBalance = await weth.balanceOf(wallet.address);
