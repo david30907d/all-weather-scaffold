@@ -88,6 +88,7 @@ contract EquilibriaGDAIVault is BaseEquilibriaVault {
     override
     returns (IFeeDistribution.RewardData[] memory rewards)
   {
+    console.log("Pid: ", pid);
     // pro rata: user's share divided by total shares, is the ratio of the reward
     uint256 portfolioSharesInThisVault = balanceOf(msg.sender);
     uint256 totalVaultShares = totalSupply();

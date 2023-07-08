@@ -131,6 +131,7 @@ contract EquilibriaGlpVault is AbstractVault {
     override
     returns (IFeeDistribution.RewardData[] memory rewards)
   {
+    console.log("getClaimableRewards of glp vault");
     // pro rata: user's share divided by total shares, is the ratio of the reward
     uint256 portfolioSharesInThisVault = balanceOf(msg.sender);
     uint256 totalVaultShares = totalSupply();
@@ -141,6 +142,7 @@ contract EquilibriaGlpVault is AbstractVault {
     (, , address rewardpool, ) = pendleBooster.poolInfo(pid);
     address[] memory rewardTokens = IBaseRewardPool(rewardpool)
       .getRewardTokens();
+    console.log("getClaimableRewards of glp vault");
     for (uint256 i = 0; i < rewardTokens.length; i++) {
       rewards[i] = IFeeDistribution.RewardData({
         token: rewardTokens[i],

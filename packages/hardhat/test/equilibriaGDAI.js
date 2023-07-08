@@ -21,7 +21,8 @@ const { fetch1InchSwapData,
   pendleTokenAddress,
   gasLimit,
   daiAddress,
-  gDAIRewardPoolAddress
+  gDAIRewardPoolAddress,
+  glpMarketPoolAddress,
 } = require("./utils");
 
 
@@ -39,6 +40,7 @@ describe("All Weather Protocol", function () {
     weth = await ethers.getContractAt('IWETH', wethAddress);
     dlpToken = await ethers.getContractAt("MockDAI", radiantDlpAddress);
     fsGLP = await ethers.getContractAt("IERC20", fsGLPAddress);
+    pendleGlpMarketLPT = await ethers.getContractAt("IERC20", glpMarketPoolAddress);
     pendleGDAIMarketLPT = await ethers.getContractAt("IERC20", gDAIMarketPoolAddress);
     pendleToken = await ethers.getContractAt("IERC20", pendleTokenAddress);
     daiToken = await ethers.getContractAt("IERC20", daiAddress);
@@ -56,13 +58,17 @@ describe("All Weather Protocol", function () {
     const DpxArbitrumVault = await ethers.getContractFactory("DpxArbitrumVault");
     dpxVault = await DpxArbitrumVault.deploy(dpxSLP.address, sushiMiniChefV2Address, sushiPid);
     await dpxVault.deployed();
-    
+
+    const EquilibriaGlpVault = await ethers.getContractFactory("EquilibriaGlpVault");
+    equilibriaGlpVault = await EquilibriaGlpVault.deploy(pendleGlpMarketLPT.address);
+    await equilibriaGlpVault.deployed();
+
     const EquilibriaGDAIVault = await ethers.getContractFactory("EquilibriaGDAIVault");
     equilibriaGDAIVault = await EquilibriaGDAIVault.deploy(pendleGDAIMarketLPT.address, "AllWeatherLP-Equilibria-GDAI", "ALP-EQB-GDAI");
     await equilibriaGDAIVault.deployed();
     
     const AllWeatherPortfolioLPToken = await ethers.getContractFactory("AllWeatherPortfolioLPToken");
-    portfolioContract = await AllWeatherPortfolioLPToken.connect(wallet).deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGDAIVault.address, equilibriaGDAIVault.address);
+    portfolioContract = await AllWeatherPortfolioLPToken.connect(wallet).deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address);
     await portfolioContract.connect(wallet).deployed();
     await portfolioContract.setVaultAllocations([{protocol: "equilibria-gdai", percentage: 100}]).then((tx) => tx.wait());
     await (await weth.connect(wallet).approve(portfolioContract.address, radiantAmount, { gasLimit: gasLimit })).wait();
@@ -120,20 +126,21 @@ describe("All Weather Protocol", function () {
       const pendleZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount), 0.2, daiToken.address);
       const receipt = await (await portfolioContract.deposit(dpxAmount, oneInchSwapDataForDpx.tx.data, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 10692137 })).wait();
       await mineBlocks(100); // Mine 100 blocks
-    //   const originalPendleToken = await pendleToken.balanceOf(wallet.address);
-    //   const originalWethBalance = await weth.balanceOf(wallet.address);
-    //   const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
-    //   for (const claimableReward of claimableRewards) {
-    //     if (claimableReward.protocol !== "equilibria-glp") {
-    //       expect(claimableReward.claimableRewards).to.deep.equal([]);
-    //     } else {
-    //       expect(claimableReward.claimableRewards.length).to.equal(2);
-    //     }
-    //   }
-    //   const pendleClaimableReward = claimableRewards[2].claimableRewards[0].amount;
-    //   const wethClaimableReward = claimableRewards[2].claimableRewards[1].amount;
-    //   expect(pendleClaimableReward).to.be.gt(0);
-    //   expect(wethClaimableReward).to.be.gt(0);
+      const originalPendleToken = await pendleToken.balanceOf(wallet.address);
+      const originalWethBalance = await weth.balanceOf(wallet.address);
+      const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
+      console.log(claimableRewards);
+      // for (const claimableReward of claimableRewards) {
+      //   if (claimableReward.protocol !== "equilibria-gdai") {
+      //     expect(claimableReward.claimableRewards).to.deep.equal([]);
+      //   } else {
+      //     expect(claimableReward.claimableRewards.length).to.equal(2);
+      //   }
+      // }
+      // const pendleClaimableReward = claimableRewards[2].claimableRewards[0].amount;
+      // const wethClaimableReward = claimableRewards[2].claimableRewards[1].amount;
+      // expect(pendleClaimableReward).to.be.gt(0);
+      // expect(wethClaimableReward).to.be.gt(0);
 
     //   const equilibriaPids = [1];
     //   await portfolioContract.connect(wallet).claim(wallet.address, equilibriaPids);

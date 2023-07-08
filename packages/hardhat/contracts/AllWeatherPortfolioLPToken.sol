@@ -153,7 +153,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
             guessPtReceivedFromSy,
             input
           ) > 0,
-          "Zap Into Equilibria GLP failed"
+          "Zap Into Equilibria GDAI failed"
         );
       } else {
         revert("Protocol not supported");
@@ -169,6 +169,10 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     address receiver,
     IPendleRouter.TokenOutput calldata output
   ) public {
+    // radiant
+    RadiantArbitrumVault(radiantVaultAddr).redeemAll(shares, receiver);
+
+    // dpx
     uint256 dpxShares = Math.mulDiv(
       DpxArbitrumVault(dpxVaultAddr).balanceOf(address(this)),
       shares,
@@ -178,6 +182,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       DpxArbitrumVault(dpxVaultAddr).redeemAll(dpxShares, receiver);
     }
 
+    // equilibria-glp
     uint256 equilibriaGlpShares = Math.mulDiv(
       EquilibriaGlpVault(equilibriaVaultAddr).balanceOf(address(this)),
       shares,
@@ -190,7 +195,20 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         output
       );
     }
-    RadiantArbitrumVault(radiantVaultAddr).redeemAll(shares, receiver);
+
+    // equilibria-gdai
+    uint256 equilibriaGDAIShares = Math.mulDiv(
+      EquilibriaGDAIVault(equilibriaGDAIVaultAddr).balanceOf(address(this)),
+      shares,
+      totalSupply()
+    );
+    if (equilibriaGlpShares > 0) {
+      EquilibriaGDAIVault(equilibriaGDAIVaultAddr).redeemAll(
+        equilibriaGDAIShares,
+        receiver,
+        output
+      );
+    }
     _burn(msg.sender, shares);
   }
 
@@ -240,7 +258,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     }
 
     ClaimableRewardOfAProtocol[]
-      memory totalClaimableRewards = new ClaimableRewardOfAProtocol[](3);
+      memory totalClaimableRewards = new ClaimableRewardOfAProtocol[](4);
     totalClaimableRewards[0] = ClaimableRewardOfAProtocol({
       protocol: "dpx",
       claimableRewards: DpxArbitrumVault(dpxVaultAddr).getClaimableRewards()
@@ -256,6 +274,11 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     totalClaimableRewards[2] = ClaimableRewardOfAProtocol({
       protocol: "equilibria-glp",
       claimableRewards: EquilibriaGlpVault(equilibriaVaultAddr)
+        .getClaimableRewards()
+    });
+    totalClaimableRewards[3] = ClaimableRewardOfAProtocol({
+      protocol: "equilibria-gdai",
+      claimableRewards: EquilibriaGDAIVault(equilibriaGDAIVaultAddr)
         .getClaimableRewards()
     });
     return totalClaimableRewards;
