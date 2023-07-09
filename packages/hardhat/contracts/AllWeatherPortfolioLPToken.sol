@@ -2,7 +2,7 @@
 // The code defines a Solidity contract called AllWeatherPortfolioLPToken that inherits from ERC20. It takes in several parameters on construction, including asset, radiantVaultAddr, and dpxVaultAddr. The contract has several functions that do the following:
 
 // deposit: Takes in an amount and transfers tokens of asset from the user to the contract, then distributes the asset into two protocols (DPX and Radiant) based on a portfolioAllocation. The user receives an ERC20 token (AWVLP) in proportion to their deposit.
-// redeemAll: Takes in a number of shares and an account, then redeems all DPX LP Tokens and sends them to the account. Only DPX LP tokens are redeemed. The proportion of redeemed tokens is distributed to the sender's ERC20 tokens (AWVLP).
+// redeem: Takes in a number of shares and an account, then redeems all DPX LP Tokens and sends them to the account. Only DPX LP tokens are redeemed. The proportion of redeemed tokens is distributed to the sender's ERC20 tokens (AWVLP).
 // claimableRewards: Takes in an account, calculates the user's claimable rewards across both protocols and returns them.
 // claim: Takes in an account and reward tokens, and claims all the available rewards across both protocols, sending them to the account.
 // The code imports several open source libraries and uses various data structures like struct, bytes, and mapping. The SPDX-License-Identifier specifies the license for the code (MIT in this case).
@@ -75,6 +75,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
 
   function deposit(
     uint256 amount,
+    address receiver,
     bytes calldata oneInchDataDpx,
     uint256 minLpOut,
     IPendleRouter.ApproxParams calldata guessPtReceivedFromSy,
@@ -101,11 +102,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       if (protocolHash == keccak256(bytes("dpx"))) {
         SafeERC20.safeApprove(IERC20(asset), dpxVaultAddr, amount);
         require(
-          DpxArbitrumVault(dpxVaultAddr).deposit(
-            amount,
-            address(this),
-            oneInchDataDpx
-          ) > 0,
+          DpxArbitrumVault(dpxVaultAddr).deposit(amount, oneInchDataDpx) > 0,
           "Buying Dpx LP token failed"
         );
       } else if (protocolHash == keccak256(bytes("radiant-arbitrum"))) {
@@ -113,7 +110,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         require(
           RadiantArbitrumVault(radiantVaultAddr).deposit(
             amount,
-            address(this),
             oneInchDataDpx
           ) > 0,
           "Buying Radiant LP token failed"
@@ -132,7 +128,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         require(
           EquilibriaGlpVault(equilibriaVaultAddr).deposit(
             zapInAmountForThisVault,
-            address(this),
             minLpOut,
             guessPtReceivedFromSy,
             input
@@ -160,17 +155,17 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       }
     }
 
-    _mint(msg.sender, amount);
-    emit Transfer(address(0), msg.sender, amount);
+    _mint(receiver, amount);
+    emit Transfer(address(0), receiver, amount);
   }
 
-  function redeemAll(
+  function redeem(
     uint256 shares,
     address receiver,
     IPendleRouter.TokenOutput calldata output
   ) public {
     // radiant
-    RadiantArbitrumVault(radiantVaultAddr).redeemAll(shares, receiver);
+    RadiantArbitrumVault(radiantVaultAddr).redeem(shares);
 
     // dpx
     uint256 dpxShares = Math.mulDiv(
@@ -179,7 +174,12 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       totalSupply()
     );
     if (dpxShares > 0) {
-      DpxArbitrumVault(dpxVaultAddr).redeemAll(dpxShares, receiver);
+      DpxArbitrumVault(dpxVaultAddr).redeem(dpxShares);
+      SafeERC20.safeTransfer(
+        IERC20(DpxArbitrumVault(dpxVaultAddr).asset()),
+        receiver,
+        dpxShares
+      );
     }
 
     // equilibria-glp
@@ -189,9 +189,8 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       totalSupply()
     );
     if (equilibriaGlpShares > 0) {
-      EquilibriaGlpVault(equilibriaVaultAddr).redeemAll(
+      EquilibriaGlpVault(equilibriaVaultAddr).redeem(
         equilibriaGlpShares,
-        receiver,
         output
       );
     }
@@ -203,9 +202,8 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       totalSupply()
     );
     if (equilibriaGDAIShares > 0) {
-      EquilibriaGDAIVault(equilibriaGDAIVaultAddr).redeemAll(
+      EquilibriaGDAIVault(equilibriaGDAIVaultAddr).redeem(
         equilibriaGDAIShares,
-        receiver,
         output
       );
     }

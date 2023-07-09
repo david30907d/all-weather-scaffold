@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// This is a Smart Contract written in Solidity. It represents a vault that allows users to deposit WETH and receive DPXV in return. The contract uses the functionalities of other smart contracts such as oneInch aggregator, SushiSwap, and MiniChefV2 to perform swaps and farming of SUSHI and DPX tokens. The contract has several functions including deposit(), redeemAll(), claim(), totalAssets(), totalLockedAssets(), totalStakedButWithoutLockedAssets(), and getClaimableRewards().
+// This is a Smart Contract written in Solidity. It represents a vault that allows users to deposit WETH and receive DPXV in return. The contract uses the functionalities of other smart contracts such as oneInch aggregator, SushiSwap, and MiniChefV2 to perform swaps and farming of SUSHI and DPX tokens. The contract has several functions including deposit(), redeem(), claim(), totalAssets(), totalLockedAssets(), totalStakedButWithoutLockedAssets(), and getClaimableRewards().
 
 pragma solidity ^0.8.4;
 
@@ -57,30 +57,47 @@ contract DpxArbitrumVault is AbstractVault {
     sushiSwapMiniChef = IMiniChefV2(sushiSwapMiniChefV2_);
   }
 
-  function deposit(
+  function _zapIn(
     uint256 amount,
-    address receiver,
     bytes calldata oneInchData
-  ) public returns (uint256) {
-    uint256 maxAssets = maxDeposit(receiver);
-    if (amount > maxAssets) {
-      revert ERC4626ExceededMaxDeposit(receiver, amount, maxAssets);
-    }
-
-    SafeERC20.safeTransferFrom(weth, msg.sender, address(this), amount);
-    uint256 shares = _zapIn(amount, oneInchData);
-    _mint(receiver, shares);
-
-    emit Deposit(msg.sender, receiver, amount, shares);
-    return shares;
+  ) internal override returns (uint256) {
+    SafeERC20.safeApprove(
+      weth,
+      oneInchAggregatorAddress,
+      Math.mulDiv(amount, 1, 2)
+    );
+    (bool succ, bytes memory data) = address(oneInchAggregatorAddress).call(
+      oneInchData
+    );
+    require(succ, "1inch failed to swap");
+    //  (uint256 dpxReturnedAmount, uint256 gasLeft) = abi.decode(data, (uint256, uint256));
+    uint256 dpxReturnedAmount = dpxToken.balanceOf(address(this));
+    SafeERC20.safeApprove(dpxToken, sushiSwapRouterAddress, dpxReturnedAmount);
+    weth.withdraw(Math.mulDiv(amount, 1, 2));
+    // deadline = current time + 5 minutes;
+    uint256 deadline = block.timestamp + 300;
+    // // TODO(david): should return those token left after `addLiquidityETH` back to user
+    (uint amountToken, uint amountETH, uint liquidity) = IUniswapV2Router01(
+      sushiSwapRouterAddress
+    ).addLiquidityETH{value: address(this).balance}(
+      address(dpxToken),
+      dpxReturnedAmount,
+      Math.mulDiv(dpxReturnedAmount, 95, 100),
+      Math.mulDiv(address(this).balance, 95, 100),
+      address(this),
+      deadline
+    );
+    IERC20(sushiSwapDpxLpTokenAddress).approve(
+      address(sushiSwapMiniChef),
+      liquidity
+    );
+    sushiSwapMiniChef.deposit(pid, liquidity, address(this));
+    return liquidity;
   }
 
-  function redeemAll(
-    uint256 shares,
-    address receiver
-  ) public override returns (uint256) {
+  function redeem(uint256 shares) public override returns (uint256) {
     sushiSwapMiniChef.withdrawAndHarvest(pid, shares, address(this));
-    uint256 shares = super.redeem(shares, receiver, msg.sender);
+    super.redeem(shares, msg.sender, msg.sender);
     return shares;
   }
 
@@ -144,44 +161,6 @@ contract DpxArbitrumVault is AbstractVault {
       )
     });
     return rewards;
-  }
-
-  function _zapIn(
-    uint256 amount,
-    bytes calldata oneInchData
-  ) internal override returns (uint256) {
-    SafeERC20.safeApprove(
-      weth,
-      oneInchAggregatorAddress,
-      Math.mulDiv(amount, 1, 2)
-    );
-    (bool succ, bytes memory data) = address(oneInchAggregatorAddress).call(
-      oneInchData
-    );
-    require(succ, "1inch failed to swap");
-    //  (uint256 dpxReturnedAmount, uint256 gasLeft) = abi.decode(data, (uint256, uint256));
-    uint256 dpxReturnedAmount = dpxToken.balanceOf(address(this));
-    SafeERC20.safeApprove(dpxToken, sushiSwapRouterAddress, dpxReturnedAmount);
-    weth.withdraw(Math.mulDiv(amount, 1, 2));
-    // deadline = current time + 5 minutes;
-    uint256 deadline = block.timestamp + 300;
-    // // TODO(david): should return those token left after `addLiquidityETH` back to user
-    (uint amountToken, uint amountETH, uint liquidity) = IUniswapV2Router01(
-      sushiSwapRouterAddress
-    ).addLiquidityETH{value: address(this).balance}(
-      address(dpxToken),
-      dpxReturnedAmount,
-      Math.mulDiv(dpxReturnedAmount, 95, 100),
-      Math.mulDiv(address(this).balance, 95, 100),
-      address(this),
-      deadline
-    );
-    IERC20(sushiSwapDpxLpTokenAddress).approve(
-      address(sushiSwapMiniChef),
-      liquidity
-    );
-    sushiSwapMiniChef.deposit(pid, liquidity, address(this));
-    return liquidity;
   }
 
   // To receive ETH from the WETH's withdraw function (it won't work without it)
