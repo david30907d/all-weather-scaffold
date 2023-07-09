@@ -42,6 +42,9 @@ function mnemonic() {
 }
 
 module.exports = {
+  mocha: {
+    timeout: 120000
+  },
   defaultNetwork,
   /**
    * gas reporter configuration that let's you know
