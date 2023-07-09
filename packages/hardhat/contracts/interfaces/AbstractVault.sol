@@ -35,6 +35,12 @@ abstract contract AbstractVault is ERC4626 {
     virtual
     returns (IFeeDistribution.RewardData[] memory claimableRewards);
 
+  function deposit(uint256 amount) public virtual returns (uint256) {
+    _prepareForDeposit(amount);
+    uint256 shares = _zapIn(amount);
+    return _mintShares(shares, amount);
+  }
+
   function deposit(
     uint256 amount,
     bytes calldata oneInchData
@@ -47,6 +53,10 @@ abstract contract AbstractVault is ERC4626 {
   function _prepareForDeposit(uint256 amount) public virtual {
     require(amount <= maxDeposit(msg.sender), "ERC4626: deposit more than max");
     SafeERC20.safeTransferFrom(weth, msg.sender, address(this), amount);
+  }
+
+  function _zapIn(uint256 amount) internal virtual returns (uint256) {
+    revert("AbstractVault: _zapIn not implemented");
   }
 
   function _zapIn(

@@ -109,10 +109,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       } else if (protocolHash == keccak256(bytes("radiant-arbitrum"))) {
         SafeERC20.safeApprove(IERC20(asset), radiantVaultAddr, amount);
         require(
-          RadiantArbitrumVault(radiantVaultAddr).deposit(
-            amount,
-            oneInchDataDpx
-          ) > 0,
+          RadiantArbitrumVault(radiantVaultAddr).deposit(amount) > 0,
           "Buying Radiant LP token failed"
         );
       } else if (protocolHash == keccak256(bytes("radiant-bsc"))) {

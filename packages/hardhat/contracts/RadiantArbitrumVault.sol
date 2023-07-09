@@ -72,10 +72,7 @@ contract RadiantArbitrumVault is AbstractVault {
     return radiantRewardNativeTokenAddresses;
   }
 
-  function _zapIn(
-    uint256 amount,
-    bytes calldata oneInchData
-  ) internal override returns (uint256) {
+  function _zapIn(uint256 amount) internal override returns (uint256) {
     SafeERC20.safeApprove(weth, address(lockZap), amount);
     uint256 shares = lockZap.zap(false, amount, 0, 3);
     return shares;
