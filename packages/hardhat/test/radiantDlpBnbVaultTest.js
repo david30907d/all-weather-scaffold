@@ -31,6 +31,7 @@ let currentTimestamp = Math.floor(Date.now() / 1000);;
 
 describe("All Weather Protocol", function () {
   beforeEach(async () => {
+    this.timeout(120000); // Set timeout to 120 seconds
     wallet = await ethers.getImpersonatedSigner(myImpersonatedWalletAddress);
     dpxSLP = await ethers.getContractAt('IERC20Uniswap', sushiSwapDpxLpTokenAddress);
     weth = await ethers.getContractAt('IWETH', wethAddress);

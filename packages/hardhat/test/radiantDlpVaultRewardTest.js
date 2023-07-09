@@ -30,6 +30,7 @@ async function deposit() {
 
 describe("All Weather Protocol", function () {
   beforeEach(async () => {
+    this.timeout(120000); // Set timeout to 120 seconds
     wallet = await ethers.getImpersonatedSigner(myImpersonatedWalletAddress);
     weth = await ethers.getContractAt('IWETH', wethAddress);
     dpxSLP = await ethers.getContractAt('IERC20Uniswap', sushiSwapDpxLpTokenAddress);
