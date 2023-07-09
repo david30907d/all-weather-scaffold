@@ -80,7 +80,6 @@ describe("All Weather Protocol", function () {
       this.timeout(120000); // Set timeout to 120 seconds
       const oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount.div(2), wallet.address, 50);
       const oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount, wallet.address, 50);
-      // console.log("oneInchSwapDataForDpx", oneInchSwapDataForDpx);
       const pendleZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount), 0.2, daiToken.address);
       const receipt = await (await portfolioContract.deposit(dpxAmount, oneInchSwapDataForDpx.tx.data, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 10692137 })).wait();
       // Iterate over the events and find the Deposit event
@@ -127,34 +126,32 @@ describe("All Weather Protocol", function () {
       const receipt = await (await portfolioContract.deposit(dpxAmount, oneInchSwapDataForDpx.tx.data, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 10692137 })).wait();
       await mineBlocks(100); // Mine 100 blocks
       const originalPendleToken = await pendleToken.balanceOf(wallet.address);
-      const originalWethBalance = await weth.balanceOf(wallet.address);
       const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
-      console.log(claimableRewards);
-      // for (const claimableReward of claimableRewards) {
-      //   if (claimableReward.protocol !== "equilibria-gdai") {
-      //     expect(claimableReward.claimableRewards).to.deep.equal([]);
-      //   } else {
-      //     expect(claimableReward.claimableRewards.length).to.equal(2);
-      //   }
-      // }
-      // const pendleClaimableReward = claimableRewards[2].claimableRewards[0].amount;
-      // const wethClaimableReward = claimableRewards[2].claimableRewards[1].amount;
-      // expect(pendleClaimableReward).to.be.gt(0);
-      // expect(wethClaimableReward).to.be.gt(0);
+      let pendleClaimableReward;
+      for (const claimableReward of claimableRewards) {
+        if (claimableReward.protocol !== "equilibria-gdai") {
+          expect(claimableReward.claimableRewards).to.deep.equal([]);
+        } else {
+          expect(claimableReward.claimableRewards.length).to.equal(1);
+          pendleClaimableReward = claimableReward.claimableRewards[0].amount;
+          expect(pendleClaimableReward).to.be.gt(0);
+        }
+      }
 
-    //   const equilibriaPids = [1];
-    //   await portfolioContract.connect(wallet).claim(wallet.address, equilibriaPids);
-    //   // NOTE: using `to.be.gt` instead of `to.equal` because the reward would somehow be increased after claim(). My hunch is that `claim()` would also claim the reward for the current block.
-    //   expect((await pendleToken.balanceOf(wallet.address)).sub(originalPendleToken)).to.be.gt(pendleClaimableReward);
-    //   expect((await weth.balanceOf(wallet.address)).sub(originalWethBalance)).to.be.gt(wethClaimableReward);
-    //   const remainingClaimableRewards = await portfolioContract.connect(wallet).getClaimableRewards(wallet.address);
-    //   // index 2 stands for equilibria-glp
-    //   expect(remainingClaimableRewards[2].claimableRewards[0].amount).to.equal(0);
-    //   expect(remainingClaimableRewards[2].claimableRewards[1].amount).to.equal(0);
+      const equilibriaPids = [2];
+      await portfolioContract.connect(wallet).claim(wallet.address, equilibriaPids);
+      // NOTE: using `to.be.gt` instead of `to.equal` because the reward would somehow be increased after claim(). My hunch is that `claim()` would also claim the reward for the current block.
+      expect((await pendleToken.balanceOf(wallet.address)).sub(originalPendleToken)).to.be.gt(pendleClaimableReward);
+      const remainingClaimableRewards = await portfolioContract.connect(wallet).getClaimableRewards(wallet.address);
+      for (const claimableReward of remainingClaimableRewards) {
+        if (claimableReward.protocol === "equilibria-gdai") {
+          expect(claimableReward.claimableRewards[0].amount).to.equal(0);
+        }
+      }
     })
-    // it("Should be able to check claimable rewards", async function () {
-    //   const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
-    //   expect(claimableRewards).to.deep.equal([]);
-    // })
+    it("Should be able to check claimable rewards", async function () {
+      const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
+      expect(claimableRewards).to.deep.equal([]);
+    })
   });
 });

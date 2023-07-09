@@ -202,7 +202,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       shares,
       totalSupply()
     );
-    if (equilibriaGlpShares > 0) {
+    if (equilibriaGDAIShares > 0) {
       EquilibriaGDAIVault(equilibriaGDAIVaultAddr).redeemAll(
         equilibriaGDAIShares,
         receiver,
@@ -245,6 +245,18 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       userShares,
       portfolioShares,
       equilibriaRewards
+    );
+
+    // equilibria-gdai
+    IFeeDistribution.RewardData[]
+      memory equilibriaGDAIRewards = EquilibriaGDAIVault(
+        equilibriaGDAIVaultAddr
+      ).claim(equilibriaPids);
+    _distributeERC20UserRewardProRata(
+      receiver,
+      userShares,
+      portfolioShares,
+      equilibriaGDAIRewards
     );
   }
 

@@ -126,10 +126,10 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     if (portfolioSharesInThisVault == 0 || totalVaultShares == 0) {
       return new IFeeDistribution.RewardData[](0);
     }
-    rewards = new IFeeDistribution.RewardData[](2);
     (, , address rewardpool, ) = pendleBooster.poolInfo(pid);
     address[] memory rewardTokens = IBaseRewardPool(rewardpool)
       .getRewardTokens();
+    rewards = new IFeeDistribution.RewardData[](rewardTokens.length);
     for (uint256 i = 0; i < rewardTokens.length; i++) {
       rewards[i] = IFeeDistribution.RewardData({
         token: rewardTokens[i],

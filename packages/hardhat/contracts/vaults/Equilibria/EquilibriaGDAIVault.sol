@@ -21,7 +21,6 @@ contract EquilibriaGDAIVault is BaseEquilibriaVault {
 
     // // asset
     DAI = IERC20(0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1);
-    // gDAI = IERC20(0xd85E038593d7A098614721EaE955EC2022B9B91B);
   }
 
   function totalUnstakedAssets() public view override returns (uint256) {
@@ -80,35 +79,5 @@ contract EquilibriaGDAIVault is BaseEquilibriaVault {
     // so cannot be 100% accurate
     SafeERC20.safeTransfer(DAI, msg.sender, DAI.balanceOf(address(this)));
     return shares;
-  }
-
-  function getClaimableRewards()
-    public
-    view
-    override
-    returns (IFeeDistribution.RewardData[] memory rewards)
-  {
-    console.log("Pid: ", pid);
-    // pro rata: user's share divided by total shares, is the ratio of the reward
-    uint256 portfolioSharesInThisVault = balanceOf(msg.sender);
-    uint256 totalVaultShares = totalSupply();
-    if (portfolioSharesInThisVault == 0 || totalVaultShares == 0) {
-      return new IFeeDistribution.RewardData[](0);
-    }
-    rewards = new IFeeDistribution.RewardData[](2);
-    (, , address rewardpool, ) = pendleBooster.poolInfo(pid);
-    address[] memory rewardTokens = IBaseRewardPool(rewardpool)
-      .getRewardTokens();
-    for (uint256 i = 0; i < rewardTokens.length; i++) {
-      rewards[i] = IFeeDistribution.RewardData({
-        token: rewardTokens[i],
-        amount: Math.mulDiv(
-          IBaseRewardPool(rewardpool).earned(address(this), rewardTokens[i]),
-          portfolioSharesInThisVault,
-          totalVaultShares
-        )
-      });
-    }
-    return rewards;
   }
 }
