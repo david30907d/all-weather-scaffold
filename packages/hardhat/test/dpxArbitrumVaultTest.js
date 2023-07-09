@@ -68,7 +68,6 @@ describe("All Weather Protocol", function () {
       dpxVault.address, 50);
     oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount, wallet.address, 50);
     pendleZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, dpxAmount, 0.99);      
-
   });
   describe("Portfolio LP Contract Test", function () {
     it("Should be able to deposit SLP to portfolio contract", async function () {
