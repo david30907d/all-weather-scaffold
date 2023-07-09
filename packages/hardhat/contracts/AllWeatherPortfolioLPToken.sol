@@ -165,7 +165,19 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     IPendleRouter.TokenOutput calldata output
   ) public {
     // radiant
-    RadiantArbitrumVault(radiantVaultAddr).redeem(shares);
+    uint256 radiantShares = Math.mulDiv(
+      RadiantArbitrumVault(radiantVaultAddr).balanceOf(address(this)),
+      shares,
+      totalSupply()
+    );
+    if (radiantShares > 0) {
+      RadiantArbitrumVault(radiantVaultAddr).redeem(shares);
+      SafeERC20.safeTransfer(
+        IERC20(RadiantArbitrumVault(radiantVaultAddr).asset()),
+        receiver,
+        radiantShares
+      );
+    }
 
     // dpx
     uint256 dpxShares = Math.mulDiv(

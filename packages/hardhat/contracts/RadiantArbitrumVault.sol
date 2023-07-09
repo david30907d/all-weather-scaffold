@@ -78,12 +78,14 @@ contract RadiantArbitrumVault is AbstractVault {
   ) internal override returns (uint256) {
     SafeERC20.safeApprove(weth, address(lockZap), amount);
     uint256 shares = lockZap.zap(false, amount, 0, 3);
+    return shares;
   }
 
   function redeem(uint256 _shares) public override returns (uint256) {
     // TODO(david): should only redeem _shares amount of dLP
     uint256 radiantDlpShares = multiFeeDistribution
       .withdrawExpiredLocksForWithOptions(address(this), 1, true);
+    require(radiantDlpShares != 0, "dLP lock has not expired yet");
     uint256 vaultShare = super.redeem(radiantDlpShares, msg.sender, msg.sender);
     require(radiantDlpShares == vaultShare, "radiantDlpShares != vaultShare");
     return vaultShare;
