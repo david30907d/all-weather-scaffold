@@ -61,9 +61,8 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     return totalStakedButWithoutLockedAssets().sub(originalShares);
   }
 
-  function redeemAll(
+  function redeem(
     uint256 shares,
-    address receiver,
     IPendleRouter.TokenOutput calldata output
   ) public virtual returns (uint256) {
     (, , address rewardPool, ) = pendleBooster.poolInfo(pid);
@@ -90,15 +89,8 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     //     1,
     //     output
     // );
-    uint256 shares = super.redeem(shares, receiver, msg.sender);
+    uint256 shares = super.redeem(shares, msg.sender, msg.sender);
     return shares;
-  }
-
-  function redeemAll(
-    uint256 shares,
-    address receiver
-  ) public override returns (uint256) {
-    revert("Not implemented");
   }
 
   function claim(

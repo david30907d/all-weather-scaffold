@@ -31,7 +31,7 @@ let oneInchSwapDataForGDAI;
 let pendleZapInData;
 
 async function deposit() {
-  return await (await portfolioContract.connect(wallet).deposit(radiantAmount, oneInchSwapDataForDpx.tx.data, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 3057560 })).wait();
+  return await (await portfolioContract.connect(wallet).deposit(radiantAmount, wallet.address, oneInchSwapDataForDpx.tx.data, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 3057560 })).wait();
 }
 
 describe("All Weather Protocol", function () {
@@ -103,7 +103,7 @@ describe("All Weather Protocol", function () {
       await simulateAYearLater();
 
       // withdraw
-      await (await portfolioContract.connect(wallet).redeemAll(radiantAmount, wallet.address, fakePendleZapOut, { gasLimit: gasLimit })).wait();
+      await (await portfolioContract.connect(wallet).redeem(radiantAmount, wallet.address, fakePendleZapOut, { gasLimit: gasLimit })).wait();
       const radiantLockedDlpAfterRedeem = await radiantVault.totalAssets();
       expect(radiantLockedDlpAfterRedeem).to.equal(0);
       expect(await dlpToken.balanceOf(wallet.address)).to.equal(radiantLockedDlpBalanceAfterDeposit);
@@ -114,7 +114,7 @@ describe("All Weather Protocol", function () {
       const totalAssets = await radiantVault.totalAssets();
       const totalLockedAssets = await radiantVault.totalLockedAssets();
       const totalUnlockedAssets = await radiantVault.totalUnstakedAssets();
-      await (await portfolioContract.connect(wallet).redeemAll(radiantAmount, wallet.address, fakePendleZapOut, { gasLimit: gasLimit })).wait();
+      await (await portfolioContract.connect(wallet).redeem(radiantAmount, wallet.address, fakePendleZapOut, { gasLimit: gasLimit })).wait();
       expect(await radiantVault.totalAssets()).to.equal(totalAssets);
       expect(await radiantVault.totalLockedAssets()).to.equal(totalLockedAssets);
       expect(await radiantVault.totalStakedButWithoutLockedAssets()).to.equal(totalUnlockedAssets);

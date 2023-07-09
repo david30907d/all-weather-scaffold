@@ -72,32 +72,19 @@ contract RadiantArbitrumVault is AbstractVault {
     return radiantRewardNativeTokenAddresses;
   }
 
-  function deposit(
+  function _zapIn(
     uint256 amount,
-    address receiver,
     bytes calldata oneInchData
-  ) public returns (uint256) {
-    // the reason why I cannot just call `super.deposit` is that user don't have dLP at the time they deposit.
-    // need to take advantage of the zap to get dLP, so need to modity `super.deposit()`
-    require(amount <= maxDeposit(receiver), "ERC4626: deposit more than max");
-
-    SafeERC20.safeTransferFrom(weth, msg.sender, address(this), amount);
+  ) internal override returns (uint256) {
     SafeERC20.safeApprove(weth, address(lockZap), amount);
     uint256 shares = lockZap.zap(false, amount, 0, 3);
-    _mint(receiver, shares);
-
-    emit Deposit(_msgSender(), receiver, amount, shares);
-    return shares;
   }
 
-  function redeemAll(
-    uint256 _shares,
-    address receiver
-  ) public override returns (uint256) {
+  function redeem(uint256 _shares) public override returns (uint256) {
     // TODO(david): should only redeem _shares amount of dLP
     uint256 radiantDlpShares = multiFeeDistribution
       .withdrawExpiredLocksForWithOptions(address(this), 1, true);
-    uint256 vaultShare = super.redeem(radiantDlpShares, receiver, msg.sender);
+    uint256 vaultShare = super.redeem(radiantDlpShares, msg.sender, msg.sender);
     require(radiantDlpShares == vaultShare, "radiantDlpShares != vaultShare");
     return vaultShare;
   }

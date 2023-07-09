@@ -64,10 +64,9 @@ abstract contract AbstractVault is ERC4626 {
     return shares;
   }
 
-  function redeemAll(
-    uint256 shares,
-    address receiver
-  ) public virtual returns (uint256);
+  function redeem(uint256 shares) public virtual returns (uint256) {
+    revert("Not implemented");
+  }
 
   function claim(
     IFeeDistribution.RewardData[] memory claimableRewards
