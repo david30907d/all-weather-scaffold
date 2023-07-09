@@ -14,7 +14,10 @@ const { fetch1InchSwapData,
   radiantAmount,
   glpMarketPoolAddress,
   getPendleZapInData,
-  fakePendleZapOut
+  gDAIMarketPoolAddress,
+  fakePendleZapOut,
+  daiAddress,
+  dpxAmount
 } = require("./utils");
 
 
@@ -23,6 +26,13 @@ let weth;
 let radiantVault;
 let portfolioContract;
 let currentTimestamp = Math.floor(Date.now() / 1000);;
+let oneInchSwapDataForDpx;
+let oneInchSwapDataForGDAI;
+let pendleZapInData;
+
+async function deposit() {
+  return await (await portfolioContract.connect(wallet).deposit(radiantAmount, oneInchSwapDataForDpx.tx.data, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 3057560 })).wait();
+}
 
 describe("All Weather Protocol", function () {
   beforeEach(async () => {
@@ -30,9 +40,11 @@ describe("All Weather Protocol", function () {
     dpxSLP = await ethers.getContractAt('IERC20Uniswap', sushiSwapDpxLpTokenAddress);
     weth = await ethers.getContractAt('IWETH', wethAddress);
     dlpToken = await ethers.getContractAt("MockDAI", radiantDlpAddress);
+    daiToken = await ethers.getContractAt("IERC20", daiAddress);
     radiantLockZap = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
     multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
     pendleGlpMarketLPT = await ethers.getContractAt("IERC20", glpMarketPoolAddress);
+    pendleGDAIMarketLPT = await ethers.getContractAt("IERC20", gDAIMarketPoolAddress);
 
     const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
     radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLockZapAddress);
@@ -47,14 +59,23 @@ describe("All Weather Protocol", function () {
     equilibriaGlpVault = await EquilibriaGlpVault.deploy(pendleGlpMarketLPT.address);
     await equilibriaGlpVault.deployed();
     
+    const EquilibriaGDAIVault = await ethers.getContractFactory("EquilibriaGDAIVault");
+    equilibriaGDAIVault = await EquilibriaGDAIVault.deploy(pendleGDAIMarketLPT.address, "AllWeatherLP-Equilibria-GDAI", "ALP-EQB-GDAI");
+    await equilibriaGDAIVault.deployed();
+
     const AllWeatherPortfolioLPToken = await ethers.getContractFactory("AllWeatherPortfolioLPToken");
-    portfolioContract = await AllWeatherPortfolioLPToken.deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address);
+    portfolioContract = await AllWeatherPortfolioLPToken.deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address);
     await portfolioContract.connect(wallet).deployed();
     await portfolioContract.setVaultAllocations([{protocol: "radiant-arbitrum", percentage: 100}]).then((tx) => tx.wait());
 
 
     await (await weth.connect(wallet).approve(portfolioContract.address, radiantAmount, { gasLimit: 2057560 })).wait();
     await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.02"), { gasLimit: 2057560 });
+
+    oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxTokenAddress, radiantAmount.div(2), wallet.address, 50);
+    oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount, wallet.address, 50);
+    pendleZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, radiantAmount, 0.99);
+
   });
 
   describe("Portfolio LP Contract Test", function () {
@@ -64,9 +85,7 @@ describe("All Weather Protocol", function () {
 
       const originalRadiantLockedDlpBalance = await radiantVault.totalAssets();
       expect(originalRadiantLockedDlpBalance).to.equal(0);
-      const oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxTokenAddress, radiantAmount.div(2), wallet.address);
-      const pendleZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, radiantAmount, 0.99);
-      await (await portfolioContract.connect(wallet).deposit(radiantAmount, oneInchSwapDataForDpx, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], { gasLimit: 3057560 })).wait();
+      await deposit();
 
       const vaultShareAfterDeposit = await radiantVault.balanceOf(portfolioContract.address)
       expect(vaultShareAfterDeposit).to.gt(0);
@@ -76,9 +95,7 @@ describe("All Weather Protocol", function () {
     it("Should be able to withdraw Radiant dLP", async function () {
       const radiantLockedDlpBalanceBeforeDeposit = await radiantVault.totalAssets();
       expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
-      const oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxTokenAddress, radiantAmount.div(2), wallet.address);
-      const pendleZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, radiantAmount, 0.99);
-      await (await portfolioContract.connect(wallet).deposit(radiantAmount, oneInchSwapDataForDpx, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], { gasLimit: 3057560 })).wait();
+      await deposit();
       const radiantLockedDlpBalanceAfterDeposit = await radiantVault.totalAssets();
       expect(radiantLockedDlpBalanceAfterDeposit).to.gt(0);
 
@@ -93,9 +110,7 @@ describe("All Weather Protocol", function () {
     });
 
     it("Should not be able to withdraw Radiant dLP", async function () {
-      const oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxTokenAddress, radiantAmount.div(2), wallet.address);
-      const pendleZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, radiantAmount, 0.99);
-      await (await portfolioContract.connect(wallet).deposit(radiantAmount, oneInchSwapDataForDpx, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], { gasLimit: 3057560 })).wait();
+      await deposit();
       const totalAssets = await radiantVault.totalAssets();
       const totalLockedAssets = await radiantVault.totalLockedAssets();
       const totalUnlockedAssets = await radiantVault.totalUnstakedAssets();
