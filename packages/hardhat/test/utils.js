@@ -1,6 +1,6 @@
 const { config } = require('dotenv');
 const { network, ethers } = require("hardhat");
-const fetch = require('node-fetch');
+const got = require('got');
 const { Router, toAddress, MarketEntity } = require('@pendle/sdk-v2');
 
 config();
@@ -12,11 +12,18 @@ async function mineBlocks(numBlocks) {
 }
 
 async function fetch1InchSwapData(fromTokenAddress, toTOkenAddress, amount, fromAddress, slippage) {
-  const res = await fetch(`https://api.1inch.io/v5.0/42161/swap?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTOkenAddress}&amount=${amount.toString()}&fromAddress=${fromAddress}&slippage=${slippage}&disableEstimate=true`)
-  if (!res.ok) {
-    throw new Error(`HTTP error! status: ${res.status}`);
-  }
-  return await res.json();
+  const res = await got(`https://api.1inch.io/v5.0/42161/swap?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTOkenAddress}&amount=${amount.toString()}&fromAddress=${fromAddress}&slippage=${slippage}&disableEstimate=true`, {
+    retry: {
+      limit: 3, // Number of retries
+      methods: ['GET'], // Retry only for GET requests
+      statusCodes: [429, 500, 502, 503, 504], // Retry for specific status codes
+      calculateDelay: ({ attemptCount }) => attemptCount * 3000, // Delay between retries in milliseconds
+    },
+  })
+  // if (!res.ok) {
+  //   throw new Error(`HTTP error! status: ${res.status}`);
+  // }
+  return JSON.parse(res.body);
 }
 
 async function getUserEthBalance(address) {
