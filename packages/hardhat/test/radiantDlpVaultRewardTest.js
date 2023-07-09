@@ -25,7 +25,7 @@ let oneInchSwapDataForGDAI;
 let pendleZapInData;
 
 async function deposit() {
-  return await (await portfolioContract.connect(wallet).deposit(radiantAmount, oneInchSwapDataForDpx.tx.data, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 3057560 })).wait();
+  return await (await portfolioContract.connect(wallet).deposit(radiantAmount, wallet.address, oneInchSwapDataForDpx.tx.data, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 3057560 })).wait();
 }
 
 describe("All Weather Protocol", function () {

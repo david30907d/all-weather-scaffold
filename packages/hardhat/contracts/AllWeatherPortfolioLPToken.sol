@@ -23,6 +23,7 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./pendle/IPendleRouter.sol";
 import "./vaults/EquilibriaGlpVault.sol";
 import "./vaults/Equilibria/EquilibriaGDAIVault.sol";
+import "./interfaces/AbstractVault.sol";
 
 contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   using SafeERC20 for IERC20;
@@ -164,60 +165,32 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     address receiver,
     IPendleRouter.TokenOutput calldata output
   ) public {
-    // radiant
-    uint256 radiantShares = Math.mulDiv(
-      RadiantArbitrumVault(radiantVaultAddr).balanceOf(address(this)),
-      shares,
-      totalSupply()
-    );
-    if (radiantShares > 0) {
-      RadiantArbitrumVault(radiantVaultAddr).redeem(shares);
-      SafeERC20.safeTransfer(
-        IERC20(RadiantArbitrumVault(radiantVaultAddr).asset()),
-        receiver,
-        radiantShares
-      );
-    }
+    AbstractVault[] memory vaults = new AbstractVault[](4);
+    vaults[0] = RadiantArbitrumVault(radiantVaultAddr);
+    vaults[1] = DpxArbitrumVault(dpxVaultAddr);
+    vaults[2] = EquilibriaGlpVault(equilibriaVaultAddr);
+    vaults[3] = EquilibriaGDAIVault(equilibriaGDAIVaultAddr);
 
-    // dpx
-    uint256 dpxShares = Math.mulDiv(
-      DpxArbitrumVault(dpxVaultAddr).balanceOf(address(this)),
-      shares,
-      totalSupply()
-    );
-    if (dpxShares > 0) {
-      DpxArbitrumVault(dpxVaultAddr).redeem(dpxShares);
-      SafeERC20.safeTransfer(
-        IERC20(DpxArbitrumVault(dpxVaultAddr).asset()),
-        receiver,
-        dpxShares
+    for (uint256 i = 0; i < vaults.length; i++) {
+      uint256 vaultShares = Math.mulDiv(
+        vaults[i].balanceOf(address(this)),
+        shares,
+        totalSupply()
       );
-    }
 
-    // equilibria-glp
-    uint256 equilibriaGlpShares = Math.mulDiv(
-      EquilibriaGlpVault(equilibriaVaultAddr).balanceOf(address(this)),
-      shares,
-      totalSupply()
-    );
-    if (equilibriaGlpShares > 0) {
-      EquilibriaGlpVault(equilibriaVaultAddr).redeem(
-        equilibriaGlpShares,
-        output
-      );
-    }
-
-    // equilibria-gdai
-    uint256 equilibriaGDAIShares = Math.mulDiv(
-      EquilibriaGDAIVault(equilibriaGDAIVaultAddr).balanceOf(address(this)),
-      shares,
-      totalSupply()
-    );
-    if (equilibriaGDAIShares > 0) {
-      EquilibriaGDAIVault(equilibriaGDAIVaultAddr).redeem(
-        equilibriaGDAIShares,
-        output
-      );
+      if (vaultShares > 0) {
+        if (i == 2 || i == 3) {
+          // equilibria needs `output` to be passed in
+          vaults[i].redeem(vaultShares, output);
+        } else {
+          vaults[i].redeem(vaultShares);
+        }
+        SafeERC20.safeTransfer(
+          IERC20(vaults[i].asset()),
+          receiver,
+          vaultShares
+        );
+      }
     }
     _burn(msg.sender, shares);
   }

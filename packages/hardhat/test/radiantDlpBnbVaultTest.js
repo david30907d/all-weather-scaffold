@@ -80,7 +80,7 @@ describe("All Weather Protocol", function () {
     //   const totalAssets = await radiantVault.totalAssets();
     //   const totalLockedAssets = await radiantVault.totalLockedAssets();
     //   const totalUnlockedAssets = await radiantVault.totalUnstakedAssets();
-    //   await (await portfolioContract.redeemAll(radiantAmount, wallet.address, { gasLimit: gasLimit })).wait();
+    //   await (await portfolioContract.redeem(radiantAmount, wallet.address, { gasLimit: gasLimit })).wait();
     //   expect(await radiantVault.totalAssets()).to.equal(totalAssets);
     //   expect(await radiantVault.totalLockedAssets()).to.equal(totalLockedAssets);
     //   expect(await radiantVault.totalStakedButWithoutLockedAssets()).to.equal(totalUnlockedAssets);

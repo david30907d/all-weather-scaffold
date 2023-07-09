@@ -64,7 +64,7 @@ abstract contract BaseEquilibriaVault is AbstractVault {
   function redeem(
     uint256 shares,
     IPendleRouter.TokenOutput calldata output
-  ) public virtual returns (uint256) {
+  ) public override returns (uint256) {
     (, , address rewardPool, ) = pendleBooster.poolInfo(pid);
     SafeERC20.safeApprove(
       IBaseRewardPool(rewardPool).stakingToken(),

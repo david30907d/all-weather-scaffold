@@ -56,12 +56,11 @@ contract EquilibriaGlpVault is AbstractVault {
 
   function deposit(
     uint256 amount,
-    address receiver,
     uint256 minLpOut,
     IPendleRouter.ApproxParams calldata guessPtReceivedFromSy,
     IPendleRouter.TokenInput calldata input
   ) public returns (uint256) {
-    require(amount <= maxDeposit(receiver), "ERC4626: deposit more than max");
+    require(amount <= maxDeposit(msg.sender), "ERC4626: deposit more than max");
 
     SafeERC20.safeTransferFrom(weth, msg.sender, address(this), amount);
     SafeERC20.safeApprove(weth, address(eqbZap), amount);
@@ -71,18 +70,16 @@ contract EquilibriaGlpVault is AbstractVault {
 
     eqbZap.zapIn(pid, minLpOut, guessPtReceivedFromSy, input, true);
     uint256 shares = totalStakedButWithoutLockedAssets().sub(originalShares);
-    _mint(receiver, shares);
+    _mint(msg.sender, shares);
 
-    emit Deposit(_msgSender(), receiver, amount, shares);
+    emit Deposit(_msgSender(), msg.sender, amount, shares);
     return shares;
   }
 
-  function redeemAll(
+  function redeem(
     uint256 shares,
-    address receiver,
     IPendleRouter.TokenOutput calldata output
-  ) public returns (uint256) {
-    console.log("redeemAll of GLP");
+  ) public override returns (uint256) {
     (, , address rewardPool, ) = pendleBooster.poolInfo(pid);
     SafeERC20.safeApprove(
       IBaseRewardPool(rewardPool).stakingToken(),
@@ -103,15 +100,8 @@ contract EquilibriaGlpVault is AbstractVault {
     //     shares,
     //     output
     // );
-    uint256 shares = super.redeem(shares, receiver, msg.sender);
+    uint256 shares = super.redeem(shares, msg.sender, msg.sender);
     return shares;
-  }
-
-  function redeemAll(
-    uint256 shares,
-    address receiver
-  ) public override returns (uint256) {
-    revert("Not implemented");
   }
 
   function claim(

@@ -33,7 +33,7 @@ let oneInchSwapDataForGDAI;
 let pendleZapInData;
 
 async function deposit() {
-  return await (await portfolioContract.deposit(dpxAmount, oneInchSwapDataForDpx.tx.data, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 10692137 })).wait();
+  return await (await portfolioContract.deposit(dpxAmount, wallet.address, oneInchSwapDataForDpx.tx.data, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 10692137 })).wait();
 }
 
 describe("All Weather Protocol", function () {
@@ -114,7 +114,7 @@ describe("All Weather Protocol", function () {
       // const pendleZapOutData = await getPendleZapOutData(42161, glpMarketPoolAddress, fsGLP.address, shares, 0.4);
       const pendleZapOutData = await getPendleZapOutData(42161, glpMarketPoolAddress, weth.address, shares, 1);
       // // withdraw
-      await (await portfolioContract.connect(wallet).redeemAll(dpxAmount, wallet.address, pendleZapOutData[3], { gasLimit: 4675600 })).wait();
+      await (await portfolioContract.connect(wallet).redeem(dpxAmount, wallet.address, pendleZapOutData[3], { gasLimit: 4675600 })).wait();
       expect(await pendleGlpMarketLPT.balanceOf(wallet.address)).to.equal(shares);
       expect(await equilibriaGlpVault.totalAssets()).to.equal(0);
     });

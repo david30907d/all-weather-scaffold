@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import "../radiant/IFeeDistribution.sol";
 import "../utils/IWETH.sol";
 import "hardhat/console.sol";
+import "../pendle/IPendleRouter.sol";
 
 abstract contract AbstractVault is ERC4626 {
   IWETH public immutable weth =
@@ -65,6 +66,13 @@ abstract contract AbstractVault is ERC4626 {
   }
 
   function redeem(uint256 shares) public virtual returns (uint256) {
+    revert("Not implemented");
+  }
+
+  function redeem(
+    uint256 shares,
+    IPendleRouter.TokenOutput calldata output
+  ) public virtual returns (uint256) {
     revert("Not implemented");
   }
 
