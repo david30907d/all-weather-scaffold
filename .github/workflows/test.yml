@@ -29,3 +29,4 @@ jobs:
           BLOCK_NUMBER=107716130 yarn test test/radiantDlpVaultTest.js;
           BLOCK_NUMBER=107716130 yarn test test/radiantDlpVaultRewardTest.js;
           BLOCK_NUMBER=107716130 yarn test test/equilibriaGLP.js;
+          BLOCK_NUMBER=107716130 yarn test test/equilibriaGDAI.js
