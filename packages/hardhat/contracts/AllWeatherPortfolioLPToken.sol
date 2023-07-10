@@ -259,29 +259,29 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     }
 
     ClaimableRewardOfAProtocol[]
-      memory totalClaimableRewards = new ClaimableRewardOfAProtocol[](4);
-    totalClaimableRewards[0] = ClaimableRewardOfAProtocol({
-      protocol: "dpx",
-      claimableRewards: DpxArbitrumVault(dpxVaultAddr).getClaimableRewards()
-    });
-    totalClaimableRewards[1] = ClaimableRewardOfAProtocol({
-      protocol: "radiant-arbitrum",
-      claimableRewards: _multiplyProRataRatioToClaimableRewards(
-        RadiantArbitrumVault(radiantVaultAddr).getClaimableRewards(),
-        userShares,
-        portfolioShares
-      )
-    });
-    totalClaimableRewards[2] = ClaimableRewardOfAProtocol({
-      protocol: "equilibria-glp",
-      claimableRewards: EquilibriaGlpVault(equilibriaVaultAddr)
-        .getClaimableRewards()
-    });
-    totalClaimableRewards[3] = ClaimableRewardOfAProtocol({
-      protocol: "equilibria-gdai",
-      claimableRewards: EquilibriaGDAIVault(equilibriaGDAIVaultAddr)
-        .getClaimableRewards()
-    });
+      memory totalClaimableRewards = new ClaimableRewardOfAProtocol[](
+        vaults.length
+      );
+    for (uint256 i = 0; i < vaults.length; i++) {
+      bytes32 bytesOfvaultName = keccak256(bytes(vaults[i].name()));
+      if (
+        bytesOfvaultName == keccak256(bytes("AllWeatherLP-RadiantArbitrum-DLP"))
+      ) {
+        totalClaimableRewards[i] = ClaimableRewardOfAProtocol({
+          protocol: vaults[i].name(),
+          claimableRewards: _multiplyProRataRatioToClaimableRewards(
+            vaults[i].getClaimableRewards(),
+            userShares,
+            portfolioShares
+          )
+        });
+      } else {
+        totalClaimableRewards[i] = ClaimableRewardOfAProtocol({
+          protocol: vaults[i].name(),
+          claimableRewards: vaults[i].getClaimableRewards()
+        });
+      }
+    }
     return totalClaimableRewards;
   }
 

@@ -96,7 +96,7 @@ describe("All Weather Protocol", function () {
       const originalSushiBalance = await sushiToken.balanceOf(wallet.address);
       const originalDpxBalance = await dpxToken.balanceOf(wallet.address);
       const claimableRewards = await portfolioContract.connect(wallet).getClaimableRewards(wallet.address);
-      expect(claimableRewards[0].protocol).to.equal("dpx");
+      expect(claimableRewards[0].protocol).to.equal("AllWeatherLP-SushSwap-DpxETH");
       const sushiClaimableReward = claimableRewards[0].claimableRewards[0].amount;
       const dpxClaimableReward = claimableRewards[0].claimableRewards[1].amount;
       expect(sushiClaimableReward).to.be.gt(0);

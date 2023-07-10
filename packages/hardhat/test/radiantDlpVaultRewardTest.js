@@ -93,7 +93,7 @@ describe("All Weather Protocol", function () {
 
       const claimableRewards = await portfolioContract.connect(wallet).getClaimableRewards(wallet.address);
 
-      expect(claimableRewards[1].protocol).to.equal("radiant-arbitrum");
+      expect(claimableRewards[1].protocol).to.equal("AllWeatherLP-RadiantArbitrum-DLP");
       // Error: VM Exception while processing transaction: reverted with reason string 'SafeERC20: low-level call failed'
       // means you probably transfer a pretty weird token
       await (await portfolioContract.connect(wallet).claim(randomWallet.address, [], { gasLimit: 30000000 })).wait();

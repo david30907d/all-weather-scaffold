@@ -128,7 +128,7 @@ describe("All Weather Protocol", function () {
       const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
       let pendleClaimableReward;
       for (const claimableReward of claimableRewards) {
-        if (claimableReward.protocol !== "equilibria-gdai") {
+        if (claimableReward.protocol !== "AllWeatherLP-Equilibria-GDAI") {
           expect(claimableReward.claimableRewards).to.deep.equal([]);
         } else {
           expect(claimableReward.claimableRewards.length).to.equal(1);
@@ -143,7 +143,7 @@ describe("All Weather Protocol", function () {
       expect((await pendleToken.balanceOf(wallet.address)).sub(originalPendleToken)).to.be.gt(pendleClaimableReward);
       const remainingClaimableRewards = await portfolioContract.connect(wallet).getClaimableRewards(wallet.address);
       for (const claimableReward of remainingClaimableRewards) {
-        if (claimableReward.protocol === "equilibria-gdai") {
+        if (claimableReward.protocol === "AllWeatherLP-Equilibria-GDAI") {
           expect(claimableReward.claimableRewards[0].amount).to.equal(0);
         }
       }

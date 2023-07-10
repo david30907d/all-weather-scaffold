@@ -131,7 +131,7 @@ describe("All Weather Protocol", function () {
       const originalWethBalance = await weth.balanceOf(wallet.address);
       const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
       for (const claimableReward of claimableRewards) {
-        if (claimableReward.protocol !== "equilibria-glp") {
+        if (claimableReward.protocol !== "AllWeatherLP-Equilibria-GLP") {
           expect(claimableReward.claimableRewards).to.deep.equal([]);
         } else {
           expect(claimableReward.claimableRewards.length).to.equal(2);
