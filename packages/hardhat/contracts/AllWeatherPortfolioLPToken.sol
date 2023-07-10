@@ -174,9 +174,13 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         shares,
         totalSupply()
       );
-
+      bytes32 bytesOfvaultName = keccak256(bytes(vaults[i].name()));
       if (vaultShares > 0) {
-        if (i == 2 || i == 3) {
+        if (
+          bytesOfvaultName ==
+          keccak256(bytes("AllWeatherLP-Equilibria-GDAI")) ||
+          bytesOfvaultName == keccak256(bytes("AllWeatherLP-Equilibria-GLP"))
+        ) {
           // equilibria needs `output` to be passed in
           vaults[i].redeem(vaultShares, output);
         } else {
@@ -203,26 +207,37 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     }
     for (uint256 i = 0; i < vaults.length; i++) {
       IFeeDistribution.RewardData[] memory rewardsOfThisVault;
-      if (i == 2 || i == 3) {
+      bytes32 bytesOfvaultName = keccak256(bytes(vaults[i].name()));
+      if (
+        bytesOfvaultName == keccak256(bytes("AllWeatherLP-Equilibria-GDAI")) ||
+        bytesOfvaultName == keccak256(bytes("AllWeatherLP-Equilibria-GLP"))
+      ) {
         // equilibria needs `pids` to be passed in
         rewardsOfThisVault = vaults[i].claim(equilibriaPids);
       } else {
         rewardsOfThisVault = vaults[i].claim();
       }
-      if (i == 0) {
+      if (
+        bytesOfvaultName == keccak256(bytes("AllWeatherLP-SushSwap-DpxETH"))
+      ) {
         _distributeERC20UserRewardProRata(
           receiver,
           userShares,
           portfolioShares,
           rewardsOfThisVault
         );
-      } else if (i == 1) {
+      } else if (
+        bytesOfvaultName == keccak256(bytes("AllWeatherLP-RadiantArbitrum-DLP"))
+      ) {
         _distributeRadiantUserRewardProRata(
           receiver,
           userShares,
           portfolioShares
         );
-      } else if (i == 2 || i == 3) {
+      } else if (
+        bytesOfvaultName == keccak256(bytes("AllWeatherLP-Equilibria-GDAI")) ||
+        bytesOfvaultName == keccak256(bytes("AllWeatherLP-Equilibria-GLP"))
+      ) {
         // equilibria needs `output` to be passed in
         _distributeERC20UserRewardProRata(
           receiver,

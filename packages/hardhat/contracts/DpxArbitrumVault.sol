@@ -52,7 +52,7 @@ contract DpxArbitrumVault is AbstractVault {
     IERC20Metadata asset_,
     address sushiSwapMiniChefV2_,
     uint256 pid_
-  ) ERC4626(asset_) ERC20("DpxVault", "DPXV") {
+  ) ERC4626(asset_) ERC20("AllWeatherLP-SushSwap-DpxETH", "DPXV") {
     pid = pid_;
     sushiSwapMiniChef = IMiniChefV2(sushiSwapMiniChefV2_);
   }
