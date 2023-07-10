@@ -105,7 +105,7 @@ contract EquilibriaGlpVault is AbstractVault {
   }
 
   function claim(
-    uint256[] memory pids
+    uint256[] calldata pids
   ) public override returns (IFeeDistribution.RewardData[] memory) {
     IFeeDistribution.RewardData[]
       memory claimableRewards = getClaimableRewards();
