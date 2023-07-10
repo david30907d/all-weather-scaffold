@@ -45,6 +45,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   address public equilibriaGDAIVaultAddr;
 
   PortfolioAllocationOfSingleCategory[] public portfolioAllocation;
+  AbstractVault[] public vaults = new AbstractVault[](4);
 
   constructor(
     address asset_,
@@ -58,6 +59,11 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     equilibriaVaultAddr = equilibriaVaultAddr_;
     equilibriaGDAIVaultAddr = equilibriaGDAIVaultAddr_;
     asset = ERC20(asset_);
+
+    vaults[0] = DpxArbitrumVault(dpxVaultAddr);
+    vaults[1] = RadiantArbitrumVault(radiantVaultAddr);
+    vaults[2] = EquilibriaGlpVault(equilibriaVaultAddr);
+    vaults[3] = EquilibriaGDAIVault(equilibriaGDAIVaultAddr);
   }
 
   function setVaultAllocations(
@@ -112,11 +118,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
           RadiantArbitrumVault(radiantVaultAddr).deposit(amount) > 0,
           "Buying Radiant LP token failed"
         );
-      } else if (protocolHash == keccak256(bytes("radiant-bsc"))) {
-        // need li.fi SDK
-        // (bool succ, bytes memory data) = address(oneInchAggregatorAddress).call(
-        //   oneInchData
-        // );
       } else if (protocolHash == keccak256(bytes("equilibria-glp"))) {
         SafeERC20.safeApprove(
           IERC20(asset),
@@ -148,6 +149,11 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
           ) > 0,
           "Zap Into Equilibria GDAI failed"
         );
+      } else if (protocolHash == keccak256(bytes("radiant-bsc"))) {
+        // need li.fi SDK
+        // (bool succ, bytes memory data) = address(oneInchAggregatorAddress).call(
+        //   oneInchData
+        // );
       } else {
         revert("Protocol not supported");
       }
@@ -162,12 +168,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     address receiver,
     IPendleRouter.TokenOutput calldata output
   ) public {
-    AbstractVault[] memory vaults = new AbstractVault[](4);
-    vaults[0] = RadiantArbitrumVault(radiantVaultAddr);
-    vaults[1] = DpxArbitrumVault(dpxVaultAddr);
-    vaults[2] = EquilibriaGlpVault(equilibriaVaultAddr);
-    vaults[3] = EquilibriaGDAIVault(equilibriaGDAIVaultAddr);
-
     for (uint256 i = 0; i < vaults.length; i++) {
       uint256 vaultShares = Math.mulDiv(
         vaults[i].balanceOf(address(this)),
@@ -201,43 +201,37 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     if (userShares == 0 || portfolioShares == 0) {
       return;
     }
-    // dpx
-    IFeeDistribution.RewardData[] memory dpxRewards = DpxArbitrumVault(
-      dpxVaultAddr
-    ).claim();
-    _distributeERC20UserRewardProRata(
-      receiver,
-      userShares,
-      portfolioShares,
-      dpxRewards
-    );
-
-    // radiant-arbitrum
-    RadiantArbitrumVault(radiantVaultAddr).claim();
-    _distributeRadiantUserRewardProRata(receiver, userShares, portfolioShares);
-
-    // equilibria-glp
-    IFeeDistribution.RewardData[] memory equilibriaRewards = EquilibriaGlpVault(
-      equilibriaVaultAddr
-    ).claim(equilibriaPids);
-    _distributeERC20UserRewardProRata(
-      receiver,
-      userShares,
-      portfolioShares,
-      equilibriaRewards
-    );
-
-    // equilibria-gdai
-    IFeeDistribution.RewardData[]
-      memory equilibriaGDAIRewards = EquilibriaGDAIVault(
-        equilibriaGDAIVaultAddr
-      ).claim(equilibriaPids);
-    _distributeERC20UserRewardProRata(
-      receiver,
-      userShares,
-      portfolioShares,
-      equilibriaGDAIRewards
-    );
+    for (uint256 i = 0; i < vaults.length; i++) {
+      IFeeDistribution.RewardData[] memory rewardsOfThisVault;
+      if (i == 2 || i == 3) {
+        // equilibria needs `pids` to be passed in
+        rewardsOfThisVault = vaults[i].claim(equilibriaPids);
+      } else {
+        rewardsOfThisVault = vaults[i].claim();
+      }
+      if (i == 0) {
+        _distributeERC20UserRewardProRata(
+          receiver,
+          userShares,
+          portfolioShares,
+          rewardsOfThisVault
+        );
+      } else if (i == 1) {
+        _distributeRadiantUserRewardProRata(
+          receiver,
+          userShares,
+          portfolioShares
+        );
+      } else if (i == 2 || i == 3) {
+        // equilibria needs `output` to be passed in
+        _distributeERC20UserRewardProRata(
+          receiver,
+          userShares,
+          portfolioShares,
+          rewardsOfThisVault
+        );
+      }
+    }
   }
 
   function getClaimableRewards(

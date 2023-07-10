@@ -95,12 +95,12 @@ abstract contract BaseEquilibriaVault is AbstractVault {
 
   function claim(
     uint256[] memory pids
-  ) public returns (IFeeDistribution.RewardData[] memory) {
+  ) public override returns (IFeeDistribution.RewardData[] memory) {
     IFeeDistribution.RewardData[]
       memory claimableRewards = getClaimableRewards();
     if (claimableRewards.length != 0) {
       eqbZap.claimRewards(pids);
-      super.claim(claimableRewards);
+      super.claimRewardsFromVaultToPortfolioVault(claimableRewards);
     }
     return claimableRewards;
   }

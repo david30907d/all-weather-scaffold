@@ -101,12 +101,16 @@ contract DpxArbitrumVault is AbstractVault {
     return shares;
   }
 
-  function claim() public returns (IFeeDistribution.RewardData[] memory) {
+  function claim()
+    public
+    override
+    returns (IFeeDistribution.RewardData[] memory)
+  {
     IFeeDistribution.RewardData[]
       memory claimableRewards = getClaimableRewards();
     if (claimableRewards.length != 0) {
       sushiSwapMiniChef.harvest(pid, address(this));
-      super.claim(claimableRewards);
+      super.claimRewardsFromVaultToPortfolioVault(claimableRewards);
     }
     return claimableRewards;
   }

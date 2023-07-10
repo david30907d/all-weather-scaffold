@@ -86,7 +86,21 @@ abstract contract AbstractVault is ERC4626 {
     revert("Not implemented");
   }
 
+  function claim()
+    public
+    virtual
+    returns (IFeeDistribution.RewardData[] memory)
+  {
+    revert("Not implemented");
+  }
+
   function claim(
+    uint256[] memory pids
+  ) public virtual returns (IFeeDistribution.RewardData[] memory) {
+    revert("Not implemented");
+  }
+
+  function claimRewardsFromVaultToPortfolioVault(
     IFeeDistribution.RewardData[] memory claimableRewards
   ) public virtual {
     for (uint256 i = 0; i < claimableRewards.length; i++) {

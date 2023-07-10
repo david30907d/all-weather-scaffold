@@ -88,7 +88,11 @@ contract RadiantArbitrumVault is AbstractVault {
     return vaultShare;
   }
 
-  function claim() public {
+  function claim()
+    public
+    override
+    returns (IFeeDistribution.RewardData[] memory)
+  {
     IFeeDistribution.RewardData[]
       memory claimableRewards = getClaimableRewards();
     if (claimableRewards.length != 0) {
@@ -96,6 +100,7 @@ contract RadiantArbitrumVault is AbstractVault {
       _withdrawRTokenToReceiver();
       _withdrawETHRewardToReceiver();
     }
+    return claimableRewards;
   }
 
   function getClaimableRewards()
