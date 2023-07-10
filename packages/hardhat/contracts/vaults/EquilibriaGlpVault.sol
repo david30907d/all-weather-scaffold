@@ -59,7 +59,7 @@ contract EquilibriaGlpVault is AbstractVault {
     uint256 minLpOut,
     IPendleRouter.ApproxParams calldata guessPtReceivedFromSy,
     IPendleRouter.TokenInput calldata input
-  ) public returns (uint256) {
+  ) public override returns (uint256) {
     require(amount <= maxDeposit(msg.sender), "ERC4626: deposit more than max");
 
     SafeERC20.safeTransferFrom(weth, msg.sender, address(this), amount);

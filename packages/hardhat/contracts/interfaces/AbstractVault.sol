@@ -50,6 +50,33 @@ abstract contract AbstractVault is ERC4626 {
     return _mintShares(shares, amount);
   }
 
+  function deposit(
+    uint256 amount,
+    uint256 minLpOut,
+    IPendleRouter.ApproxParams calldata guessPtReceivedFromSy,
+    IPendleRouter.TokenInput calldata input
+  ) public virtual returns (uint256) {
+    revert("AbstractVault: deposit for equilibria has not implemented yet");
+  }
+
+  function deposit(
+    uint256 amount,
+    bytes calldata oneInchData,
+    uint256 minLpOut,
+    IPendleRouter.ApproxParams calldata guessPtReceivedFromSy,
+    IPendleRouter.TokenInput calldata input
+  ) public virtual returns (uint256) {
+    _prepareForDeposit(amount);
+    uint256 shares = _zapIn(
+      amount,
+      oneInchData,
+      minLpOut,
+      guessPtReceivedFromSy,
+      input
+    );
+    return _mintShares(shares, shares);
+  }
+
   function _prepareForDeposit(uint256 amount) public virtual {
     require(amount <= maxDeposit(msg.sender), "ERC4626: deposit more than max");
     SafeERC20.safeTransferFrom(weth, msg.sender, address(this), amount);
@@ -62,6 +89,16 @@ abstract contract AbstractVault is ERC4626 {
   function _zapIn(
     uint256 amount,
     bytes calldata oneInchData
+  ) internal virtual returns (uint256) {
+    revert("AbstractVault: _zapIn not implemented");
+  }
+
+  function _zapIn(
+    uint256 amount,
+    bytes calldata oneInchData,
+    uint256 minLpOut,
+    IPendleRouter.ApproxParams calldata guessPtReceivedFromSy,
+    IPendleRouter.TokenInput calldata input
   ) internal virtual returns (uint256) {
     revert("AbstractVault: _zapIn not implemented");
   }

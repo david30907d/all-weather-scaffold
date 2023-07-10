@@ -67,7 +67,7 @@ describe("All Weather Protocol", function () {
     const AllWeatherPortfolioLPToken = await ethers.getContractFactory("AllWeatherPortfolioLPToken");
     portfolioContract = await AllWeatherPortfolioLPToken.deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address);
     await portfolioContract.connect(wallet).deployed();
-    await portfolioContract.setVaultAllocations([{protocol: "radiant-arbitrum", percentage: 100}]).then((tx) => tx.wait());
+    await portfolioContract.setVaultAllocations([{protocol: "AllWeatherLP-RadiantArbitrum-DLP", percentage: 100}]).then((tx) => tx.wait());
 
 
     await (await weth.connect(wallet).approve(portfolioContract.address, radiantAmount, { gasLimit: 2057560 })).wait();

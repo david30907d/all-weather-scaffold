@@ -28,31 +28,13 @@ contract EquilibriaGDAIVault is BaseEquilibriaVault {
     return IERC20(asset()).balanceOf(address(this));
   }
 
-  function deposit(
-    uint256 amount,
-    bytes calldata oneInchData,
-    uint256 minLpOut,
-    IPendleRouter.ApproxParams calldata guessPtReceivedFromSy,
-    IPendleRouter.TokenInput calldata input
-  ) public returns (uint256) {
-    _prepareForDeposit(amount);
-    uint256 shares = _zapIn(
-      amount,
-      oneInchData,
-      minLpOut,
-      guessPtReceivedFromSy,
-      input
-    );
-    return _mintShares(shares, shares);
-  }
-
   function _zapIn(
     uint256 amount,
     bytes calldata oneInchData,
     uint256 minLpOut,
     IPendleRouter.ApproxParams calldata guessPtReceivedFromSy,
     IPendleRouter.TokenInput calldata input
-  ) internal returns (uint256) {
+  ) internal override returns (uint256) {
     // swap weth to DAI with 1inch
     uint256 originalDaiBalance = DAI.balanceOf(address(this));
     SafeERC20.safeApprove(weth, oneInchAggregatorAddress, amount);

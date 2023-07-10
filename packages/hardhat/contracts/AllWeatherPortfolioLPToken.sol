@@ -44,7 +44,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   address public equilibriaVaultAddr;
   address public equilibriaGDAIVaultAddr;
 
-  PortfolioAllocationOfSingleCategory[] public portfolioAllocation;
+  mapping(string => uint256) public portfolioAllocation;
   AbstractVault[] public vaults = new AbstractVault[](4);
 
   constructor(
@@ -70,13 +70,10 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     PortfolioAllocationOfSingleCategory[] memory portfolioAllocation_
   ) public onlyOwner {
     uint256 length = portfolioAllocation_.length;
-
-    // Clear existing storage array
-    delete portfolioAllocation;
-
-    // Assign each element individually
     for (uint256 i = 0; i < length; i++) {
-      portfolioAllocation.push(portfolioAllocation_[i]);
+      portfolioAllocation[
+        portfolioAllocation_[i].protocol
+      ] = portfolioAllocation_[i].percentage;
     }
   }
 
@@ -97,35 +94,40 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       address(this),
       amount
     );
-    for (uint idx = 0; idx < portfolioAllocation.length; idx++) {
-      bytes32 protocolHash = keccak256(
-        bytes(portfolioAllocation[idx].protocol)
-      );
+    for (uint idx = 0; idx < vaults.length; idx++) {
+      bytes32 bytesOfvaultName = keccak256(bytes(vaults[idx].name()));
       uint256 zapInAmountForThisVault = Math.mulDiv(
         amount,
-        portfolioAllocation[idx].percentage,
+        portfolioAllocation[vaults[idx].name()],
         100
       );
-      if (protocolHash == keccak256(bytes("dpx"))) {
-        SafeERC20.safeApprove(IERC20(asset), dpxVaultAddr, amount);
+      if (zapInAmountForThisVault == 0) {
+        continue;
+      }
+      SafeERC20.safeApprove(
+        IERC20(asset),
+        address(vaults[idx]),
+        zapInAmountForThisVault
+      );
+      if (
+        bytesOfvaultName == keccak256(bytes("AllWeatherLP-SushSwap-DpxETH"))
+      ) {
         require(
-          DpxArbitrumVault(dpxVaultAddr).deposit(amount, oneInchDataDpx) > 0,
+          vaults[idx].deposit(zapInAmountForThisVault, oneInchDataDpx) > 0,
           "Buying Dpx LP token failed"
         );
-      } else if (protocolHash == keccak256(bytes("radiant-arbitrum"))) {
-        SafeERC20.safeApprove(IERC20(asset), radiantVaultAddr, amount);
+      } else if (
+        bytesOfvaultName == keccak256(bytes("AllWeatherLP-RadiantArbitrum-DLP"))
+      ) {
         require(
-          RadiantArbitrumVault(radiantVaultAddr).deposit(amount) > 0,
+          vaults[idx].deposit(zapInAmountForThisVault) > 0,
           "Buying Radiant LP token failed"
         );
-      } else if (protocolHash == keccak256(bytes("equilibria-glp"))) {
-        SafeERC20.safeApprove(
-          IERC20(asset),
-          equilibriaVaultAddr,
-          zapInAmountForThisVault
-        );
+      } else if (
+        bytesOfvaultName == keccak256(bytes("AllWeatherLP-Equilibria-GLP"))
+      ) {
         require(
-          EquilibriaGlpVault(equilibriaVaultAddr).deposit(
+          vaults[idx].deposit(
             zapInAmountForThisVault,
             minLpOut,
             guessPtReceivedFromSy,
@@ -133,14 +135,11 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
           ) > 0,
           "Zap Into Equilibria GLP failed"
         );
-      } else if (protocolHash == keccak256(bytes("equilibria-gdai"))) {
-        SafeERC20.safeApprove(
-          IERC20(asset),
-          equilibriaGDAIVaultAddr,
-          zapInAmountForThisVault
-        );
+      } else if (
+        bytesOfvaultName == keccak256(bytes("AllWeatherLP-Equilibria-GDAI"))
+      ) {
         require(
-          EquilibriaGDAIVault(equilibriaGDAIVaultAddr).deposit(
+          vaults[idx].deposit(
             zapInAmountForThisVault,
             oneInchDataGDAI,
             minLpOut,
@@ -149,13 +148,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
           ) > 0,
           "Zap Into Equilibria GDAI failed"
         );
-      } else if (protocolHash == keccak256(bytes("radiant-bsc"))) {
-        // need li.fi SDK
-        // (bool succ, bytes memory data) = address(oneInchAggregatorAddress).call(
-        //   oneInchData
-        // );
-      } else {
-        revert("Protocol not supported");
       }
     }
 
