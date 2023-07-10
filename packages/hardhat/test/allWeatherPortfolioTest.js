@@ -35,7 +35,7 @@ let oneInchSwapDataForGDAI;
 let pendleGDAIZapInData;
 let pendleGLPZapInData;
 async function deposit() {
-    return await (await portfolioContract.deposit(end2endTestingAmount, wallet.address, oneInchSwapDataForDpx.tx.data, pendleGDAIZapInData[2], pendleGDAIZapInData[3], pendleGDAIZapInData[4], pendleGLPZapInData[2], pendleGLPZapInData[3], pendleGLPZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 10692137 })).wait();
+    return await (await portfolioContract.deposit(end2endTestingAmount, wallet.address, oneInchSwapDataForDpx.tx.data, pendleGLPZapInData[2], pendleGLPZapInData[3], pendleGLPZapInData[4], pendleGDAIZapInData[2], pendleGDAIZapInData[3], pendleGDAIZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 10692137 })).wait();
 }
 
 describe("All Weather Protocol", function () {
@@ -92,6 +92,7 @@ describe("All Weather Protocol", function () {
 
         oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxToken.address, end2endTestingAmount.div(8), wallet.address, 50);
         oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, end2endTestingAmount.div(4), wallet.address, 50);
+        console.log("pendle DAI zap in amount:", ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount));
         pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount), 0.2, daiToken.address);
         pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, end2endTestingAmount.div(4), 0.99);
     });
@@ -100,7 +101,7 @@ describe("All Weather Protocol", function () {
         it("Should be able to zapin with WETH into equilibria GDAI", async function () {
             this.timeout(120000); // Set timeout to 120 seconds
             console.log(await portfolioContract.getPortfolioAllocation());
-              const receipt = await deposit();
+            const receipt = await deposit();
             // // Iterate over the events and find the Deposit event
             // for (const event of receipt.events) {
             //   if (event.topics.includes(equilibriaGDAIVault.interface.getEventTopic('Deposit'))) {

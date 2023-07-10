@@ -153,8 +153,20 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
           ),
           "Zap Into Equilibria GLP failed"
         );
-        // } else if (bytesOfvaultName == keccak256(bytes("AllWeatherLP-Equilibria-GDAI"))) {
-        //   require(_depositEquilibriaGDAI(idx, zapInAmountForThisVault, gdaiOneInchDataGDAI, gdaiMinLpOut, gdaiGuessPtReceivedFromSy, gdaiInput), "Zap Into Equilibria GDAI failed");
+      } else if (
+        bytesOfvaultName == keccak256(bytes("AllWeatherLP-Equilibria-GDAI"))
+      ) {
+        require(
+          _depositEquilibriaGDAI(
+            idx,
+            zapInAmountForThisVault,
+            gdaiOneInchDataGDAI,
+            gdaiMinLpOut,
+            gdaiGuessPtReceivedFromSy,
+            gdaiInput
+          ),
+          "Zap Into Equilibria GDAI failed"
+        );
       }
     }
 
