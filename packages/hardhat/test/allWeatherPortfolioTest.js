@@ -142,11 +142,26 @@ describe("All Weather Protocol", function () {
           currentTimestamp += 12 * 31 * 24 * 60 * 60; // Increment timestamp
           await simulateAYearLater();
     
-          // // withdraw
-          console.log([(await equilibriaGlpVault.pid()).toNumber(), (await equilibriaGDAIVault.pid()).toNumber()]);
-          await (await portfolioContract.connect(wallet).redeem(dpxAmount, wallet.address, pendleZapOutData[3], { gasLimit: 4675600 })).wait();
-        //   expect(await pendleGDAIMarketLPT.balanceOf(wallet.address)).to.equal(shares);
-        //   expect(await equilibriaGDAIVault.totalAssets()).to.equal(0);
+          const totalAssetsWhichShouldBeWithdrew = await portfolioContract.totalAssets();
+          // withdraw
+          await (await portfolioContract.connect(wallet).redeem(end2endTestingAmount, wallet.address, pendleZapOutData[3], { gasLimit: 4675600 })).wait();
+          for (const asset of totalAssetsWhichShouldBeWithdrew) {
+            if (asset.vaultName === 'AllWeatherLP-SushSwap-DpxETH') {
+                expect(asset.assets).to.equal(await dpxSLP.balanceOf(wallet.address));
+            } else if (asset.vaultName === 'AllWeatherLP-RadiantArbitrum-DLP') {
+                expect(asset.assets).to.equal(await dlpToken.balanceOf(wallet.address));
+            } else if  (asset.vaultName === 'AllWeatherLP-Equilibria-GLP') {
+                expect(asset.assets).to.equal(await pendleGlpMarketLPT.balanceOf(wallet.address));
+            } else if (asset.vaultName === 'AllWeatherLP-Equilibria-GDAI') {
+                expect(asset.assets).to.equal(await pendleGDAIMarketLPT.balanceOf(wallet.address));
+            } else {
+                throw new Error(`Unknown vault name ${asset.vaultName}`);
+            }
+          }
+          const currentUnclaimedAssets = await portfolioContract.totalAssets();
+          for (const asset of currentUnclaimedAssets) {
+            expect(asset.assets).to.equal(0);
+          }
         });
 
         // it("Should be able to claim rewards", async function () {
