@@ -143,10 +143,10 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       if (
         bytesOfvaultName == keccak256(bytes("AllWeatherLP-SushSwap-DpxETH"))
       ) {
-        require(
-          _depositDpxLP(idx, zapInAmountForThisVault, oneInchDataDpx),
-          "Buying Dpx LP token failed"
-        );
+        // require(
+        //   _depositDpxLP(idx, zapInAmountForThisVault, oneInchDataDpx),
+        //   "Buying Dpx LP token failed"
+        // );
       } else if (
         bytesOfvaultName == keccak256(bytes("AllWeatherLP-RadiantArbitrum-DLP"))
       ) {
@@ -239,7 +239,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
 
   function redeem(
     uint256 shares,
-    address receiver,
+    address payable receiver,
     IPendleRouter.TokenOutput calldata output
   ) public {
     for (uint256 i = 0; i < vaults.length; i++) {
@@ -267,13 +267,11 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         );
       }
     }
+    claim(receiver);
     _burn(msg.sender, shares);
   }
 
-  function claim(
-    address payable receiver,
-    uint256[] calldata equilibriaPids
-  ) public {
+  function claim(address payable receiver) public {
     uint256 userShares = balanceOf(msg.sender);
     uint256 portfolioShares = totalSupply();
     if (userShares == 0 || portfolioShares == 0) {
@@ -282,15 +280,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     for (uint256 i = 0; i < vaults.length; i++) {
       IFeeDistribution.RewardData[] memory rewardsOfThisVault;
       bytes32 bytesOfvaultName = keccak256(bytes(vaults[i].name()));
-      if (
-        bytesOfvaultName == keccak256(bytes("AllWeatherLP-Equilibria-GDAI")) ||
-        bytesOfvaultName == keccak256(bytes("AllWeatherLP-Equilibria-GLP"))
-      ) {
-        // equilibria needs `pids` to be passed in
-        rewardsOfThisVault = vaults[i].claim(equilibriaPids);
-      } else {
-        rewardsOfThisVault = vaults[i].claim();
-      }
+      rewardsOfThisVault = vaults[i].claim();
       if (
         bytesOfvaultName == keccak256(bytes("AllWeatherLP-SushSwap-DpxETH"))
       ) {
@@ -324,7 +314,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   }
 
   function getClaimableRewards(
-    address receiver
+    address payable receiver
   ) public view returns (ClaimableRewardOfAProtocol[] memory) {
     uint256 userShares = balanceOf(receiver);
     uint256 portfolioShares = totalSupply();

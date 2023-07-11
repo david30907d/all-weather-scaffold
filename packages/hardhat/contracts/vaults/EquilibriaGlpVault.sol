@@ -104,12 +104,16 @@ contract EquilibriaGlpVault is AbstractVault {
     return shares;
   }
 
-  function claim(
-    uint256[] calldata pids
-  ) public override returns (IFeeDistribution.RewardData[] memory) {
+  function claim()
+    public
+    override
+    returns (IFeeDistribution.RewardData[] memory)
+  {
     IFeeDistribution.RewardData[]
       memory claimableRewards = getClaimableRewards();
     if (claimableRewards.length != 0) {
+      uint256[] memory pids = new uint256[](1);
+      pids[0] = pid;
       eqbZap.claimRewards(pids);
       super.claimRewardsFromVaultToPortfolioVault(claimableRewards);
     }

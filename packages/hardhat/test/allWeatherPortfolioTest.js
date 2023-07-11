@@ -23,8 +23,9 @@ const { fetch1InchSwapData,
     daiAddress,
     gDAIRewardPoolAddress,
     glpMarketPoolAddress,
+    simulateAYearLater
 } = require("./utils");
-
+let {currentTimestamp} = require("./utils");
 
 let wallet;
 let weth;
@@ -96,7 +97,7 @@ describe("All Weather Protocol", function () {
     });
 
     describe("Portfolio LP Contract Test", function () {
-        it("Should be able to zapin with WETH into equilibria GDAI", async function () {
+        it("Should be able to zapin with WETH into All Weather Portfolio", async function () {
             this.timeout(120000); // Set timeout to 120 seconds
             const receipt = await deposit();
             // Iterate over the events and find the Deposit event
@@ -124,24 +125,29 @@ describe("All Weather Protocol", function () {
                 }
             }
         });
-        // it("Should be able to withdraw GDAI from equilibria", async function () {
-        //   this.timeout(120000); // Set timeout to 120 seconds
-        //   const radiantLockedDlpBalanceBeforeDeposit = await radiantVault.totalAssets();
-        //   expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
-        //   const receipt = await deposit();
-        //   let shares;
-        //   for (const event of receipt.events) {
-        //     if (event.topics.includes(equilibriaGDAIVault.interface.getEventTopic('Deposit'))) {
-        //       const decodedEvent = equilibriaGDAIVault.interface.decodeEventLog('Deposit', event.data, event.topics);
-        //       shares = decodedEvent.shares;
-        //     }
-        //   }
-        //   const pendleZapOutData = await getPendleZapOutData(42161, gDAIMarketPoolAddress, daiToken.address, shares, 1);
-        //   // // withdraw
-        //   await (await portfolioContract.connect(wallet).redeem(dpxAmount, wallet.address, pendleZapOutData[3], { gasLimit: 4675600 })).wait();
+        it("Should be able to withdraw everything from All Weather Portfolio", async function () {
+          this.timeout(120000); // Set timeout to 120 seconds
+          const radiantLockedDlpBalanceBeforeDeposit = await radiantVault.totalAssets();
+          expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
+          const receipt = await deposit();
+          let shares;
+          for (const event of receipt.events) {
+            if (event.topics.includes(equilibriaGDAIVault.interface.getEventTopic('Deposit'))) {
+              const decodedEvent = equilibriaGDAIVault.interface.decodeEventLog('Deposit', event.data, event.topics);
+              shares = decodedEvent.shares;
+            }
+          }
+          const pendleZapOutData = await getPendleZapOutData(42161, gDAIMarketPoolAddress, daiToken.address, shares, 1);
+
+          currentTimestamp += 12 * 31 * 24 * 60 * 60; // Increment timestamp
+          await simulateAYearLater();
+    
+          // // withdraw
+          console.log([(await equilibriaGlpVault.pid()).toNumber(), (await equilibriaGDAIVault.pid()).toNumber()]);
+          await (await portfolioContract.connect(wallet).redeem(dpxAmount, wallet.address, pendleZapOutData[3], { gasLimit: 4675600 })).wait();
         //   expect(await pendleGDAIMarketLPT.balanceOf(wallet.address)).to.equal(shares);
         //   expect(await equilibriaGDAIVault.totalAssets()).to.equal(0);
-        // });
+        });
 
         // it("Should be able to claim rewards", async function () {
         //   this.timeout(120000); // Set timeout to 120 seconds

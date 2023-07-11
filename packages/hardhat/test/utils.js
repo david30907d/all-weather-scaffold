@@ -114,6 +114,16 @@ const radiantDlpAddress = "0x32dF62dc3aEd2cD6224193052Ce665DC18165841";
 const radiantLendingPoolAddress = "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1";
 const radiantLockZapAddress = "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1";
 const multiFeeDistributionAddress = "0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE";
+// radiant has an one year lock, therefore need these timestamp-related variables
+let currentTimestamp = Math.floor(Date.now() / 1000);;
+async function simulateAYearLater() {
+  // Simulate a year later
+  const oneMonthInSeconds = 12 * 31 * 24 * 60 * 60;
+  const futureTimestamp = currentTimestamp + oneMonthInSeconds;
+  await ethers.provider.send('evm_setNextBlockTimestamp', [futureTimestamp]);
+  await ethers.provider.send('evm_mine');
+}
+
 
 // GLP
 const fsGLPAddress = "0x1aDDD80E6039594eE970E5872D247bf0414C8903";
@@ -175,5 +185,7 @@ module.exports = {
   daiAddress,
   gDAIRewardPoolAddress,
   gDAIAddress,
-  end2endTestingAmount
+  end2endTestingAmount,
+  simulateAYearLater,
+  currentTimestamp
 };
