@@ -100,6 +100,7 @@ contract EquilibriaGlpVault is AbstractVault {
     //     shares,
     //     output
     // );
+    claim();
     uint256 shares = super.redeem(shares, msg.sender, msg.sender);
     return shares;
   }

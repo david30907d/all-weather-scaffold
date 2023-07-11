@@ -89,6 +89,7 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     //     1,
     //     output
     // );
+    claim();
     uint256 shares = super.redeem(shares, msg.sender, msg.sender);
     return shares;
   }

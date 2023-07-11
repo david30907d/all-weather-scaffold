@@ -143,10 +143,10 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       if (
         bytesOfvaultName == keccak256(bytes("AllWeatherLP-SushSwap-DpxETH"))
       ) {
-        // require(
-        //   _depositDpxLP(idx, zapInAmountForThisVault, oneInchDataDpx),
-        //   "Buying Dpx LP token failed"
-        // );
+        require(
+          _depositDpxLP(idx, zapInAmountForThisVault, oneInchDataDpx),
+          "Buying Dpx LP token failed"
+        );
       } else if (
         bytesOfvaultName == keccak256(bytes("AllWeatherLP-RadiantArbitrum-DLP"))
       ) {
@@ -267,7 +267,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         );
       }
     }
-    claim(receiver);
     _burn(msg.sender, shares);
   }
 

@@ -85,6 +85,7 @@ contract RadiantArbitrumVault is AbstractVault {
     require(radiantDlpShares != 0, "dLP lock has not expired yet");
     uint256 vaultShare = super.redeem(radiantDlpShares, msg.sender, msg.sender);
     require(radiantDlpShares == vaultShare, "radiantDlpShares != vaultShare");
+    claim();
     return vaultShare;
   }
 
