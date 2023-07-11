@@ -57,7 +57,6 @@ describe("All Weather Protocol", function () {
         radiantLockZap = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
         multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
         await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.025"), { gasLimit: 2057560 });
-        console.log("WETH balance: ", (await weth.balanceOf(wallet.address)).toString());
 
         const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
         radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLockZapAddress);
@@ -92,7 +91,6 @@ describe("All Weather Protocol", function () {
 
         oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxToken.address, end2endTestingAmount.div(8), wallet.address, 50);
         oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, end2endTestingAmount.div(4), wallet.address, 50);
-        console.log("pendle DAI zap in amount:", ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount));
         pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount), 0.2, daiToken.address);
         pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, end2endTestingAmount.div(4), 0.99);
     });
@@ -100,19 +98,31 @@ describe("All Weather Protocol", function () {
     describe("Portfolio LP Contract Test", function () {
         it("Should be able to zapin with WETH into equilibria GDAI", async function () {
             this.timeout(120000); // Set timeout to 120 seconds
-            console.log(await portfolioContract.getPortfolioAllocation());
             const receipt = await deposit();
-            // // Iterate over the events and find the Deposit event
-            // for (const event of receipt.events) {
-            //   if (event.topics.includes(equilibriaGDAIVault.interface.getEventTopic('Deposit'))) {
-            //     const decodedEvent = equilibriaGDAIVault.interface.decodeEventLog('Deposit', event.data, event.topics);
-
-            //     expect(await equilibriaGDAIVault.balanceOf(portfolioContract.address)).to.equal(decodedEvent.shares);
-            //     expect((await equilibriaGDAIVault.totalAssets())).to.equal(decodedEvent.shares);
-            //     expect(await portfolioContract.balanceOf(wallet.address)).to.equal(dpxAmount);
-            //     expect((await dGDAIRewardPool.balanceOf(equilibriaGDAIVault.address))).to.equal(decodedEvent.shares);
-            //   }
-            // }
+            // Iterate over the events and find the Deposit event
+            for (const event of receipt.events) {
+                if (event.topics.includes(portfolioContract.interface.getEventTopic('Transfer'))) {
+                    const decodedEvent = portfolioContract.interface.decodeEventLog('Transfer', event.data, event.topics);
+                    expect(await portfolioContract.balanceOf(wallet.address)).to.equal(end2endTestingAmount);
+                    if (decodedEvent.to === wallet.address && decodedEvent.from === portfolioContract.address) {
+                        expect(decodedEvent.value).to.equal(end2endTestingAmount);
+                    }
+                }
+            }
+            const totalAssets = await portfolioContract.totalAssets();
+            for (const asset of totalAssets) {
+                if (asset.vaultName === 'AllWeatherLP-SushSwap-DpxETH') {
+                    expect(asset.assets).to.equal(await dpxVault.balanceOf(portfolioContract.address));
+                } else if (asset.vaultName === 'AllWeatherLP-RadiantArbitrum-DLP') {
+                    expect(asset.assets).to.equal(await radiantVault.balanceOf(portfolioContract.address));
+                } else if (asset.vaultName === 'AllWeatherLP-Equilibria-GLP') {
+                    expect(asset.assets).to.equal(await equilibriaGlpVault.balanceOf(portfolioContract.address));
+                } else if (asset.vaultName === 'AllWeatherLP-Equilibria-GDAI') {
+                    expect(asset.assets).to.equal(await equilibriaGDAIVault.balanceOf(portfolioContract.address));
+                } else {
+                    throw new Error(`Unknown vault name ${asset.vaultName}`);
+                }
+            }
         });
         // it("Should be able to withdraw GDAI from equilibria", async function () {
         //   this.timeout(120000); // Set timeout to 120 seconds

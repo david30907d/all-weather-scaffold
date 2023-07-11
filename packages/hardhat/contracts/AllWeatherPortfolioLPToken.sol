@@ -38,6 +38,11 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     IFeeDistribution.RewardData[] claimableRewards;
   }
 
+  struct SharesOfVault {
+    string vaultName;
+    uint256 assets;
+  }
+
   IERC20 public immutable asset;
   address public radiantVaultAddr;
   address payable public dpxVaultAddr;
@@ -89,6 +94,15 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       percentages[i] = portfolioAllocation[vaults[i].name()];
     }
     return (nameOfVaults, percentages);
+  }
+
+  function totalAssets() public view returns (SharesOfVault[] memory) {
+    SharesOfVault[] memory shareOfVaults = new SharesOfVault[](vaults.length);
+    for (uint256 i = 0; i < vaults.length; i++) {
+      shareOfVaults[i].vaultName = vaults[i].name();
+      shareOfVaults[i].assets = vaults[i].totalAssets();
+    }
+    return shareOfVaults;
   }
 
   function deposit(
