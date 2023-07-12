@@ -17,8 +17,6 @@ contract EquilibriaGDAIVault is BaseEquilibriaVault {
     pid = 2;
     eqbZap = IEqbZap(0xc7517f481Cc0a645e63f870830A4B2e580421e32);
     pendleBooster = IPendleBooster(0x4D32C8Ff2fACC771eC7Efc70d6A8468bC30C26bF);
-    pendleRouter = IPendleRouter(0x0000000001E4ef00d069e71d6bA041b0A16F7eA0);
-
     // // asset
     DAI = IERC20(0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1);
   }

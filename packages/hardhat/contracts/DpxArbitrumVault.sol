@@ -66,33 +66,36 @@ contract DpxArbitrumVault is AbstractVault {
       oneInchAggregatorAddress,
       Math.mulDiv(amount, 1, 2)
     );
-    (bool succ, bytes memory data) = address(oneInchAggregatorAddress).call(
-      oneInchData
-    );
-    require(succ, "1inch failed to swap");
-    //  (uint256 dpxReturnedAmount, uint256 gasLeft) = abi.decode(data, (uint256, uint256));
-    uint256 dpxReturnedAmount = dpxToken.balanceOf(address(this));
-    SafeERC20.safeApprove(dpxToken, sushiSwapRouterAddress, dpxReturnedAmount);
-    weth.withdraw(Math.mulDiv(amount, 1, 2));
-    // deadline = current time + 5 minutes;
-    uint256 deadline = block.timestamp + 300;
+    return amount;
     // // TODO(david): should return those token left after `addLiquidityETH` back to user
-    (uint amountToken, uint amountETH, uint liquidity) = IUniswapV2Router01(
-      sushiSwapRouterAddress
-    ).addLiquidityETH{value: address(this).balance}(
-      address(dpxToken),
-      dpxReturnedAmount,
-      Math.mulDiv(dpxReturnedAmount, 95, 100),
-      Math.mulDiv(address(this).balance, 95, 100),
-      address(this),
-      deadline
-    );
-    IERC20(sushiSwapDpxLpTokenAddress).approve(
-      address(sushiSwapMiniChef),
-      liquidity
-    );
-    sushiSwapMiniChef.deposit(pid, liquidity, address(this));
-    return liquidity;
+    // TODO: need to figure out why I keep getting this error
+    // (bool succ, bytes memory data) = address(oneInchAggregatorAddress).call(
+    //   oneInchData
+    // );
+    // require(succ, "1inch failed to swap");
+    // //  (uint256 dpxReturnedAmount, uint256 gasLeft) = abi.decode(data, (uint256, uint256));
+    // uint256 dpxReturnedAmount = dpxToken.balanceOf(address(this));
+    // SafeERC20.safeApprove(dpxToken, sushiSwapRouterAddress, dpxReturnedAmount);
+    // weth.withdraw(Math.mulDiv(amount, 1, 2));
+    // // deadline = current time + 5 minutes;
+    // uint256 deadline = block.timestamp + 300;
+    // Error: VM Exception while processing transaction: reverted with reason string '1inch failed to swap'
+    // (uint amountToken, uint amountETH, uint liquidity) = IUniswapV2Router01(
+    //   sushiSwapRouterAddress
+    // ).addLiquidityETH{value: address(this).balance}(
+    //   address(dpxToken),
+    //   dpxReturnedAmount,
+    //   Math.mulDiv(dpxReturnedAmount, 95, 100),
+    //   Math.mulDiv(address(this).balance, 95, 100),
+    //   address(this),
+    //   deadline
+    // );
+    // IERC20(sushiSwapDpxLpTokenAddress).approve(
+    //   address(sushiSwapMiniChef),
+    //   liquidity
+    // );
+    // sushiSwapMiniChef.deposit(pid, liquidity, address(this));
+    // return liquidity;
   }
 
   function redeem(uint256 shares) public override returns (uint256) {

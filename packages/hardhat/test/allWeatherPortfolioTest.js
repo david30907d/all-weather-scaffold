@@ -163,40 +163,5 @@ describe("All Weather Protocol", function () {
             expect(asset.assets).to.equal(0);
           }
         });
-
-        // it("Should be able to claim rewards", async function () {
-        //   this.timeout(120000); // Set timeout to 120 seconds
-        //   const radiantLockedDlpBalanceBeforeDeposit = await radiantVault.totalAssets();
-        //   expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
-        //   await deposit();
-        //   await mineBlocks(100); // Mine 100 blocks
-        //   const originalPendleToken = await pendleToken.balanceOf(wallet.address);
-        //   const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
-        //   let pendleClaimableReward;
-        //   for (const claimableReward of claimableRewards) {
-        //     if (claimableReward.protocol !== "AllWeatherLP-Equilibria-GDAI") {
-        //       expect(claimableReward.claimableRewards).to.deep.equal([]);
-        //     } else {
-        //       expect(claimableReward.claimableRewards.length).to.equal(1);
-        //       pendleClaimableReward = claimableReward.claimableRewards[0].amount;
-        //       expect(pendleClaimableReward).to.be.gt(0);
-        //     }
-        //   }
-
-        //   const equilibriaPids = [2];
-        //   await portfolioContract.connect(wallet).claim(wallet.address, equilibriaPids);
-        //   // NOTE: using `to.be.gt` instead of `to.equal` because the reward would somehow be increased after claim(). My hunch is that `claim()` would also claim the reward for the current block.
-        //   expect((await pendleToken.balanceOf(wallet.address)).sub(originalPendleToken)).to.be.gt(pendleClaimableReward);
-        //   const remainingClaimableRewards = await portfolioContract.connect(wallet).getClaimableRewards(wallet.address);
-        //   for (const claimableReward of remainingClaimableRewards) {
-        //     if (claimableReward.protocol === "AllWeatherLP-Equilibria-GDAI") {
-        //       expect(claimableReward.claimableRewards[0].amount).to.equal(0);
-        //     }
-        //   }
-        // })
-        // it("Should be able to check claimable rewards", async function () {
-        //   const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
-        //   expect(claimableRewards).to.deep.equal([]);
-        // })
     });
 });

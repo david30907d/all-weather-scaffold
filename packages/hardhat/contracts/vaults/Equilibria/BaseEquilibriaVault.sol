@@ -28,11 +28,7 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     IERC20Metadata asset_,
     string memory name,
     string memory symbol
-  ) ERC4626(asset_) ERC20(name, symbol) {
-    eqbZap = IEqbZap(0xc7517f481Cc0a645e63f870830A4B2e580421e32);
-    pendleBooster = IPendleBooster(0x4D32C8Ff2fACC771eC7Efc70d6A8468bC30C26bF);
-    pendleRouter = IPendleRouter(0x0000000001E4ef00d069e71d6bA041b0A16F7eA0);
-  }
+  ) ERC4626(asset_) ERC20(name, symbol) {}
 
   function totalLockedAssets() public view override returns (uint256) {
     return 0;
