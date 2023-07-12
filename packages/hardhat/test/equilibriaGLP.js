@@ -30,10 +30,11 @@ let radiantVault;
 let portfolioContract;
 let oneInchSwapDataForDpx;
 let oneInchSwapDataForGDAI;
-let pendleZapInData;
+let pendleGLPZapInData;
+let pendleGDAIZapInData;
 
 async function deposit() {
-  return await (await portfolioContract.deposit(dpxAmount, wallet.address, oneInchSwapDataForDpx.tx.data, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 10692137 })).wait();
+  return await (await portfolioContract.connect(wallet).deposit(dpxAmount, wallet.address, oneInchSwapDataForDpx.tx.data, pendleGLPZapInData[2], pendleGLPZapInData[3], pendleGLPZapInData[4], pendleGDAIZapInData[2], pendleGDAIZapInData[3], pendleGDAIZapInData[4], oneInchSwapDataForGDAI.tx.data)).wait();
 }
 
 describe("All Weather Protocol", function () {
@@ -79,7 +80,8 @@ describe("All Weather Protocol", function () {
 
     oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxTokenAddress, radiantAmount.div(2), wallet.address, 50);
     oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount, wallet.address, 50);
-    pendleZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, dpxAmount, 0.99);
+    pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, dpxAmount, 0.99);
+    pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount), 0.2, daiToken.address);
   });
 
   describe("Portfolio LP Contract Test", function () {
@@ -143,7 +145,7 @@ describe("All Weather Protocol", function () {
       expect(wethClaimableReward).to.be.gt(0);
 
       const equilibriaPids = [1];
-      await portfolioContract.connect(wallet).claim(wallet.address, equilibriaPids);
+      await portfolioContract.connect(wallet).claim(wallet.address);
       // NOTE: using `to.be.gt` instead of `to.equal` because the reward would somehow be increased after claim(). My hunch is that `claim()` would also claim the reward for the current block.
       expect((await pendleToken.balanceOf(wallet.address)).sub(originalPendleToken)).to.be.gt(pendleClaimableReward);
       expect((await weth.balanceOf(wallet.address)).sub(originalWethBalance)).to.be.gt(wethClaimableReward);
