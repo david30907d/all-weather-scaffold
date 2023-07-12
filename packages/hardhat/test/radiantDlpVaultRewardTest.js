@@ -14,20 +14,20 @@ const { fetch1InchSwapData, getUserEthBalance, sushiSwapDpxLpTokenAddress, sushi
   daiAddress,
   dpxAmount,
   simulateAYearLater,
-  currentTimestamp
 } = require("./utils");
+let {currentTimestamp} = require("./utils");
 
 let wallet;
 let weth;
 let radiantVault;
 let portfolioContract;
-let currentTimestamp = Math.floor(Date.now() / 1000);;
 let oneInchSwapDataForDpx;
 let oneInchSwapDataForGDAI;
-let pendleZapInData;
+let pendleGLPZapInData;
+let pendleGDAIZapInData;
 
 async function deposit() {
-  return await (await portfolioContract.connect(wallet).deposit(radiantAmount, wallet.address, oneInchSwapDataForDpx.tx.data, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 3057560 })).wait();
+  return await (await portfolioContract.connect(wallet).deposit(radiantAmount, wallet.address, oneInchSwapDataForDpx.tx.data, pendleGLPZapInData[2], pendleGLPZapInData[3], pendleGLPZapInData[4], pendleGDAIZapInData[2], pendleGDAIZapInData[3], pendleGDAIZapInData[4], oneInchSwapDataForGDAI.tx.data)).wait();
 }
 
 describe("All Weather Protocol", function () {
@@ -69,7 +69,8 @@ describe("All Weather Protocol", function () {
 
     oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxTokenAddress, radiantAmount.div(2), wallet.address, 50);
     oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount, wallet.address, 50);
-    pendleZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, radiantAmount, 0.99);
+    pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, radiantAmount, 0.99);
+    pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount), 0.2, daiToken.address);
   });
 
   describe("Portfolio LP Contract Test", function () {
@@ -94,11 +95,10 @@ describe("All Weather Protocol", function () {
       expect(ethBalanceBeforeClaim).to.equal(0);
 
       const claimableRewards = await portfolioContract.connect(wallet).getClaimableRewards(wallet.address);
-
       expect(claimableRewards[1].protocol).to.equal("AllWeatherLP-RadiantArbitrum-DLP");
       // Error: VM Exception while processing transaction: reverted with reason string 'SafeERC20: low-level call failed'
       // means you probably transfer a pretty weird token
-      await (await portfolioContract.connect(wallet).claim(randomWallet.address, [], { gasLimit: 30000000 })).wait();
+      await (await portfolioContract.connect(wallet).claim(randomWallet.address, { gasLimit: 30000000 })).wait();
       for (const nativeRewardToken of nativeRewardTokens) {
         const nativeToken = await ethers.getContractAt("MockDAI", nativeRewardToken);
         const balanceAfterClaim = await nativeToken.balanceOf(randomWallet.address);
