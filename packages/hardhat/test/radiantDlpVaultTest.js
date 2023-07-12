@@ -18,8 +18,9 @@ const { fetch1InchSwapData,
   fakePendleZapOut,
   daiAddress,
   dpxAmount,
-  currentTimestamp
+  simulateAYearLater
 } = require("./utils");
+let {currentTimestamp} = require("./utils");
 
 
 let wallet;
@@ -28,10 +29,12 @@ let radiantVault;
 let portfolioContract;
 let oneInchSwapDataForDpx;
 let oneInchSwapDataForGDAI;
-let pendleZapInData;
+let pendleGLPZapInData;
+let pendleGDAIZapInData;
+
 
 async function deposit() {
-  return await (await portfolioContract.connect(wallet).deposit(radiantAmount, wallet.address, oneInchSwapDataForDpx.tx.data, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 3057560 })).wait();
+  return await (await portfolioContract.connect(wallet).deposit(radiantAmount, wallet.address, oneInchSwapDataForDpx.tx.data, pendleGLPZapInData[2], pendleGLPZapInData[3], pendleGLPZapInData[4], pendleGDAIZapInData[2], pendleGDAIZapInData[3], pendleGDAIZapInData[4], oneInchSwapDataForGDAI.tx.data)).wait();
 }
 
 describe("All Weather Protocol", function () {
@@ -71,12 +74,12 @@ describe("All Weather Protocol", function () {
 
 
     await (await weth.connect(wallet).approve(portfolioContract.address, radiantAmount, { gasLimit: 2057560 })).wait();
-    await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.02"), { gasLimit: 2057560 });
+    await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.025"), { gasLimit: 2057560 });
 
     oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxTokenAddress, radiantAmount.div(2), wallet.address, 50);
     oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount, wallet.address, 50);
-    pendleZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, radiantAmount, 0.99);
-
+    pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, radiantAmount, 0.99);
+    pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount), 0.2, daiToken.address);
   });
 
   describe("Portfolio LP Contract Test", function () {
