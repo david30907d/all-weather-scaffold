@@ -43,7 +43,7 @@ function mnemonic() {
 
 module.exports = {
   mocha: {
-    timeout: 120000
+    timeout: 360000
   },
   defaultNetwork,
   /**

@@ -38,6 +38,11 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     IFeeDistribution.RewardData[] claimableRewards;
   }
 
+  struct SharesOfVault {
+    string vaultName;
+    uint256 assets;
+  }
+
   IERC20 public immutable asset;
   address public radiantVaultAddr;
   address payable public dpxVaultAddr;
@@ -67,24 +72,50 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   }
 
   function setVaultAllocations(
-    PortfolioAllocationOfSingleCategory[] memory portfolioAllocation_
+    PortfolioAllocationOfSingleCategory[] calldata portfolioAllocation_
   ) public onlyOwner {
-    uint256 length = portfolioAllocation_.length;
-    for (uint256 i = 0; i < length; i++) {
+    for (uint256 i = 0; i < portfolioAllocation_.length; i++) {
       portfolioAllocation[
         portfolioAllocation_[i].protocol
       ] = portfolioAllocation_[i].percentage;
     }
   }
 
+  function getPortfolioAllocation()
+    public
+    view
+    returns (string[] memory, uint256[] memory)
+  {
+    string[] memory nameOfVaults = new string[](vaults.length);
+    uint256[] memory percentages = new uint256[](vaults.length);
+    uint256 currentIndex = 0;
+    for (uint256 i = 0; i < vaults.length; i++) {
+      nameOfVaults[i] = vaults[i].name();
+      percentages[i] = portfolioAllocation[vaults[i].name()];
+    }
+    return (nameOfVaults, percentages);
+  }
+
+  function totalAssets() public view returns (SharesOfVault[] memory) {
+    SharesOfVault[] memory shareOfVaults = new SharesOfVault[](vaults.length);
+    for (uint256 i = 0; i < vaults.length; i++) {
+      shareOfVaults[i].vaultName = vaults[i].name();
+      shareOfVaults[i].assets = vaults[i].totalAssets();
+    }
+    return shareOfVaults;
+  }
+
   function deposit(
     uint256 amount,
     address receiver,
     bytes calldata oneInchDataDpx,
-    uint256 minLpOut,
-    IPendleRouter.ApproxParams calldata guessPtReceivedFromSy,
-    IPendleRouter.TokenInput calldata input,
-    bytes calldata oneInchDataGDAI
+    uint256 glpMinLpOut,
+    IPendleRouter.ApproxParams calldata glpGuessPtReceivedFromSy,
+    IPendleRouter.TokenInput calldata glpInput,
+    uint256 gdaiMinLpOut,
+    IPendleRouter.ApproxParams calldata gdaiGuessPtReceivedFromSy,
+    IPendleRouter.TokenInput calldata gdaiInput,
+    bytes calldata gdaiOneInchDataGDAI
   ) public {
     require(amount > 0, "Token amount must be greater than 0");
     // Transfer tokens from the user to the contract
@@ -113,39 +144,41 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         bytesOfvaultName == keccak256(bytes("AllWeatherLP-SushSwap-DpxETH"))
       ) {
         require(
-          vaults[idx].deposit(zapInAmountForThisVault, oneInchDataDpx) > 0,
+          _depositDpxLP(idx, zapInAmountForThisVault, oneInchDataDpx),
           "Buying Dpx LP token failed"
         );
       } else if (
         bytesOfvaultName == keccak256(bytes("AllWeatherLP-RadiantArbitrum-DLP"))
       ) {
         require(
-          vaults[idx].deposit(zapInAmountForThisVault) > 0,
+          _depositRadiantLP(idx, zapInAmountForThisVault),
           "Buying Radiant LP token failed"
         );
       } else if (
         bytesOfvaultName == keccak256(bytes("AllWeatherLP-Equilibria-GLP"))
       ) {
         require(
-          vaults[idx].deposit(
+          _depositEquilibriaGLP(
+            idx,
             zapInAmountForThisVault,
-            minLpOut,
-            guessPtReceivedFromSy,
-            input
-          ) > 0,
+            glpMinLpOut,
+            glpGuessPtReceivedFromSy,
+            glpInput
+          ),
           "Zap Into Equilibria GLP failed"
         );
       } else if (
         bytesOfvaultName == keccak256(bytes("AllWeatherLP-Equilibria-GDAI"))
       ) {
         require(
-          vaults[idx].deposit(
+          _depositEquilibriaGDAI(
+            idx,
             zapInAmountForThisVault,
-            oneInchDataGDAI,
-            minLpOut,
-            guessPtReceivedFromSy,
-            input
-          ) > 0,
+            gdaiOneInchDataGDAI,
+            gdaiMinLpOut,
+            gdaiGuessPtReceivedFromSy,
+            gdaiInput
+          ),
           "Zap Into Equilibria GDAI failed"
         );
       }
@@ -155,9 +188,58 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     emit Transfer(address(0), receiver, amount);
   }
 
+  function _depositDpxLP(
+    uint256 idx,
+    uint256 zapInAmountForThisVault,
+    bytes calldata oneInchDataDpx
+  ) internal returns (bool) {
+    return vaults[idx].deposit(zapInAmountForThisVault, oneInchDataDpx) > 0;
+  }
+
+  function _depositRadiantLP(
+    uint256 idx,
+    uint256 zapInAmountForThisVault
+  ) internal returns (bool) {
+    return vaults[idx].deposit(zapInAmountForThisVault) > 0;
+  }
+
+  function _depositEquilibriaGLP(
+    uint256 idx,
+    uint256 zapInAmountForThisVault,
+    uint256 glpMinLpOut,
+    IPendleRouter.ApproxParams calldata glpGuessPtReceivedFromSy,
+    IPendleRouter.TokenInput calldata glpInput
+  ) internal returns (bool) {
+    return
+      vaults[idx].deposit(
+        zapInAmountForThisVault,
+        glpMinLpOut,
+        glpGuessPtReceivedFromSy,
+        glpInput
+      ) > 0;
+  }
+
+  function _depositEquilibriaGDAI(
+    uint256 idx,
+    uint256 zapInAmountForThisVault,
+    bytes calldata gdaiOneInchDataGDAI,
+    uint256 gdaiMinLpOut,
+    IPendleRouter.ApproxParams calldata gdaiGuessPtReceivedFromSy,
+    IPendleRouter.TokenInput calldata gdaiInput
+  ) internal returns (bool) {
+    return
+      vaults[idx].deposit(
+        zapInAmountForThisVault,
+        gdaiOneInchDataGDAI,
+        gdaiMinLpOut,
+        gdaiGuessPtReceivedFromSy,
+        gdaiInput
+      ) > 0;
+  }
+
   function redeem(
     uint256 shares,
-    address receiver,
+    address payable receiver,
     IPendleRouter.TokenOutput calldata output
   ) public {
     for (uint256 i = 0; i < vaults.length; i++) {
@@ -188,10 +270,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     _burn(msg.sender, shares);
   }
 
-  function claim(
-    address payable receiver,
-    uint256[] memory equilibriaPids
-  ) public {
+  function claim(address payable receiver) public {
     uint256 userShares = balanceOf(msg.sender);
     uint256 portfolioShares = totalSupply();
     if (userShares == 0 || portfolioShares == 0) {
@@ -200,15 +279,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     for (uint256 i = 0; i < vaults.length; i++) {
       IFeeDistribution.RewardData[] memory rewardsOfThisVault;
       bytes32 bytesOfvaultName = keccak256(bytes(vaults[i].name()));
-      if (
-        bytesOfvaultName == keccak256(bytes("AllWeatherLP-Equilibria-GDAI")) ||
-        bytesOfvaultName == keccak256(bytes("AllWeatherLP-Equilibria-GLP"))
-      ) {
-        // equilibria needs `pids` to be passed in
-        rewardsOfThisVault = vaults[i].claim(equilibriaPids);
-      } else {
-        rewardsOfThisVault = vaults[i].claim();
-      }
+      rewardsOfThisVault = vaults[i].claim();
       if (
         bytesOfvaultName == keccak256(bytes("AllWeatherLP-SushSwap-DpxETH"))
       ) {
@@ -242,7 +313,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   }
 
   function getClaimableRewards(
-    address receiver
+    address payable receiver
   ) public view returns (ClaimableRewardOfAProtocol[] memory) {
     uint256 userShares = balanceOf(receiver);
     uint256 portfolioShares = totalSupply();

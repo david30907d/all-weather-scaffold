@@ -17,7 +17,8 @@ const { fetch1InchSwapData,
   gDAIMarketPoolAddress,
   fakePendleZapOut,
   daiAddress,
-  dpxAmount
+  dpxAmount,
+  currentTimestamp
 } = require("./utils");
 
 
@@ -25,7 +26,6 @@ let wallet;
 let weth;
 let radiantVault;
 let portfolioContract;
-let currentTimestamp = Math.floor(Date.now() / 1000);;
 let oneInchSwapDataForDpx;
 let oneInchSwapDataForGDAI;
 let pendleZapInData;
@@ -130,9 +130,3 @@ describe("All Weather Protocol", function () {
     });
   });
 });
-
-async function simulateAYearLater() {
-  // Simulate a year later
-  await ethers.provider.send('evm_setNextBlockTimestamp', [currentTimestamp]);
-  await ethers.provider.send('evm_mine');
-}

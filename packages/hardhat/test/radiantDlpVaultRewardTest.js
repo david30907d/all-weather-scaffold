@@ -12,7 +12,9 @@ const { fetch1InchSwapData, getUserEthBalance, sushiSwapDpxLpTokenAddress, sushi
   gDAIMarketPoolAddress,
   mineBlocks,
   daiAddress,
-  dpxAmount
+  dpxAmount,
+  simulateAYearLater,
+  currentTimestamp
 } = require("./utils");
 
 let wallet;
@@ -111,12 +113,3 @@ describe("All Weather Protocol", function () {
     })
   });
 });
-
-
-async function simulateAYearLater() {
-  // Simulate a year later
-  const oneMonthInSeconds = 12 * 31 * 24 * 60 * 60;
-  const futureTimestamp = currentTimestamp + oneMonthInSeconds;
-  await ethers.provider.send('evm_setNextBlockTimestamp', [futureTimestamp]);
-  await ethers.provider.send('evm_mine');
-}
