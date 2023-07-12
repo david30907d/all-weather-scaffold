@@ -21,12 +21,13 @@ const { fetch1InchSwapData, mineBlocks, myImpersonatedWalletAddress,
 let wallet;
 let dpxVault;
 let portfolioContract;
-let oneInchSwapData;
+let oneInchSwapDataForDpx;
 let oneInchSwapDataForGDAI;
-let pendleZapInData;
+let pendleGDAIZapInData;
+let pendleGLPZapInData;
 
 async function deposit() {
-  return await (await portfolioContract.deposit(dpxAmount, wallet.address, oneInchSwapData.tx.data, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 10692137 })).wait();
+  return await (await portfolioContract.connect(wallet).deposit(dpxAmount, wallet.address, oneInchSwapDataForDpx.tx.data, pendleGLPZapInData[2], pendleGLPZapInData[3], pendleGLPZapInData[4], pendleGDAIZapInData[2], pendleGDAIZapInData[3], pendleGDAIZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 30000000 })).wait();
 }
 
 describe("All Weather Protocol", function () {
@@ -68,12 +69,15 @@ describe("All Weather Protocol", function () {
     await (await weth.connect(wallet).approve(portfolioContract.address, dpxAmount, { gasLimit: gasLimit })).wait();
     await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.03"), { gasLimit: 1057560 });
 
-    oneInchSwapData = await fetch1InchSwapData(weth.address,
+    oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address,
       dpxTokenAddress,
       dpxAmount.div(2),
       dpxVault.address, 50);
     oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount, wallet.address, 50);
     pendleZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, dpxAmount, 0.99);      
+    pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount), 0.2, daiToken.address);
+    pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, dpxAmount, 0.99);
+
   });
   describe("Portfolio LP Contract Test", function () {
     it("Should be able to deposit SLP to portfolio contract", async function () {
