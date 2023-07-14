@@ -33,8 +33,21 @@ let oneInchSwapDataForDpx;
 let oneInchSwapDataForGDAI;
 let pendleGDAIZapInData;
 let pendleGLPZapInData;
+
 async function deposit() {
-    return await (await portfolioContract.connect(wallet).deposit(end2endTestingAmount, wallet.address, oneInchSwapDataForDpx.tx.data, pendleGLPZapInData[2], pendleGLPZapInData[3], pendleGLPZapInData[4], pendleGDAIZapInData[2], pendleGDAIZapInData[3], pendleGDAIZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 30000000 })).wait();
+  const depositData = {
+    amount: end2endTestingAmount,
+    receiver: wallet.address,
+    oneInchDataDpx: oneInchSwapDataForDpx.tx.data,
+    glpMinLpOut: pendleGLPZapInData[2],
+    glpGuessPtReceivedFromSy: pendleGLPZapInData[3],
+    glpInput: pendleGLPZapInData[4],
+    gdaiMinLpOut: pendleGDAIZapInData[2],
+    gdaiGuessPtReceivedFromSy: pendleGDAIZapInData[3],
+    gdaiInput: pendleGDAIZapInData[4],
+    gdaiOneInchDataGDAI: oneInchSwapDataForGDAI.tx.data
+  }
+  return await (await portfolioContract.connect(wallet).deposit(depositData, { gasLimit: 30000000 })).wait();
 }
 
 describe("All Weather Protocol", function () {
@@ -89,7 +102,8 @@ describe("All Weather Protocol", function () {
 
         oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxToken.address, end2endTestingAmount.div(8), wallet.address, 50);
         oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, end2endTestingAmount.div(4), wallet.address, 50);
-        pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount), 0.2, daiToken.address);
+        // oneInchSwapDataForGDAI.toTokenAmount).div(2): due to the 1inch slippage, need to multiple by 0.95 to pass pendle zap in
+        pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount).mul(95).div(100), 0.2, daiToken.address);
         pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, end2endTestingAmount.div(4), 0.99);
     });
 
@@ -99,9 +113,7 @@ describe("All Weather Protocol", function () {
           this.timeout(120000); // Set timeout to 120 seconds
           await deposit();
           await mineBlocks(1000);
-          const originalPendleToken = await pendleToken.balanceOf(wallet.address);
           const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
-          let pendleClaimableReward;
           await portfolioContract.connect(wallet).claim(randomWallet.address);
           const radiantRTokens = ["0xd69D402D1bDB9A2b8c3d88D98b9CEaf9e4Cd72d9",          "0x48a29E756CC1C097388f3B2f3b570ED270423b3d",          "0x0D914606f3424804FA1BbBE56CCC3416733acEC6",          "0x0dF5dfd95966753f01cb80E76dc20EA958238C46",          "0x42C248D137512907048021B30d9dA17f48B5b7B2",          "0x2dADe5b7df9DA3a7e1c9748d169Cd6dFf77e3d01"]
           for (const claimableReward of claimableRewards) {

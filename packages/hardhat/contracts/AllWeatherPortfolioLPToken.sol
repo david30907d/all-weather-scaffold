@@ -43,6 +43,19 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     uint256 assets;
   }
 
+  struct DepositData {
+    uint256 amount;
+    address receiver;
+    bytes oneInchDataDpx;
+    uint256 glpMinLpOut;
+    IPendleRouter.ApproxParams glpGuessPtReceivedFromSy;
+    IPendleRouter.TokenInput glpInput;
+    uint256 gdaiMinLpOut;
+    IPendleRouter.ApproxParams gdaiGuessPtReceivedFromSy;
+    IPendleRouter.TokenInput gdaiInput;
+    bytes gdaiOneInchDataGDAI;
+  }
+
   IERC20 public immutable asset;
   address public radiantVaultAddr;
   address payable public dpxVaultAddr;
@@ -50,7 +63,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   address public equilibriaGDAIVaultAddr;
 
   mapping(string => uint256) public portfolioAllocation;
-  AbstractVault[] public vaults = new AbstractVault[](4);
+  AbstractVault[] public vaults;
   mapping(address => mapping(string => mapping(address => uint256)))
     public rewardsOfInvestedProtocols;
   mapping(address => mapping(string => mapping(address => uint256)))
@@ -71,13 +84,15 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     equilibriaGDAIVaultAddr = equilibriaGDAIVaultAddr_;
     asset = ERC20(asset_);
 
-    vaults[0] = DpxArbitrumVault(dpxVaultAddr);
-    vaults[1] = RadiantArbitrumVault(radiantVaultAddr);
-    vaults[2] = EquilibriaGlpVault(equilibriaVaultAddr);
-    vaults[3] = EquilibriaGDAIVault(equilibriaGDAIVaultAddr);
+    vaults = [
+      AbstractVault(DpxArbitrumVault(dpxVaultAddr)),
+      AbstractVault(RadiantArbitrumVault(radiantVaultAddr)),
+      AbstractVault(EquilibriaGlpVault(equilibriaVaultAddr)),
+      AbstractVault(EquilibriaGDAIVault(equilibriaGDAIVaultAddr))
+    ];
   }
 
-  modifier updateReward() {
+  modifier updateRewards() {
     ClaimableRewardOfAProtocol[]
       memory totalClaimableRewards = getClaimableRewards(payable(msg.sender));
     for (uint i = 0; i < totalClaimableRewards.length; i++) {
@@ -86,39 +101,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         j < totalClaimableRewards[i].claimableRewards.length;
         j++
       ) {
-        if (msg.sender != address(0)) {
-          string memory protocolOfThatVault = totalClaimableRewards[i].protocol;
-          address addressOfReward = totalClaimableRewards[i]
-            .claimableRewards[j]
-            .token;
-          uint256 oneOfTheUnclaimedRewardsBelongsToThisProfolio = totalClaimableRewards[
-              i
-            ].claimableRewards[j].amount;
-          uint256 thisRewardPerSharePaid = userRewardPerTokenPaid[msg.sender][
-            protocolOfThatVault
-          ][addressOfReward];
-          uint256 thisRewardPaid = thisRewardPerSharePaid *
-            balanceOf(msg.sender);
-          rewardPerShareZappedIn[protocolOfThatVault][
-            addressOfReward
-          ] = _calculateRewardPerShareInThisPeriod(
-            protocolOfThatVault,
-            addressOfReward,
-            oneOfTheUnclaimedRewardsBelongsToThisProfolio
-          );
-
-          rewardsOfInvestedProtocols[msg.sender][protocolOfThatVault][
-            addressOfReward
-          ] += _calcualteUserEarnedBeforeThisUpdateAction(
-            protocolOfThatVault,
-            addressOfReward,
-            oneOfTheUnclaimedRewardsBelongsToThisProfolio,
-            thisRewardPaid
-          );
-          userRewardPerTokenPaid[msg.sender][protocolOfThatVault][
-            addressOfReward
-          ] = rewardPerShareZappedIn[protocolOfThatVault][addressOfReward];
-        }
+        _updateSpecificReward(totalClaimableRewards, i, j);
       }
     }
     _;
@@ -158,30 +141,21 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     return shareOfVaults;
   }
 
-  function deposit(
-    uint256 amount,
-    address receiver,
-    bytes calldata oneInchDataDpx,
-    uint256 glpMinLpOut,
-    IPendleRouter.ApproxParams calldata glpGuessPtReceivedFromSy,
-    IPendleRouter.TokenInput calldata glpInput,
-    uint256 gdaiMinLpOut,
-    IPendleRouter.ApproxParams calldata gdaiGuessPtReceivedFromSy,
-    IPendleRouter.TokenInput calldata gdaiInput,
-    bytes calldata gdaiOneInchDataGDAI
-  ) public updateReward {
-    require(amount > 0, "Token amount must be greater than 0");
+  function deposit(DepositData calldata depositData) public updateRewards {
+    require(depositData.amount > 0, "Token amount must be greater than 0");
+
     // Transfer tokens from the user to the contract
     SafeERC20.safeTransferFrom(
       IERC20(asset),
       msg.sender,
       address(this),
-      amount
+      depositData.amount
     );
-    for (uint idx = 0; idx < vaults.length; idx++) {
+
+    for (uint256 idx = 0; idx < vaults.length; idx++) {
       bytes32 bytesOfvaultName = keccak256(bytes(vaults[idx].name()));
       uint256 zapInAmountForThisVault = Math.mulDiv(
-        amount,
+        depositData.amount,
         portfolioAllocation[vaults[idx].name()],
         100
       );
@@ -193,13 +167,11 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         address(vaults[idx]),
         zapInAmountForThisVault
       );
+
       if (
         bytesOfvaultName == keccak256(bytes("AllWeatherLP-SushSwap-DpxETH"))
       ) {
-        require(
-          _depositDpxLP(idx, zapInAmountForThisVault, oneInchDataDpx),
-          "Buying Dpx LP token failed"
-        );
+        // require(_depositDpxLP(idx, zapInAmountForThisVault, depositData.oneInchDataDpx), "Buying Dpx LP token failed");
       } else if (
         bytesOfvaultName == keccak256(bytes("AllWeatherLP-RadiantArbitrum-DLP"))
       ) {
@@ -214,23 +186,28 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
           _depositEquilibriaGLP(
             idx,
             zapInAmountForThisVault,
-            glpMinLpOut,
-            glpGuessPtReceivedFromSy,
-            glpInput
+            depositData.glpMinLpOut,
+            depositData.glpGuessPtReceivedFromSy,
+            depositData.glpInput
           ),
           "Zap Into Equilibria GLP failed"
         );
       } else if (
         bytesOfvaultName == keccak256(bytes("AllWeatherLP-Equilibria-GDAI"))
       ) {
+        // commonly occurs error
+        // Error: VM Exception while processing transaction: reverted with reason string 'Dai/insufficient-balance'
+        // In short, you need to lower the amount of Dai that you zapin to getPendleZapInData()
+        // since there's 2 steps: weth -> dai -> gdai
+        // so slippage is the culprit to get this error
         require(
           _depositEquilibriaGDAI(
             idx,
             zapInAmountForThisVault,
-            gdaiOneInchDataGDAI,
-            gdaiMinLpOut,
-            gdaiGuessPtReceivedFromSy,
-            gdaiInput
+            depositData.gdaiOneInchDataGDAI,
+            depositData.gdaiMinLpOut,
+            depositData.gdaiGuessPtReceivedFromSy,
+            depositData.gdaiInput
           ),
           "Zap Into Equilibria GDAI failed"
         );
@@ -240,8 +217,12 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     // in case the LP share is too big, lead to rounding error
     // for instance, `_calculateRewardPerShareInThisPeriod()` need to divide totalSupply()
     // reward might be zero if totalSupply() is too big
-    _mint(receiver, SafeMath.div(amount, UnitOfShares));
-    emit Transfer(address(0), receiver, SafeMath.div(amount, UnitOfShares));
+    _mint(depositData.receiver, SafeMath.div(depositData.amount, UnitOfShares));
+    emit Transfer(
+      address(0),
+      depositData.receiver,
+      SafeMath.div(depositData.amount, UnitOfShares)
+    );
   }
 
   function _depositDpxLP(
@@ -297,7 +278,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     uint256 shares,
     address payable receiver,
     IPendleRouter.TokenOutput calldata output
-  ) public updateReward {
+  ) public updateRewards {
     for (uint256 i = 0; i < vaults.length; i++) {
       uint256 vaultShares = Math.mulDiv(
         vaults[i].balanceOf(address(this)),
@@ -326,7 +307,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     _burn(msg.sender, shares);
   }
 
-  function claim(address payable receiver) public updateReward {
+  function claim(address payable receiver) public updateRewards {
     uint256 userShares = balanceOf(msg.sender);
     uint256 portfolioShares = totalSupply();
     if (userShares == 0 || portfolioShares == 0) {
@@ -485,6 +466,45 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     receiver.transfer(amountOfEthToTransfer);
   }
 
+  function _updateSpecificReward(
+    ClaimableRewardOfAProtocol[] memory totalClaimableRewards,
+    uint256 i,
+    uint256 j
+  ) internal {
+    if (msg.sender != address(0)) {
+      string memory protocolOfThatVault = totalClaimableRewards[i].protocol;
+      address addressOfReward = totalClaimableRewards[i]
+        .claimableRewards[j]
+        .token;
+      uint256 oneOfTheUnclaimedRewardsBelongsToThisProfolio = totalClaimableRewards[
+          i
+        ].claimableRewards[j].amount;
+      uint256 thisRewardPerSharePaid = userRewardPerTokenPaid[msg.sender][
+        protocolOfThatVault
+      ][addressOfReward];
+      uint256 thisRewardPaid = thisRewardPerSharePaid * balanceOf(msg.sender);
+      rewardPerShareZappedIn[protocolOfThatVault][
+        addressOfReward
+      ] = _calculateRewardPerShareInThisPeriod(
+        protocolOfThatVault,
+        addressOfReward,
+        oneOfTheUnclaimedRewardsBelongsToThisProfolio
+      );
+
+      rewardsOfInvestedProtocols[msg.sender][protocolOfThatVault][
+        addressOfReward
+      ] += _calcualteUserEarnedBeforeThisUpdateAction(
+        protocolOfThatVault,
+        addressOfReward,
+        oneOfTheUnclaimedRewardsBelongsToThisProfolio,
+        thisRewardPaid
+      );
+      userRewardPerTokenPaid[msg.sender][protocolOfThatVault][
+        addressOfReward
+      ] = rewardPerShareZappedIn[protocolOfThatVault][addressOfReward];
+    }
+  }
+
   function _checkUserRewardPerShares(
     uint256 tokenOfPortfolio,
     uint256 userShares,
@@ -515,7 +535,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     string memory protocolOfThatVault,
     address addressOfReward,
     uint256 oneOfTheUnclaimedRewardsBelongsToThisProfolio
-  ) public view returns (uint) {
+  ) internal view returns (uint) {
     if (totalSupply() == 0) {
       return rewardPerShareZappedIn[protocolOfThatVault][addressOfReward];
     }
@@ -525,6 +545,18 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         oneOfTheUnclaimedRewardsBelongsToThisProfolio,
         totalSupply()
       );
+  }
+
+  function rescueFunds(
+    address tokenAddress,
+    uint256 amount
+  ) external onlyOwner {
+    require(tokenAddress != address(0), "Invalid token address");
+    IERC20(tokenAddress).safeTransfer(owner(), amount);
+  }
+
+  function rescueETH(uint256 amount) external onlyOwner {
+    payable(owner()).transfer(amount);
   }
 
   receive() external payable {}
