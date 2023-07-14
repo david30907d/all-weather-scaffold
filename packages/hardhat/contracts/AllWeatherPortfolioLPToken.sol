@@ -51,6 +51,12 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
 
   mapping(string => uint256) public portfolioAllocation;
   AbstractVault[] public vaults = new AbstractVault[](4);
+  mapping(address => mapping(string => mapping(address => uint256)))
+    public rewardsOfInvestedProtocols;
+  mapping(address => mapping(string => mapping(address => uint256)))
+    public userRewardPerTokenPaid;
+  mapping(string => mapping(address => uint256)) public rewardPerShareZappedIn;
+  uint256 public immutable UnitOfShares = 1000;
 
   constructor(
     address asset_,
@@ -69,6 +75,53 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     vaults[1] = RadiantArbitrumVault(radiantVaultAddr);
     vaults[2] = EquilibriaGlpVault(equilibriaVaultAddr);
     vaults[3] = EquilibriaGDAIVault(equilibriaGDAIVaultAddr);
+  }
+
+  modifier updateReward() {
+    ClaimableRewardOfAProtocol[]
+      memory totalClaimableRewards = getClaimableRewards(payable(msg.sender));
+    for (uint i = 0; i < totalClaimableRewards.length; i++) {
+      for (
+        uint j = 0;
+        j < totalClaimableRewards[i].claimableRewards.length;
+        j++
+      ) {
+        if (msg.sender != address(0)) {
+          string memory protocolOfThatVault = totalClaimableRewards[i].protocol;
+          address addressOfReward = totalClaimableRewards[i]
+            .claimableRewards[j]
+            .token;
+          uint256 oneOfTheUnclaimedRewardsBelongsToThisProfolio = totalClaimableRewards[
+              i
+            ].claimableRewards[j].amount;
+          uint256 thisRewardPerSharePaid = userRewardPerTokenPaid[msg.sender][
+            protocolOfThatVault
+          ][addressOfReward];
+          uint256 thisRewardPaid = thisRewardPerSharePaid *
+            balanceOf(msg.sender);
+          rewardPerShareZappedIn[protocolOfThatVault][
+            addressOfReward
+          ] = _calculateRewardPerShareInThisPeriod(
+            protocolOfThatVault,
+            addressOfReward,
+            oneOfTheUnclaimedRewardsBelongsToThisProfolio
+          );
+
+          rewardsOfInvestedProtocols[msg.sender][protocolOfThatVault][
+            addressOfReward
+          ] += _calcualteUserEarnedBeforeThisUpdateAction(
+            protocolOfThatVault,
+            addressOfReward,
+            oneOfTheUnclaimedRewardsBelongsToThisProfolio,
+            thisRewardPaid
+          );
+          userRewardPerTokenPaid[msg.sender][protocolOfThatVault][
+            addressOfReward
+          ] = rewardPerShareZappedIn[protocolOfThatVault][addressOfReward];
+        }
+      }
+    }
+    _;
   }
 
   function setVaultAllocations(
@@ -116,7 +169,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     IPendleRouter.ApproxParams calldata gdaiGuessPtReceivedFromSy,
     IPendleRouter.TokenInput calldata gdaiInput,
     bytes calldata gdaiOneInchDataGDAI
-  ) public {
+  ) public updateReward {
     require(amount > 0, "Token amount must be greater than 0");
     // Transfer tokens from the user to the contract
     SafeERC20.safeTransferFrom(
@@ -184,8 +237,11 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       }
     }
 
-    _mint(receiver, amount);
-    emit Transfer(address(0), receiver, amount);
+    // in case the LP share is too big, lead to rounding error
+    // for instance, `_calculateRewardPerShareInThisPeriod()` need to divide totalSupply()
+    // reward might be zero if totalSupply() is too big
+    _mint(receiver, SafeMath.div(amount, UnitOfShares));
+    emit Transfer(address(0), receiver, SafeMath.div(amount, UnitOfShares));
   }
 
   function _depositDpxLP(
@@ -241,7 +297,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     uint256 shares,
     address payable receiver,
     IPendleRouter.TokenOutput calldata output
-  ) public {
+  ) public updateReward {
     for (uint256 i = 0; i < vaults.length; i++) {
       uint256 vaultShares = Math.mulDiv(
         vaults[i].balanceOf(address(this)),
@@ -270,7 +326,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     _burn(msg.sender, shares);
   }
 
-  function claim(address payable receiver) public {
+  function claim(address payable receiver) public updateReward {
     uint256 userShares = balanceOf(msg.sender);
     uint256 portfolioShares = totalSupply();
     if (userShares == 0 || portfolioShares == 0) {
@@ -399,7 +455,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     ).getRadiantRewardNativeTokenAddresses();
     // rToken
     for (uint i = 0; i < radiantRewardNativeTokenAddresses.length; i++) {
-      uint256 userReward = _checkUserRewardPerTokenPaid(
+      uint256 userReward = _checkUserRewardPerShares(
         IERC20(radiantRewardNativeTokenAddresses[i]).balanceOf(address(this)),
         userShares,
         portfolioShares
@@ -417,7 +473,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     uint256 userShares,
     uint256 portfolioShares
   ) internal {
-    uint256 amountOfEthToTransfer = _checkUserRewardPerTokenPaid(
+    uint256 amountOfEthToTransfer = _checkUserRewardPerShares(
       address(this).balance,
       userShares,
       portfolioShares
@@ -429,7 +485,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     receiver.transfer(amountOfEthToTransfer);
   }
 
-  function _checkUserRewardPerTokenPaid(
+  function _checkUserRewardPerShares(
     uint256 tokenOfPortfolio,
     uint256 userShares,
     uint256 portfolioShares
@@ -437,6 +493,38 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     // TODO: current implementation is not accurate
     // need to implement the user reward per token paid like what convex and equilibria do
     return Math.mulDiv(tokenOfPortfolio, userShares, portfolioShares);
+  }
+
+  function _calcualteUserEarnedBeforeThisUpdateAction(
+    string memory protocolOfThatVault,
+    address addressOfReward,
+    uint256 oneOfTheUnclaimedRewardsBelongsToThisProfolio,
+    uint256 thisRewardPaid
+  ) public view returns (uint) {
+    return
+      _calculateRewardPerShareInThisPeriod(
+        protocolOfThatVault,
+        addressOfReward,
+        oneOfTheUnclaimedRewardsBelongsToThisProfolio
+      ) *
+      balanceOf(msg.sender) -
+      thisRewardPaid;
+  }
+
+  function _calculateRewardPerShareInThisPeriod(
+    string memory protocolOfThatVault,
+    address addressOfReward,
+    uint256 oneOfTheUnclaimedRewardsBelongsToThisProfolio
+  ) public view returns (uint) {
+    if (totalSupply() == 0) {
+      return rewardPerShareZappedIn[protocolOfThatVault][addressOfReward];
+    }
+    return
+      rewardPerShareZappedIn[protocolOfThatVault][addressOfReward] +
+      SafeMath.div(
+        oneOfTheUnclaimedRewardsBelongsToThisProfolio,
+        totalSupply()
+      );
   }
 
   receive() external payable {}
