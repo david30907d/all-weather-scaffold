@@ -27,7 +27,19 @@ let pendleGLPZapInData;
 let pendleGDAIZapInData;
 
 async function deposit() {
-  return await (await portfolioContract.connect(wallet).deposit(radiantAmount, wallet.address, oneInchSwapDataForDpx.tx.data, pendleGLPZapInData[2], pendleGLPZapInData[3], pendleGLPZapInData[4], pendleGDAIZapInData[2], pendleGDAIZapInData[3], pendleGDAIZapInData[4], oneInchSwapDataForGDAI.tx.data)).wait();
+  const depositData = {
+    amount: radiantAmount,
+    receiver: wallet.address,
+    oneInchDataDpx: oneInchSwapDataForDpx.tx.data,
+    glpMinLpOut: pendleGLPZapInData[2],
+    glpGuessPtReceivedFromSy: pendleGLPZapInData[3],
+    glpInput: pendleGLPZapInData[4],
+    gdaiMinLpOut: pendleGDAIZapInData[2],
+    gdaiGuessPtReceivedFromSy: pendleGDAIZapInData[3],
+    gdaiInput: pendleGDAIZapInData[4],
+    gdaiOneInchDataGDAI: oneInchSwapDataForGDAI.tx.data
+  }
+  return await (await portfolioContract.connect(wallet).deposit(depositData)).wait();
 }
 
 describe("All Weather Protocol", function () {
@@ -42,7 +54,7 @@ describe("All Weather Protocol", function () {
     multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
     pendleGlpMarketLPT = await ethers.getContractAt("IERC20", glpMarketPoolAddress);
     pendleGDAIMarketLPT = await ethers.getContractAt("IERC20", gDAIMarketPoolAddress);
-    await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.05"), { gasLimit: 1057560 });
+    await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit: 2057560 });
     
     const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
     radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLockZapAddress);

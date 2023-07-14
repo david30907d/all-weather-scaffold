@@ -93,6 +93,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   }
 
   modifier updateRewards() {
+    // pretty much copied from https://solidity-by-example.org/defi/staking-rewards/
     ClaimableRewardOfAProtocol[]
       memory totalClaimableRewards = getClaimableRewards(payable(msg.sender));
     for (uint i = 0; i < totalClaimableRewards.length; i++) {
@@ -286,6 +287,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     address payable receiver,
     IPendleRouter.TokenOutput calldata output
   ) public updateRewards {
+    require(shares <= totalSupply(), "Shares exceed total supply");
     for (uint256 i = 0; i < vaults.length; i++) {
       uint256 vaultShares = Math.mulDiv(
         vaults[i].balanceOf(address(this)),
