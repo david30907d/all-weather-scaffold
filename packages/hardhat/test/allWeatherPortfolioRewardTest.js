@@ -67,7 +67,7 @@ describe("All Weather Protocol", function () {
         dGDAIRewardPool = await ethers.getContractAt("IERC20", gDAIRewardPoolAddress);
         radiantLockZap = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
         multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
-        await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.04"), { gasLimit: 2057560 });
+        await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit: 2057560 });
 
         const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
         radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLockZapAddress);

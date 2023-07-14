@@ -35,8 +35,22 @@ let oneInchSwapDataForDpx;
 let oneInchSwapDataForGDAI;
 let pendleGDAIZapInData;
 let pendleGLPZapInData;
+let portfolioShares;
+
 async function deposit() {
-    return await (await portfolioContract.deposit(end2endTestingAmount, wallet.address, oneInchSwapDataForDpx.tx.data, pendleGLPZapInData[2], pendleGLPZapInData[3], pendleGLPZapInData[4], pendleGDAIZapInData[2], pendleGDAIZapInData[3], pendleGDAIZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 10692137 })).wait();
+    const depositData = {
+        amount: end2endTestingAmount,
+        receiver: wallet.address,
+        oneInchDataDpx: oneInchSwapDataForDpx.tx.data,
+        glpMinLpOut: pendleGLPZapInData[2],
+        glpGuessPtReceivedFromSy: pendleGLPZapInData[3],
+        glpInput: pendleGLPZapInData[4],
+        gdaiMinLpOut: pendleGDAIZapInData[2],
+        gdaiGuessPtReceivedFromSy: pendleGDAIZapInData[3],
+        gdaiInput: pendleGDAIZapInData[4],
+        gdaiOneInchDataGDAI: oneInchSwapDataForGDAI.tx.data
+    }
+    return await (await portfolioContract.deposit(depositData, { gasLimit: 10692137 })).wait();
 }
 
 describe("All Weather Protocol", function () {
@@ -57,7 +71,7 @@ describe("All Weather Protocol", function () {
         dGDAIRewardPool = await ethers.getContractAt("IERC20", gDAIRewardPoolAddress);
         radiantLockZap = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
         multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
-        await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.025"), { gasLimit: 2057560 });
+        await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit: 2057560 });
 
         const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
         radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLockZapAddress);
@@ -92,8 +106,9 @@ describe("All Weather Protocol", function () {
 
         oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxToken.address, end2endTestingAmount.div(8), wallet.address, 50);
         oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, end2endTestingAmount.div(4), wallet.address, 50);
-        pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount), 0.2, daiToken.address);
+        pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount).mul(95).div(100), 0.2, daiToken.address);
         pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, end2endTestingAmount.div(4), 0.99);
+        portfolioShares = end2endTestingAmount.div(await portfolioContract.UnitOfShares());
     });
 
     describe("Portfolio LP Contract Test", function () {
@@ -104,7 +119,7 @@ describe("All Weather Protocol", function () {
             for (const event of receipt.events) {
                 if (event.topics.includes(portfolioContract.interface.getEventTopic('Transfer'))) {
                     const decodedEvent = portfolioContract.interface.decodeEventLog('Transfer', event.data, event.topics);
-                    expect(await portfolioContract.balanceOf(wallet.address)).to.equal(end2endTestingAmount);
+                    expect(await portfolioContract.balanceOf(wallet.address)).to.equal(portfolioShares);
                     if (decodedEvent.to === wallet.address && decodedEvent.from === portfolioContract.address) {
                         expect(decodedEvent.value).to.equal(end2endTestingAmount);
                     }
@@ -144,7 +159,7 @@ describe("All Weather Protocol", function () {
     
           const totalAssetsWhichShouldBeWithdrew = await portfolioContract.totalAssets();
           // withdraw
-          await (await portfolioContract.connect(wallet).redeem(end2endTestingAmount, wallet.address, pendleZapOutData[3], { gasLimit: 4675600 })).wait();
+          await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, pendleZapOutData[3], { gasLimit: 4675600 })).wait();
           for (const asset of totalAssetsWhichShouldBeWithdrew) {
             if (asset.vaultName === 'AllWeatherLP-SushSwap-DpxETH') {
                 expect(asset.assets).to.equal(await dpxSLP.balanceOf(wallet.address));
