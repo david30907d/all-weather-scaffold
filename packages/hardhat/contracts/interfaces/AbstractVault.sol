@@ -1,14 +1,20 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.4;
-
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+
 import "../radiant/IFeeDistribution.sol";
 import "../utils/IWETH.sol";
 import "hardhat/console.sol";
 import "../pendle/IPendleRouter.sol";
 
-abstract contract AbstractVault is ERC4626 {
+abstract contract AbstractVault is ERC4626, Ownable {
+  using SafeERC20 for IERC20;
+  using SafeMath for uint256;
+
   IWETH public immutable weth =
     IWETH(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1);
 
@@ -141,5 +147,17 @@ abstract contract AbstractVault is ERC4626 {
         claimableRewards[i].amount
       );
     }
+  }
+
+  function rescueFunds(
+    address tokenAddress,
+    uint256 amount
+  ) external onlyOwner {
+    require(tokenAddress != address(0), "Invalid token address");
+    IERC20(tokenAddress).safeTransfer(owner(), amount);
+  }
+
+  function rescueETH(uint256 amount) external onlyOwner {
+    payable(owner()).transfer(amount);
   }
 }
