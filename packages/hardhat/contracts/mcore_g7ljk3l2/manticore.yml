@@ -1,4 +1,0 @@
-cli:
-  argv:
-  - AllWeatherPortfolioLPToken.sol
-  skip_reverts: true
