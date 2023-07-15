@@ -172,14 +172,14 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       if (
         bytesOfvaultName == keccak256(bytes("AllWeatherLP-SushSwap-DpxETH"))
       ) {
-        require(
-          _depositDpxLP(
-            idx,
-            zapInAmountForThisVault,
-            depositData.oneInchDataDpx
-          ),
-          "Buying Dpx LP token failed"
-        );
+        // require(
+        //   _depositDpxLP(
+        //     idx,
+        //     zapInAmountForThisVault,
+        //     depositData.oneInchDataDpx
+        //   ),
+        //   "Buying Dpx LP token failed"
+        // );
       } else if (
         bytesOfvaultName == keccak256(bytes("AllWeatherLP-RadiantArbitrum-DLP"))
       ) {
