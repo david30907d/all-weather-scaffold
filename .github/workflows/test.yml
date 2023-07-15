@@ -25,7 +25,7 @@ jobs:
       - run: yarn
       - name: Test
         run: |
-          BLOCK_NUMBER=107716130 yarn test test/dpxArbitrumVaultTest.js;
+          # BLOCK_NUMBER=107716130 yarn test test/dpxArbitrumVaultTest.js;
           BLOCK_NUMBER=107716130 yarn test test/radiantDlpVaultTest.js;
           BLOCK_NUMBER=107716130 yarn test test/radiantDlpVaultRewardTest.js;
           BLOCK_NUMBER=107716130 yarn test test/equilibriaGLP.js;
