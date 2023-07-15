@@ -8,17 +8,17 @@
 // The code imports several open source libraries and uses various data structures like struct, bytes, and mapping. The SPDX-License-Identifier specifies the license for the code (MIT in this case).
 
 pragma solidity ^0.8.4;
-import "node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "node_modules/@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "node_modules/@openzeppelin/contracts/interfaces/IERC4626.sol";
-import "node_modules/@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/interfaces/IERC4626.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./RadiantArbitrumVault.sol";
 import "./DpxArbitrumVault.sol";
-import "node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "./radiant/IFeeDistribution.sol";
-import "node_modules/@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "node_modules/@openzeppelin/contracts/utils/math/Math.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./pendle/IPendleRouter.sol";
 import "./vaults/EquilibriaGlpVault.sol";
 import "./vaults/Equilibria/EquilibriaGDAIVault.sol";

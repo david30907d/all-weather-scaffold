@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity ^0.8.4;
 
-import "node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IScaledBalanceToken} from "./IScaledBalanceToken.sol";
 import {IInitializableAToken} from "./IInitializableAToken.sol";
 import {IAaveIncentivesController} from "./IAaveIncentivesController.sol";
