@@ -34,5 +34,4 @@ jobs:
       - name: Run solhint
         run: |
           cd packages/hardhat/;
-          find contracts -type f -name "*.sol" -exec sed -i 's@openzeppelin@node_modules/@openzeppelin@g' {} +;
           solhint contracts/**/*.sol;

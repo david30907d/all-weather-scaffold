@@ -23,7 +23,9 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    - run: yarn add -W @openzeppelin/contracts
+    - run: |
+        yarn add -W @openzeppelin/contracts
+        node .github/scripts/replaceStringForSlither.js        
 
     - name: Run Slither
       uses: crytic/slither-action@v0.3.0
