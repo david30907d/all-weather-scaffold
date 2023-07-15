@@ -29,9 +29,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd packages/hardhat/;
           yarn;
 
       - name: Run solhint
         run: |
+          cd packages/hardhat/;
           solhint contracts/**/*.sol;
