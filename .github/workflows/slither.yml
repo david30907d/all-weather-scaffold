@@ -23,7 +23,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm i @openzeppelin/contracts
+    - run: yarn add @openzeppelin/contracts
 
     - name: Run Slither
       uses: crytic/slither-action@v0.3.0
