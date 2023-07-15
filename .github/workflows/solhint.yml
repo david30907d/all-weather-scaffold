@@ -1,18 +1,36 @@
-name: solhint-ci
+name: Lint
+
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
+
 jobs:
-  solhint:
-    name: runner / solhint
-    runs-on: ubuntu-latest
+  ci:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node: [16.x]
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Run solhint with contracthsark
-        uses: contractshark/inject-solhint-ci@1.0.0+0
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Setup node env
+        uses: actions/setup-node@v3
         with:
-          github_token: ${{ secrets.github_token }}
-          reporter: github-pr-review # Change reporter.
-          solhint_input: 'packages/hardhat/contracts/**/*.sol'
+          node-version: ${{ matrix.node }}
+          cache : yarn 
+
+      - name: Install dependencies
+        run: yarn add solhint
+
+      - name: Run solhint
+        run: |
+          cd packages/hardhat/;
+          solhint contracts/**/*.sol;
