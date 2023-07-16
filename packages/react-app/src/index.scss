@@ -1,0 +1,104 @@
+@import "./reset.css";
+
+$dark-color: #000000;
+$primary-color: #BEED54;
+
+// .App {
+//     text-align: center;
+// }
+
+body {
+    background-color: $dark-color;
+}
+
+// table css
+
+.ant-btn-default {
+    background-color: $dark-color;
+}
+
+.ant-table-wrapper {
+    border: 1px solid $primary-color;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+
+    .ant-table {
+        background-color: $dark-color;
+        color: white;
+
+        .ant-table-thead>tr>th {
+            background-color: $primary-color;
+        }
+
+        .ant-table-thead>tr>td {
+            background-color: $primary-color;
+        }
+
+        .ant-table-tbody>tr>td.ant-table-cell-row-hover {
+            background-color: #474747;
+        }
+    }
+}
+
+.ant-tag {
+    background-color: $primary-color;
+    border-color: $primary-color;
+    font-weight: bold;
+}
+
+.ant-table-title {
+    color: white;
+    margin-bottom: 15px;
+}
+
+
+.ant-modal .ant-modal-content {
+
+    padding: 0;
+}
+
+// popover css
+
+.ant-popover .ant-popover-inner {
+    padding: 0;
+}
+
+.ant-popover-arrow {
+    background-color: $primary-color;
+}
+
+// scrollbar css
+
+::-webkit-scrollbar {
+    width: 5px;
+    height: 7px;
+
+}
+
+::-webkit-scrollbar-button {
+
+    background: transparent;
+
+    border-radius: 4px;
+
+}
+
+::-webkit-scrollbar-track-piece {
+
+    background: transparent;
+
+}
+
+::-webkit-scrollbar-thumb {
+
+    border-radius: 4px;
+
+    background-color: #C9CACA;
+
+}
+
+::-webkit-scrollbar-track {
+
+    box-shadow: transparent;
+
+}

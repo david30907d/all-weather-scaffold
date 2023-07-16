@@ -1,26 +1,30 @@
 import { Tag } from "antd";
-export const getColumnsForSuggestionsTable = portfolioAPR => [
+export const getColumnsForSuggestionsTable = (portfolioAPR) => [
   {
     title: "Chain",
     dataIndex: "chain",
     key: "chain",
+    width: 24,
   },
   {
     title: "Pool",
     dataIndex: "pool",
     key: "pool",
-    render: text => <button>{text}</button>,
+    width: 24,
+    // render: text => <button>{text}</button>,
   },
   {
     title: "Coin",
     dataIndex: "coin",
     key: "coin",
+    width: 24,
   },
   {
     title: "TVL",
     key: "tvl",
     dataIndex: "tvl",
-    render: tvl => {
+    width: 14,
+    render: (tvl) => {
       let color = tvl < 500000 ? "volcano" : "green";
       return (
         <Tag color={color} key={tvl}>
@@ -33,7 +37,8 @@ export const getColumnsForSuggestionsTable = portfolioAPR => [
     title: "APR",
     key: "apr",
     dataIndex: "apr",
-    render: apr => {
+    width: 14,
+    render: (apr) => {
       let color = apr < portfolioAPR / 100 ? "volcano" : "green";
       return (
         <>

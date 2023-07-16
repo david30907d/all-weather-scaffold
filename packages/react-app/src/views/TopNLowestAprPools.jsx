@@ -9,24 +9,25 @@ export default function TopNLowestAprPools(props) {
       title: "Pool",
       dataIndex: "pool",
       key: "pool",
-      render: text => <button>{text}</button>,
+      width: 60,
+      // render: text => <button>{text}</button>,
     },
     {
       title: "APR",
       key: "apr",
       dataIndex: "apr",
-      render: apr => {
+      width: 40,
+      render: (apr) => {
         let color = apr < portfolioAPR / 100 ? "volcano" : "green";
         return (
           <>
-            <Tag color={color} key={apr}>
-              {(apr * 100).toFixed(2)}%
-            </Tag>
+            <Tag key={apr}>{(apr * 100).toFixed(2)}%</Tag>
           </>
         );
       },
     },
   ];
+
   useEffect(() => {
     if (topNData) {
       const extractedData = topNData.map((metadata, idx) => ({
@@ -39,9 +40,16 @@ export default function TopNLowestAprPools(props) {
   }, [topNData]);
 
   return (
-    <div>
-      <h3>{wording}:</h3>
-      <Table columns={columns} dataSource={data} />
-    </div>
+    <>
+      <h2 className="ant-table-title">{wording}:</h2>
+      <Table
+        columns={columns}
+        dataSource={data}
+        pagination={false}
+        scroll={{
+          y: props.windowHeight,
+        }}
+      />
+    </>
   );
 }

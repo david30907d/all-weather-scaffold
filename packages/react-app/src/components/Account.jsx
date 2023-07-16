@@ -1,6 +1,6 @@
 import { Button } from "antd";
 import React from "react";
-import { useThemeSwitcher } from "react-css-theme-switcher";
+// import { useThemeSwitcher } from "react-css-theme-switcher";
 
 import Address from "./Address";
 import Balance from "./Balance";
@@ -53,20 +53,30 @@ export default function Account({
   blockExplorer,
   isContract,
 }) {
-  const { currentTheme } = useThemeSwitcher();
+  // const { currentTheme } = useThemeSwitcher();
   let accountButtonInfo;
   if (web3Modal?.cachedProvider) {
     accountButtonInfo = { name: "Logout", action: logoutOfWeb3Modal };
   } else {
-    accountButtonInfo = { name: "Connect", action: loadWeb3Modal };
+    accountButtonInfo = { name: "Connect Wallet", action: loadWeb3Modal };
   }
 
   const display = !minimized && (
     <span>
       {address && (
-        <Address address={address} ensProvider={mainnetProvider} blockExplorer={blockExplorer} fontSize={20} />
+        <Address
+          address={address}
+          ensProvider={mainnetProvider}
+          blockExplorer={blockExplorer}
+          fontSize={20}
+        />
       )}
-      <Balance address={address} provider={localProvider} price={price} size={20} />
+      <Balance
+        address={address}
+        provider={localProvider}
+        price={price}
+        size={20}
+      />
       {!isContract && (
         <Wallet
           address={address}
@@ -74,7 +84,7 @@ export default function Account({
           signer={userSigner}
           ensProvider={mainnetProvider}
           price={price}
-          color={currentTheme === "light" ? "#1890ff" : "#2caad9"}
+          // color={currentTheme === "light" ? "#1890ff" : "#2caad9"}
           size={22}
           padding={"0px"}
         />
@@ -84,9 +94,13 @@ export default function Account({
 
   return (
     <div style={{ display: "flex" }}>
-      {display}
+      {/* {display} */}
       {web3Modal && (
-        <Button style={{ marginLeft: 8 }} shape="round" onClick={accountButtonInfo.action}>
+        <Button
+          style={{ marginLeft: 8, color: "#BEED54", borderColor: "#BEED54" }}
+          shape="round"
+          onClick={accountButtonInfo.action}
+        >
           {accountButtonInfo.name}
         </Button>
       )}

@@ -6,6 +6,7 @@ export default function SuggestionsForBetterStableCoins(props) {
   const { wording, topNData, portfolioApr } = props;
   const [data, setData] = useState([]);
   const commonColumns = getColumnsForSuggestionsTable(portfolioApr);
+
   useEffect(() => {
     if (topNData) {
       const extractedData = topNData.map((metadata, idx) => ({
@@ -22,8 +23,15 @@ export default function SuggestionsForBetterStableCoins(props) {
 
   return (
     <div>
-      <h3>{wording}:</h3>
-      <Table columns={commonColumns} dataSource={data} />
+      <h2 className="ant-table-title">{wording}:</h2>
+      <Table
+        columns={commonColumns}
+        dataSource={data}
+        pagination={false}
+        scroll={{
+          y: props.windowHeight,
+        }}
+      />
     </div>
   );
 }

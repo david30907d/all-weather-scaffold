@@ -9,12 +9,13 @@ export default function useRebalanceSuggestions(address, pollTime = 300000) {
   const [portfolioApr, setPortfolioApr] = useState(0);
   const [sharpeRatio, setSharpeRatio] = useState(0);
   const [topNLowestAprPools, setTopNLowestAprPools] = useState([]);
-  const [topNPoolConsistOfSameLpToken, setTopNPoolConsistOfSameLpToken] = useState([]);
+  const [topNPoolConsistOfSameLpToken, setTopNPoolConsistOfSameLpToken] =
+    useState([]);
   const [topNStableCoins, setTopNStableCoins] = useState([]);
   const loadSuggestions = async () => {
-    axios
+    await axios
       .get(`${API_URL}/address?addresses=${address}`)
-      .then(response => {
+      .then((response) => {
         const newNetWorth = response.data.net_worth;
         setNetWorth(newNetWorth);
         const newRebalanceSuggestions = response.data.suggestions;
@@ -27,12 +28,13 @@ export default function useRebalanceSuggestions(address, pollTime = 300000) {
         setSharpeRatio(sharpeRatio);
         const topNLowestAprPools = response.data.top_n_lowest_apr_pools;
         setTopNLowestAprPools(topNLowestAprPools);
-        const topNPoolConsistOfSameLpToken = response.data.top_n_pool_consist_of_same_lp_token;
+        const topNPoolConsistOfSameLpToken =
+          response.data.top_n_pool_consist_of_same_lp_token;
         setTopNPoolConsistOfSameLpToken(topNPoolConsistOfSameLpToken);
         const topNStableCoins = response.data.topn_stable_coins;
         setTopNStableCoins(topNStableCoins);
       })
-      .catch(error => console.log(error));
+      .catch((error) => console.log(error));
   };
 
   usePoller(loadSuggestions, pollTime);

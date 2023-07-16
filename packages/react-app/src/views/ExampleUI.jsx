@@ -1,3 +1,5 @@
+import { Affix, Button } from "antd";
+import { MessageFilled } from "@ant-design/icons";
 import React from "react";
 import RebalancerWidget from "./Rebalancer";
 import OneInch from "./dexAggregator/1inch";
@@ -14,11 +16,11 @@ export default function ExampleUI({
   writeContracts,
 }) {
   return (
-    <div>
+    <div style={{ padding: 30 }}>
       {/*
         ⚙️ Here is an example UI that displays and sets the purpose in your smart contract:
       */}
-      <OneInch
+      {/* <OneInch
         chainId={chainId}
         // fromTokenAddress="0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
         // fromTokenAddress="0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
@@ -31,11 +33,17 @@ export default function ExampleUI({
         slippage="1"
         tx={tx}
         writeContracts={writeContracts}
-      />
-      <div style={{ border: "1px solid #cccccc", padding: 16, width: 400, margin: "auto", marginTop: 64 }}>
-        <h2>All Weather Portfolio:</h2>
-        <RebalancerWidget address={address} />
-      </div>
+      /> */}
+
+      <RebalancerWidget address={address} />
+      <Affix style={{ position: "fixed", bottom: "20px", right: "20px" }}>
+        <Button
+          shape="circle"
+          size="large"
+          icon={<MessageFilled style={{ color: "white" }} />}
+          style={{ backgroundColor: "#5C7724", borderColor: "#5C7724" }}
+        />
+      </Affix>
     </div>
   );
 }

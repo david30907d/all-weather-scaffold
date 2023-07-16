@@ -1,7 +1,4 @@
 import { Button, Col, Menu, Row } from "antd";
-
-import "antd/dist/antd.css";
-import "semantic-ui-css/semantic.min.css";
 import {
   useBalance,
   useContractLoader,
@@ -12,13 +9,12 @@ import {
 import { useExchangeEthPrice } from "eth-hooks/dapps/dex";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, Route, Switch, useLocation } from "react-router-dom";
-import "./App.css";
 import {
   Account,
   Contract,
   Faucet,
   GasGauge,
-  Header,
+  AppHeader,
   Ramp,
   ThemeSwitch,
   NetworkDisplay,
@@ -88,7 +84,9 @@ function App(props) {
 
   // load all your providers
   const localProvider = useStaticJsonRPC([
-    process.env.REACT_APP_PROVIDER ? process.env.REACT_APP_PROVIDER : targetNetwork.rpcUrl,
+    process.env.REACT_APP_PROVIDER
+      ? process.env.REACT_APP_PROVIDER
+      : targetNetwork.rpcUrl,
   ]);
 
   const mainnetProvider = useStaticJsonRPC(providers, localProvider);
@@ -104,7 +102,11 @@ function App(props) {
 
   const logoutOfWeb3Modal = async () => {
     await web3Modal.clearCachedProvider();
-    if (injectedProvider && injectedProvider.provider && typeof injectedProvider.provider.disconnect == "function") {
+    if (
+      injectedProvider &&
+      injectedProvider.provider &&
+      typeof injectedProvider.provider.disconnect == "function"
+    ) {
       await injectedProvider.provider.disconnect();
     }
     setTimeout(() => {
@@ -113,12 +115,24 @@ function App(props) {
   };
 
   /* 💵 This hook will get the price of ETH from 🦄 Uniswap: */
-  const price = useExchangeEthPrice(targetNetwork, mainnetProvider, mainnetProviderPollingTime);
+  const price = useExchangeEthPrice(
+    targetNetwork,
+    mainnetProvider,
+    mainnetProviderPollingTime
+  );
 
   /* 🔥 This hook will get the price of Gas from ⛽️ EtherGasStation */
-  const gasPrice = useGasPrice(targetNetwork, "FastGasPrice", localProviderPollingTime);
+  const gasPrice = useGasPrice(
+    targetNetwork,
+    "FastGasPrice",
+    localProviderPollingTime
+  );
   // Use your injected provider from 🦊 Metamask or if you don't have it then instantly generate a 🔥 burner wallet.
-  const userProviderAndSigner = useUserProviderAndSigner(injectedProvider, localProvider, USE_BURNER_WALLET);
+  const userProviderAndSigner = useUserProviderAndSigner(
+    injectedProvider,
+    localProvider,
+    USE_BURNER_WALLET
+  );
   const userSigner = userProviderAndSigner.signer;
 
   useEffect(() => {
@@ -132,9 +146,13 @@ function App(props) {
   }, [userSigner]);
 
   // You can warn the user if you would like them to be on a specific network
-  const localChainId = localProvider && localProvider._network && localProvider._network.chainId;
+  const localChainId =
+    localProvider && localProvider._network && localProvider._network.chainId;
   const selectedChainId =
-    userSigner && userSigner.provider && userSigner.provider._network && userSigner.provider._network.chainId;
+    userSigner &&
+    userSigner.provider &&
+    userSigner.provider._network &&
+    userSigner.provider._network.chainId;
 
   // For more hooks, check out 🔗eth-hooks at: https://www.npmjs.com/package/eth-hooks
 
@@ -142,20 +160,35 @@ function App(props) {
   const tx = Transactor(userSigner, gasPrice);
 
   // 🏗 scaffold-eth is full of handy hooks like this one to get your balance:
-  const yourLocalBalance = useBalance(localProvider, address, localProviderPollingTime);
+  const yourLocalBalance = useBalance(
+    localProvider,
+    address,
+    localProviderPollingTime
+  );
 
   // Just plug in different 🛰 providers to get your balance on different chains:
-  const yourMainnetBalance = useBalance(mainnetProvider, address, mainnetProviderPollingTime);
+  const yourMainnetBalance = useBalance(
+    mainnetProvider,
+    address,
+    mainnetProviderPollingTime
+  );
 
   // const contractConfig = useContractConfig();
 
-  const contractConfig = { deployedContracts: deployedContracts || {}, externalContracts: externalContracts || {} };
+  const contractConfig = {
+    deployedContracts: deployedContracts || {},
+    externalContracts: externalContracts || {},
+  };
 
   // Load in your local 📝 contract and read a value from it:
   const readContracts = useContractLoader(localProvider, contractConfig);
 
   // If you want to make 🔐 write transactions to your contracts, use the userSigner:
-  const writeContracts = useContractLoader(userSigner, contractConfig, localChainId);
+  const writeContracts = useContractLoader(
+    userSigner,
+    contractConfig,
+    localChainId
+  );
 
   // EXTERNAL CONTRACT EXAMPLE:
   //
@@ -168,7 +201,13 @@ function App(props) {
   // });
 
   // keep track of a variable from the contract in the local React state:
-  const purpose = useContractReader(readContracts, "YourContract", "purpose", [], localProviderPollingTime);
+  const purpose = useContractReader(
+    readContracts,
+    "YourContract",
+    "purpose",
+    [],
+    localProviderPollingTime
+  );
 
   /*
   const addressFromENS = useResolveName(mainnetProvider, "austingriffith.eth");
@@ -190,16 +229,16 @@ function App(props) {
       writeContracts &&
       mainnetContracts
     ) {
-      console.log("_____________________________________ 🏗 scaffold-eth _____________________________________");
-      console.log("🌎 mainnetProvider", mainnetProvider);
-      console.log("🏠 localChainId", localChainId);
-      console.log("👩‍💼 selected address:", address);
-      console.log("🕵🏻‍♂️ selectedChainId:", selectedChainId);
-      console.log("💵 yourLocalBalance", yourLocalBalance ? ethers.utils.formatEther(yourLocalBalance) : "...");
-      console.log("💵 yourMainnetBalance", yourMainnetBalance ? ethers.utils.formatEther(yourMainnetBalance) : "...");
-      console.log("📝 readContracts", readContracts);
-      console.log("🌍 DAI contract on mainnet:", mainnetContracts);
-      console.log("🔐 writeContracts", writeContracts);
+      // console.log("_____________________________________ 🏗 scaffold-eth _____________________________________");
+      // console.log("🌎 mainnetProvider", mainnetProvider);
+      // console.log("🏠 localChainId", localChainId);
+      // console.log("👩‍💼 selected address:", address);
+      // console.log("🕵🏻‍♂️ selectedChainId:", selectedChainId);
+      // console.log("💵 yourLocalBalance", yourLocalBalance ? ethers.utils.formatEther(yourLocalBalance) : "...");
+      // console.log("💵 yourMainnetBalance", yourMainnetBalance ? ethers.utils.formatEther(yourMainnetBalance) : "...");
+      // console.log("📝 readContracts", readContracts);
+      // console.log("🌍 DAI contract on mainnet:", mainnetContracts);
+      // console.log("🔐 writeContracts", writeContracts);
     }
   }, [
     mainnetProvider,
@@ -218,7 +257,7 @@ function App(props) {
     const provider = await web3Modal.requestProvider();
     setInjectedProvider(new ethers.providers.Web3Provider(provider));
 
-    provider.on("chainChanged", chainId => {
+    provider.on("chainChanged", (chainId) => {
       console.log(`chain changed to ${chainId}! updating providers`);
       setInjectedProvider(new ethers.providers.Web3Provider(provider));
     });
@@ -249,15 +288,24 @@ function App(props) {
     checkSafeApp();
   }, [loadWeb3Modal]);
 
-  const faucetAvailable = localProvider && localProvider.connection && targetNetwork.name.indexOf("local") !== -1;
+  const faucetAvailable =
+    localProvider &&
+    localProvider.connection &&
+    targetNetwork.name.indexOf("local") !== -1;
 
   return (
-    <div className="App">
+    <div className="">
       {/* ✏️ Edit the header and change the title to your project name */}
-      <Header>
+      <AppHeader>
         {/* 👨‍💼 Your account is in the top right with a wallet at connect options */}
-        <div style={{ position: "relative", display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", flex: 1 }}>
+        <div
+          style={{
+            position: "relative",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <div>
             {USE_NETWORK_SELECTOR && (
               <div style={{ marginRight: 20 }}>
                 <NetworkSwitch
@@ -281,29 +329,33 @@ function App(props) {
             />
           </div>
         </div>
-      </Header>
+      </AppHeader>
       {yourLocalBalance.lte(ethers.BigNumber.from("0")) && (
-        <FaucetHint localProvider={localProvider} targetNetwork={targetNetwork} address={address} />
+        <FaucetHint
+          localProvider={localProvider}
+          targetNetwork={targetNetwork}
+          address={address}
+        />
       )}
-      <NetworkDisplay
-        NETWORKCHECK={NETWORKCHECK}
-        localChainId={localChainId}
-        selectedChainId={selectedChainId}
-        targetNetwork={targetNetwork}
-        logoutOfWeb3Modal={logoutOfWeb3Modal}
-        USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
-      />
-      <Menu style={{ textAlign: "center", marginTop: 20 }} selectedKeys={[location.pathname]} mode="horizontal">
-        <Menu.Item key="/exampleui">
-          <Link to="/exampleui">Vault</Link>
-        </Menu.Item>
-        <Menu.Item key="/mainnetdai">
-          <Link to="/mainnetdai">(WIP)Mainnet DAI</Link>
-        </Menu.Item>
-      </Menu>
+      {/* <NetworkDisplay
+                NETWORKCHECK={NETWORKCHECK}
+                localChainId={localChainId}
+                selectedChainId={selectedChainId}
+                targetNetwork={targetNetwork}
+                logoutOfWeb3Modal={logoutOfWeb3Modal}
+                USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
+            /> */}
+      {/* <Menu style={{ textAlign: "center", marginTop: 20 }} selectedKeys={[location.pathname]} mode="horizontal">
+                <Menu.Item key="/exampleui">
+                    <Link to="/exampleui">Vault</Link>
+                </Menu.Item>
+                <Menu.Item key="/mainnetdai">
+                    <Link to="/mainnetdai">(WIP)Mainnet DAI</Link>
+                </Menu.Item>
+            </Menu> */}
 
       <Switch>
-        <Route path="/exampleui">
+        <Route path="/">
           <ExampleUI
             chainId={localChainId}
             address={address}
@@ -318,18 +370,18 @@ function App(props) {
             purpose={purpose}
           />
         </Route>
-        <Route path="/mainnetdai">
-          <Contract
-            name="DAI"
-            customContract={mainnetContracts && mainnetContracts.contracts && mainnetContracts.contracts.DAI}
-            signer={userSigner}
-            provider={mainnetProvider}
-            address={address}
-            blockExplorer="https://etherscan.io/"
-            contractConfig={contractConfig}
-            chainId={1}
-          />
-          {/*
+        {/* <Route path="/mainnetdai">
+                    <Contract
+                        name="DAI"
+                        customContract={mainnetContracts && mainnetContracts.contracts && mainnetContracts.contracts.DAI}
+                        signer={userSigner}
+                        provider={mainnetProvider}
+                        address={address}
+                        blockExplorer="https://etherscan.io/"
+                        contractConfig={contractConfig}
+                        chainId={1}
+                    />
+                    
             <Contract
               name="UNI"
               customContract={mainnetContracts && mainnetContracts.contracts && mainnetContracts.contracts.UNI}
@@ -338,51 +390,47 @@ function App(props) {
               address={address}
               blockExplorer="https://etherscan.io/"
             />
-            */}
-        </Route>
+           
+                </Route> */}
       </Switch>
 
-      <ThemeSwitch />
+      {/* <ThemeSwitch /> */}
 
       {/* 🗺 Extra UI like gas price, eth price, faucet, and support: */}
-      <div style={{ position: "fixed", textAlign: "left", left: 0, bottom: 20, padding: 10 }}>
-        <Row align="middle" gutter={[4, 4]}>
-          <Col span={8}>
-            <Ramp price={price} address={address} networks={NETWORKS} />
-          </Col>
+      {/* <div style={{ position: "fixed", textAlign: "left", left: 0, bottom: 20, padding: 10 }}>
+                <Row align="middle" gutter={[4, 4]}>
+                    <Col span={8}>
+                        <Ramp price={price} address={address} networks={NETWORKS} />
+                    </Col>
 
-          <Col span={8} style={{ textAlign: "center", opacity: 0.8 }}>
-            <GasGauge gasPrice={gasPrice} />
-          </Col>
-          <Col span={8} style={{ textAlign: "center", opacity: 1 }}>
-            <Button
-              onClick={() => {
-                window.open("https://t.me/joinchat/KByvmRe5wkR-8F_zz6AjpA");
-              }}
-              size="large"
-              shape="round"
-            >
-              <span style={{ marginRight: 8 }} role="img" aria-label="support">
-                💬
-              </span>
-              Support
-            </Button>
-          </Col>
-        </Row>
+                    <Col span={8} style={{ textAlign: "center", opacity: 0.8 }}>
+                        <GasGauge gasPrice={gasPrice} />
+                    </Col>
+                    <Col span={8} style={{ textAlign: "center", opacity: 1 }}>
+                        <Button
+                            onClick={() => {
+                                window.open("https://t.me/joinchat/KByvmRe5wkR-8F_zz6AjpA");
+                            }}
+                            size="large"
+                            shape="round"
+                        >
+                            <span style={{ marginRight: 8 }} role="img" aria-label="support">
+                                💬
+                            </span>
+                            Support
+                        </Button>
+                    </Col>
+                </Row>
 
-        <Row align="middle" gutter={[4, 4]}>
-          <Col span={24}>
-            {
-              /*  if the local provider has a signer, let's show the faucet:  */
-              faucetAvailable ? (
-                <Faucet localProvider={localProvider} price={price} ensProvider={mainnetProvider} />
-              ) : (
-                ""
-              )
-            }
-          </Col>
-        </Row>
-      </div>
+                <Row align="middle" gutter={[4, 4]}>
+                    <Col span={24}>
+                        {
+                          
+                            faucetAvailable ? <Faucet localProvider={localProvider} price={price} ensProvider={mainnetProvider} /> : ""
+                        }
+                    </Col>
+                </Row>
+            </div> */}
     </div>
   );
 }
