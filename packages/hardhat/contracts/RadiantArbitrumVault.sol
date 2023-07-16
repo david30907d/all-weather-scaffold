@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import "hardhat/console.sol";
+
 import "./radiant/ILendingPool.sol";
 import "./radiant/ILockZap.sol";
 import "./radiant/IMultiFeeDistribution.sol";
@@ -20,6 +20,8 @@ import "./interfaces/AbstractVault.sol";
 contract RadiantArbitrumVault is AbstractVault {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
+
+  event WithdrawFailed(address token);
 
   ILendingPool public radiantLending;
   ILockZap public lockZap;
@@ -85,6 +87,7 @@ contract RadiantArbitrumVault is AbstractVault {
     require(radiantDlpShares != 0, "dLP lock has not expired yet");
     uint256 vaultShare = super.redeem(radiantDlpShares, msg.sender, msg.sender);
     require(radiantDlpShares == vaultShare, "radiantDlpShares != vaultShare");
+    claim();
     return vaultShare;
   }
 
@@ -128,14 +131,26 @@ contract RadiantArbitrumVault is AbstractVault {
   }
 
   function _withdrawRTokenToReceiver() internal {
-    // Error: VM Exception while processing transaction: reverted with reason string '1'
-    // means there's no rToken for you to withdraw
     for (uint256 i = 0; i < radiantRewardNativeTokenAddresses.length; i++) {
-      radiantLending.withdraw(
-        radiantRewardNativeTokenAddresses[i],
-        type(uint256).max,
-        msg.sender
-      );
+      try
+        radiantLending.withdraw(
+          radiantRewardNativeTokenAddresses[i],
+          type(uint256).max,
+          msg.sender
+        )
+      returns (uint256 withdrawAmount) {
+        require(
+          withdrawAmount > 0,
+          string(
+            abi.encodePacked(
+              "failed to withdraw rToken ",
+              radiantRewardNativeTokenAddresses[i]
+            )
+          )
+        );
+      } catch (bytes memory /* error */) {
+        emit WithdrawFailed(radiantRewardNativeTokenAddresses[i]);
+      }
     }
   }
 

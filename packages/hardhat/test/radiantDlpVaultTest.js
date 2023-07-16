@@ -17,21 +17,36 @@ const { fetch1InchSwapData,
   gDAIMarketPoolAddress,
   fakePendleZapOut,
   daiAddress,
-  dpxAmount
+  dpxAmount,
+  simulateAYearLater
 } = require("./utils");
+let {currentTimestamp} = require("./utils");
 
 
 let wallet;
 let weth;
 let radiantVault;
 let portfolioContract;
-let currentTimestamp = Math.floor(Date.now() / 1000);;
 let oneInchSwapDataForDpx;
 let oneInchSwapDataForGDAI;
-let pendleZapInData;
+let pendleGLPZapInData;
+let pendleGDAIZapInData;
+let portfolioShares;
 
 async function deposit() {
-  return await (await portfolioContract.connect(wallet).deposit(radiantAmount, wallet.address, oneInchSwapDataForDpx.tx.data, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 3057560 })).wait();
+  const depositData = {
+      amount: radiantAmount,
+      receiver: wallet.address,
+      oneInchDataDpx: oneInchSwapDataForDpx.tx.data,
+      glpMinLpOut: pendleGLPZapInData[2],
+      glpGuessPtReceivedFromSy: pendleGLPZapInData[3],
+      glpInput: pendleGLPZapInData[4],
+      gdaiMinLpOut: pendleGDAIZapInData[2],
+      gdaiGuessPtReceivedFromSy: pendleGDAIZapInData[3],
+      gdaiInput: pendleGDAIZapInData[4],
+      gdaiOneInchDataGDAI: oneInchSwapDataForGDAI.tx.data
+  }
+  return await (await portfolioContract.connect(wallet).deposit(depositData)).wait();
 }
 
 describe("All Weather Protocol", function () {
@@ -71,12 +86,13 @@ describe("All Weather Protocol", function () {
 
 
     await (await weth.connect(wallet).approve(portfolioContract.address, radiantAmount, { gasLimit: 2057560 })).wait();
-    await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.02"), { gasLimit: 2057560 });
+    await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit: 2057560 });
 
     oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxTokenAddress, radiantAmount.div(2), wallet.address, 50);
     oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount, wallet.address, 50);
-    pendleZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, radiantAmount, 0.99);
-
+    pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, radiantAmount, 0.99);
+    pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount), 0.2, daiToken.address);
+    portfolioShares = radiantAmount.div(await portfolioContract.UnitOfShares());
   });
 
   describe("Portfolio LP Contract Test", function () {
@@ -104,7 +120,7 @@ describe("All Weather Protocol", function () {
       await simulateAYearLater();
 
       // withdraw
-      await (await portfolioContract.connect(wallet).redeem(radiantAmount, wallet.address, fakePendleZapOut, { gasLimit: gasLimit })).wait();
+      await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, fakePendleZapOut, { gasLimit: gasLimit })).wait();
       const radiantLockedDlpAfterRedeem = await radiantVault.totalAssets();
       expect(radiantLockedDlpAfterRedeem).to.equal(0);
       expect(await dlpToken.balanceOf(wallet.address)).to.equal(radiantLockedDlpBalanceAfterDeposit);
@@ -117,7 +133,7 @@ describe("All Weather Protocol", function () {
       const totalUnlockedAssets = await radiantVault.totalUnstakedAssets();
       try {
         // Call the contract function that may throw an error
-        await (await portfolioContract.connect(wallet).redeem(radiantAmount, wallet.address, fakePendleZapOut, { gasLimit: gasLimit })).wait();
+        await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, fakePendleZapOut, { gasLimit: gasLimit })).wait();
       } catch (error) {
         if (error.message.includes("dLP lock has not expired yet")) {
           expect(await radiantVault.totalAssets()).to.equal(totalAssets);
@@ -130,9 +146,3 @@ describe("All Weather Protocol", function () {
     });
   });
 });
-
-async function simulateAYearLater() {
-  // Simulate a year later
-  await ethers.provider.send('evm_setNextBlockTimestamp', [currentTimestamp]);
-  await ethers.provider.send('evm_mine');
-}

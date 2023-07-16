@@ -32,10 +32,27 @@ let radiantVault;
 let portfolioContract;
 let oneInchSwapDataForDpx;
 let oneInchSwapDataForGDAI;
-let pendleZapInData;
+let pendleGLPZapInData;
+let pendleGDAIZapInData;
+let portfolioShares;
+
+
 async function deposit() {
-  return await (await portfolioContract.deposit(dpxAmount, wallet.address, oneInchSwapDataForDpx.tx.data, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4], oneInchSwapDataForGDAI.tx.data, { gasLimit: 10692137 })).wait();
+  const depositData = {
+    amount: dpxAmount,
+    receiver: wallet.address,
+    oneInchDataDpx: oneInchSwapDataForDpx.tx.data,
+    glpMinLpOut: pendleGLPZapInData[2],
+    glpGuessPtReceivedFromSy: pendleGLPZapInData[3],
+    glpInput: pendleGLPZapInData[4],
+    gdaiMinLpOut: pendleGDAIZapInData[2],
+    gdaiGuessPtReceivedFromSy: pendleGDAIZapInData[3],
+    gdaiInput: pendleGDAIZapInData[4],
+    gdaiOneInchDataGDAI: oneInchSwapDataForGDAI.tx.data
+  }
+  return await (await portfolioContract.connect(wallet).deposit(depositData)).wait();
 }
+
 
 describe("All Weather Protocol", function () {
   beforeEach(async () => {
@@ -54,7 +71,7 @@ describe("All Weather Protocol", function () {
     dGDAIRewardPool = await ethers.getContractAt("IERC20", gDAIRewardPoolAddress);
     radiantLockZap = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
     multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
-    await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.025"), { gasLimit: 2057560 });
+    await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit: 2057560 });
     
     const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
     radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLockZapAddress);
@@ -80,7 +97,9 @@ describe("All Weather Protocol", function () {
 
     oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount.div(2), wallet.address, 50);
     oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount, wallet.address, 50);
-    pendleZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount), 0.2, daiToken.address);
+    pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, dpxAmount, 0.99);
+    pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount).mul(95).div(100), 0.99, daiToken.address);
+    portfolioShares = dpxAmount.div(await portfolioContract.UnitOfShares());
   });
 
   describe("Portfolio LP Contract Test", function () {
@@ -94,7 +113,7 @@ describe("All Weather Protocol", function () {
 
           expect(await equilibriaGDAIVault.balanceOf(portfolioContract.address)).to.equal(decodedEvent.shares);
           expect((await equilibriaGDAIVault.totalAssets())).to.equal(decodedEvent.shares);
-          expect(await portfolioContract.balanceOf(wallet.address)).to.equal(dpxAmount);
+          expect(await portfolioContract.balanceOf(wallet.address)).to.equal(portfolioShares);
           expect((await dGDAIRewardPool.balanceOf(equilibriaGDAIVault.address))).to.equal(decodedEvent.shares);
         }
       }
@@ -113,7 +132,7 @@ describe("All Weather Protocol", function () {
       }
       const pendleZapOutData = await getPendleZapOutData(42161, gDAIMarketPoolAddress, daiToken.address, shares, 1);
       // // withdraw
-      await (await portfolioContract.connect(wallet).redeem(dpxAmount, wallet.address, pendleZapOutData[3], { gasLimit: 4675600 })).wait();
+      await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, pendleZapOutData[3], { gasLimit: 4675600 })).wait();
       expect(await pendleGDAIMarketLPT.balanceOf(wallet.address)).to.equal(shares);
       expect(await equilibriaGDAIVault.totalAssets()).to.equal(0);
     });
@@ -138,7 +157,7 @@ describe("All Weather Protocol", function () {
       }
 
       const equilibriaPids = [2];
-      await portfolioContract.connect(wallet).claim(wallet.address, equilibriaPids);
+      await portfolioContract.connect(wallet).claim(wallet.address);
       // NOTE: using `to.be.gt` instead of `to.equal` because the reward would somehow be increased after claim(). My hunch is that `claim()` would also claim the reward for the current block.
       expect((await pendleToken.balanceOf(wallet.address)).sub(originalPendleToken)).to.be.gt(pendleClaimableReward);
       const remainingClaimableRewards = await portfolioContract.connect(wallet).getClaimableRewards(wallet.address);

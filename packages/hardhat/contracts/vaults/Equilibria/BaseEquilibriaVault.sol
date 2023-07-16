@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import "hardhat/console.sol";
+
 import "../../interfaces/AbstractVault.sol";
 import "../../equilibria/IEqbZap.sol";
 import "../../equilibria/IBaseRewardPool.sol";
@@ -28,11 +28,7 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     IERC20Metadata asset_,
     string memory name,
     string memory symbol
-  ) ERC4626(asset_) ERC20(name, symbol) {
-    eqbZap = IEqbZap(0xc7517f481Cc0a645e63f870830A4B2e580421e32);
-    pendleBooster = IPendleBooster(0x4D32C8Ff2fACC771eC7Efc70d6A8468bC30C26bF);
-    pendleRouter = IPendleRouter(0x0000000001E4ef00d069e71d6bA041b0A16F7eA0);
-  }
+  ) ERC4626(asset_) ERC20(name, symbol) {}
 
   function totalLockedAssets() public view override returns (uint256) {
     return 0;
@@ -74,6 +70,8 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     // this would only withdraw GLP-LPT, not fsGLP
     eqbZap.withdraw(pid, shares);
 
+    // do this mute solhint's unused local variable warning
+    output;
     // ideal solution: use eqbZap.zapOut
     // eqbZap.zapOut(pid, 1, output, false);
 
@@ -89,16 +87,21 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     //     1,
     //     output
     // );
+    claim();
     uint256 shares = super.redeem(shares, msg.sender, msg.sender);
     return shares;
   }
 
-  function claim(
-    uint256[] memory pids
-  ) public override returns (IFeeDistribution.RewardData[] memory) {
+  function claim()
+    public
+    override
+    returns (IFeeDistribution.RewardData[] memory)
+  {
     IFeeDistribution.RewardData[]
       memory claimableRewards = getClaimableRewards();
     if (claimableRewards.length != 0) {
+      uint256[] memory pids = new uint256[](1);
+      pids[0] = pid;
       eqbZap.claimRewards(pids);
       super.claimRewardsFromVaultToPortfolioVault(claimableRewards);
     }

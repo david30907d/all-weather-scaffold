@@ -94,11 +94,13 @@ const getLiFiCrossChainContractCallCallData = async (fromChain, fromToken, fromA
 };
 
 // common config
-const myImpersonatedWalletAddress = "0x7ee54ab0f204bb3a83df90fdd824d8b4abe93222";
+// Rich guy
+const myImpersonatedWalletAddress = "0x2B9AcFd85440B7828DB8E54694Ee07b2B056B30C";
 const wethAddress = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
 const gasLimit = 2675600;
 const radiantAmount = ethers.utils.parseUnits('0.01', 18);
 const dpxAmount = ethers.utils.parseUnits('0.001', 18);
+const end2endTestingAmount = ethers.utils.parseUnits('0.02', 18);
 
 // sushi dpx
 const sushiSwapDpxLpTokenAddress = "0x0C1Cf6883efA1B496B01f654E247B9b419873054";
@@ -113,6 +115,16 @@ const radiantDlpAddress = "0x32dF62dc3aEd2cD6224193052Ce665DC18165841";
 const radiantLendingPoolAddress = "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1";
 const radiantLockZapAddress = "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1";
 const multiFeeDistributionAddress = "0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE";
+// radiant has an one year lock, therefore need these timestamp-related variables
+let currentTimestamp = Math.floor(Date.now() / 1000);;
+async function simulateAYearLater() {
+  // Simulate a year later
+  const oneMonthInSeconds = 12 * 31 * 24 * 60 * 60;
+  const futureTimestamp = currentTimestamp + oneMonthInSeconds;
+  await ethers.provider.send('evm_setNextBlockTimestamp', [futureTimestamp]);
+  await ethers.provider.send('evm_mine');
+}
+
 
 // GLP
 const fsGLPAddress = "0x1aDDD80E6039594eE970E5872D247bf0414C8903";
@@ -173,5 +185,8 @@ module.exports = {
   fakePendleZapOut,
   daiAddress,
   gDAIRewardPoolAddress,
-  gDAIAddress
+  gDAIAddress,
+  end2endTestingAmount,
+  simulateAYearLater,
+  currentTimestamp
 };

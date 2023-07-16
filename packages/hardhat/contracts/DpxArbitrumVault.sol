@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import "hardhat/console.sol";
+
 import "./dpx/IMiniChefV2.sol";
 import "./dpx/ICloneRewarderTime.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
@@ -66,6 +66,8 @@ contract DpxArbitrumVault is AbstractVault {
       oneInchAggregatorAddress,
       Math.mulDiv(amount, 1, 2)
     );
+    // TODO(david): should return those token left after `addLiquidityETH` back to user
+    // recurring error: "Error: VM Exception while processing transaction: reverted with reason string '1inch failed to swap'"
     (bool succ, bytes memory data) = address(oneInchAggregatorAddress).call(
       oneInchData
     );
@@ -74,9 +76,8 @@ contract DpxArbitrumVault is AbstractVault {
     uint256 dpxReturnedAmount = dpxToken.balanceOf(address(this));
     SafeERC20.safeApprove(dpxToken, sushiSwapRouterAddress, dpxReturnedAmount);
     weth.withdraw(Math.mulDiv(amount, 1, 2));
-    // deadline = current time + 5 minutes;
+    // deadline means current time + 5 minutes;
     uint256 deadline = block.timestamp + 300;
-    // // TODO(david): should return those token left after `addLiquidityETH` back to user
     (uint amountToken, uint amountETH, uint liquidity) = IUniswapV2Router01(
       sushiSwapRouterAddress
     ).addLiquidityETH{value: address(this).balance}(

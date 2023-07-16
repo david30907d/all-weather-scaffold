@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import "hardhat/console.sol";
+
 import "../interfaces/AbstractVault.sol";
 import "../equilibria/IEqbZap.sol";
 import "../equilibria/IBaseRewardPool.sol";
@@ -76,6 +76,7 @@ contract EquilibriaGlpVault is AbstractVault {
     return shares;
   }
 
+  /* solhint-disable no-unused-vars */
   function redeem(
     uint256 shares,
     IPendleRouter.TokenOutput calldata output
@@ -100,16 +101,23 @@ contract EquilibriaGlpVault is AbstractVault {
     //     shares,
     //     output
     // );
+    claim();
     uint256 shares = super.redeem(shares, msg.sender, msg.sender);
     return shares;
   }
 
-  function claim(
-    uint256[] memory pids
-  ) public override returns (IFeeDistribution.RewardData[] memory) {
+  /* solhint-enable no-unused-vars */
+
+  function claim()
+    public
+    override
+    returns (IFeeDistribution.RewardData[] memory)
+  {
     IFeeDistribution.RewardData[]
       memory claimableRewards = getClaimableRewards();
     if (claimableRewards.length != 0) {
+      uint256[] memory pids = new uint256[](1);
+      pids[0] = pid;
       eqbZap.claimRewards(pids);
       super.claimRewardsFromVaultToPortfolioVault(claimableRewards);
     }
