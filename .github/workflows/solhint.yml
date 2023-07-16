@@ -34,5 +34,7 @@ jobs:
 
       - name: Run solhint
         run: |
-          cd packages/hardhat/;
-          solhint contracts/**/*.sol;
+          cd packages/hardhat/
+          if ! solhint contracts/**/*.sol --max-warnings 0; then
+            exit 1
+          fi
