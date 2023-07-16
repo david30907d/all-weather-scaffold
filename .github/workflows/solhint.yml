@@ -34,12 +34,13 @@ jobs:
 
       - name: Run solhint
         run: |
-          cd packages/hardhat/
-          if ! solhint contracts/**/*.sol --max-warnings 0; then
-            echo "should fail!"
-            echo "should fail!"
-            echo "should fail!"
-            echo "should fail!"
-            echo "should fail!"
+          cd packages/hardhat/;
+          solhint contracts/**/*.sol --max-warnings 0;
+          if [ $? -ne 0 ]; then
+            console.log("failed!!!")
+            console.log("failed!!!")
+            console.log("failed!!!")
+            console.log("failed!!!")
+            console.log("failed!!!")
             exit 1
           fi
