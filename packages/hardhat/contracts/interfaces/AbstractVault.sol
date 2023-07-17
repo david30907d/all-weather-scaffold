@@ -56,14 +56,17 @@ abstract contract AbstractVault is ERC4626, Ownable {
     return _mintShares(shares, amount);
   }
 
+  /* solhint-disable no-unused-vars */
   function deposit(
     uint256 amount,
     uint256 minLpOut,
     IPendleRouter.ApproxParams calldata guessPtReceivedFromSy,
     IPendleRouter.TokenInput calldata input
   ) public virtual returns (uint256) {
-    revert("AbstractVault: deposit for equilibria has not implemented yet");
+    revert("deposit() not implemented");
   }
+
+  /* solhint-enable no-unused-vars */
 
   function deposit(
     uint256 amount,
@@ -88,17 +91,24 @@ abstract contract AbstractVault is ERC4626, Ownable {
     SafeERC20.safeTransferFrom(weth, msg.sender, address(this), amount);
   }
 
+  /* solhint-disable no-unused-vars */
   function _zapIn(uint256 amount) internal virtual returns (uint256) {
-    revert("AbstractVault: _zapIn not implemented");
+    revert("_zapIn not implemented");
   }
 
+  /* solhint-enable no-unused-vars */
+
+  /* solhint-disable no-unused-vars */
   function _zapIn(
     uint256 amount,
     bytes calldata oneInchData
   ) internal virtual returns (uint256) {
-    revert("AbstractVault: _zapIn not implemented");
+    revert("_zapIn not implemented");
   }
 
+  /* solhint-enable no-unused-vars */
+
+  /* solhint-disable no-unused-vars */
   function _zapIn(
     uint256 amount,
     bytes calldata oneInchData,
@@ -106,8 +116,10 @@ abstract contract AbstractVault is ERC4626, Ownable {
     IPendleRouter.ApproxParams calldata guessPtReceivedFromSy,
     IPendleRouter.TokenInput calldata input
   ) internal virtual returns (uint256) {
-    revert("AbstractVault: _zapIn not implemented");
+    revert("_zapIn not implemented");
   }
+
+  /* solhint-enable no-unused-vars */
 
   function _mintShares(
     uint256 shares,
@@ -118,10 +130,14 @@ abstract contract AbstractVault is ERC4626, Ownable {
     return shares;
   }
 
+  /* solhint-disable no-unused-vars */
   function redeem(uint256 shares) public virtual returns (uint256) {
     revert("Not implemented");
   }
 
+  /* solhint-enable no-unused-vars */
+
+  /* solhint-disable no-unused-vars */
   function redeem(
     uint256 shares,
     IPendleRouter.TokenOutput calldata output
@@ -129,6 +145,9 @@ abstract contract AbstractVault is ERC4626, Ownable {
     revert("Not implemented");
   }
 
+  /* solhint-enable no-unused-vars */
+
+  /* solhint-disable no-unused-vars */
   function claim()
     public
     virtual
@@ -136,6 +155,8 @@ abstract contract AbstractVault is ERC4626, Ownable {
   {
     revert("Not implemented");
   }
+
+  /* solhint-enable no-unused-vars */
 
   function claimRewardsFromVaultToPortfolioVault(
     IFeeDistribution.RewardData[] memory claimableRewards
