@@ -76,7 +76,6 @@ contract EquilibriaGlpVault is AbstractVault {
     return shares;
   }
 
-  /* solhint-disable no-unused-vars */
   function redeem(
     uint256 shares,
     IPendleRouter.TokenOutput calldata output
@@ -105,8 +104,6 @@ contract EquilibriaGlpVault is AbstractVault {
     uint256 shares = super.redeem(shares, msg.sender, msg.sender);
     return shares;
   }
-
-  /* solhint-enable no-unused-vars */
 
   function claim()
     public

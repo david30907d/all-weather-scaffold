@@ -1,0 +1,1 @@
+/usr/local/bin/manticore AllWeatherPortfolioLPToken.sol

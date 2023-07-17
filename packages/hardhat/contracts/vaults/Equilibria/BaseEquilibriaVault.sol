@@ -70,8 +70,6 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     // this would only withdraw GLP-LPT, not fsGLP
     eqbZap.withdraw(pid, shares);
 
-    // do this mute solhint's unused local variable warning
-    output;
     // ideal solution: use eqbZap.zapOut
     // eqbZap.zapOut(pid, 1, output, false);
 
