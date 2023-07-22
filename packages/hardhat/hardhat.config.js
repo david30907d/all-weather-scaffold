@@ -69,13 +69,6 @@ module.exports = {
       forking: {
         // url: "https://arb-mainnet.g.alchemy.com/v2/WIcMNRX1L9IpsIwW_o_IUIdhOWwAnFiO",
         url: "https://arbitrum-mainnet.infura.io/v3/5f2c1e51fadf404d8f04f620c58b71d9",
-        // for radiant
-        // blockNumber: 86630670,
-        // for sushiswap dpx:
-        // blockNumber: 97022421,
-        // for radiant dLP:
-        // blockNumber: 101043121,
-        blockNumber: parseInt(process.env.BLOCK_NUMBER),
       }
     },
     localhost: {
@@ -159,10 +152,10 @@ module.exports = {
     //   url: "https://alpha-rpc.scroll.io/l2",
     //   accounts: [`0x${PRIVATE_KEY}`]
     // },
-    // mantleAlpha: {
-    //   url: "https://rpc.testnet.mantle.xyz",
-    //   accounts: [`0x${PRIVATE_KEY}`]
-    // },
+    mantleAlpha: {
+      url: "https://rpc.testnet.mantle.xyz",
+      accounts: [`0x${PRIVATE_KEY}`]
+    },
     mumbai: {
       url: "https://rpc-mumbai.maticvigil.com",
       accounts: {
