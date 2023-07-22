@@ -299,6 +299,15 @@ module.exports = {
         mnemonic: mnemonic(),
       },
     },
+    neonlabs: {
+      url: 'https://devnet.neonevm.org',
+      accounts: [PRIVATE_KEY],
+      network_id: 245022926,
+      chainId: 245022926,
+      allowUnlimitedContractSize: false,
+      timeout: 1000000,
+      isFork: true
+    }
   },
   solidity: {
     compilers: [
