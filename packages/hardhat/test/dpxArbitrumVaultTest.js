@@ -6,7 +6,7 @@ const { fetch1InchSwapData, mineBlocks, myImpersonatedWalletAddress,
   sushiTokenAddress,
   wethAddress,
   radiantDlpAddress,
-  radiantLockZapAddress,
+  radiantLendingPoolAddress,
   sushiPid,
   gasLimit,
   glpMarketPoolAddress,
@@ -56,7 +56,7 @@ describe("All Weather Protocol", function () {
     weth = await ethers.getContractAt('IWETH', wethAddress);
 
     const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
-    radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLockZapAddress);
+    radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLendingPoolAddress);
     await radiantVault.deployed();
 
 

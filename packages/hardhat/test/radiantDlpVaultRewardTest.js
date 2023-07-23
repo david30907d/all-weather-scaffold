@@ -3,7 +3,7 @@ const { fetch1InchSwapData, getUserEthBalance, sushiSwapDpxLpTokenAddress, sushi
   myImpersonatedWalletAddress,
   wethAddress,
   radiantDlpAddress,
-  radiantLockZapAddress,
+  radiantLendingPoolAddress,
   multiFeeDistributionAddress,
   radiantAmount,
   dpxTokenAddress,
@@ -50,14 +50,14 @@ describe("All Weather Protocol", function () {
     dpxSLP = await ethers.getContractAt('IERC20Uniswap', sushiSwapDpxLpTokenAddress);
     dlpToken = await ethers.getContractAt("MockDAI", radiantDlpAddress);
     daiToken = await ethers.getContractAt("IERC20", daiAddress);
-    radiantLockZap = await ethers.getContractAt("ILendingPool", radiantLockZapAddress);
+    radiantLendingPool = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
     multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
     pendleGlpMarketLPT = await ethers.getContractAt("IERC20", glpMarketPoolAddress);
     pendleGDAIMarketLPT = await ethers.getContractAt("IERC20", gDAIMarketPoolAddress);
     await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit: 2057560 });
     
     const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
-    radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLockZapAddress);
+    radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLendingPoolAddress);
     await radiantVault.deployed();
     
     const DpxArbitrumVault = await ethers.getContractFactory("DpxArbitrumVault");

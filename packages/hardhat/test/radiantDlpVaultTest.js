@@ -6,7 +6,7 @@ const { fetch1InchSwapData,
   dpxTokenAddress,
   wethAddress,
   radiantDlpAddress,
-  radiantLockZapAddress,
+  radiantLendingPoolAddress,
   sushiPid,
   gasLimit,
   radiantLendingPoolAddress,
@@ -57,13 +57,13 @@ describe("All Weather Protocol", function () {
     weth = await ethers.getContractAt('IWETH', wethAddress);
     dlpToken = await ethers.getContractAt("MockDAI", radiantDlpAddress);
     daiToken = await ethers.getContractAt("IERC20", daiAddress);
-    radiantLockZap = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
+    radiantLendingPool = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
     multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
     pendleGlpMarketLPT = await ethers.getContractAt("IERC20", glpMarketPoolAddress);
     pendleGDAIMarketLPT = await ethers.getContractAt("IERC20", gDAIMarketPoolAddress);
 
     const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
-    radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLockZapAddress);
+    radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLendingPoolAddress);
     await radiantVault.deployed();
 
     const DpxArbitrumVault = await ethers.getContractFactory("DpxArbitrumVault");

@@ -113,7 +113,7 @@ const sushiPid = 17;
 const rRewardTokens = ["0x912ce59144191c1204e64559fe8253a0e49e6548","0x5979d7b546e38e414f7e9822514be443a4800529","0xda10009cbd5d07dd0cecc66161fc93d7c9000da1","0xff970a61a04b1ca14834a43f5de4533ebddb5cc8","0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9","0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f"];
 const radiantDlpAddress = "0x32dF62dc3aEd2cD6224193052Ce665DC18165841";
 const radiantLendingPoolAddress = "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1";
-const radiantLockZapAddress = "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1";
+const radiantLendingPoolAddress = "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1";
 const multiFeeDistributionAddress = "0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE";
 // radiant has an one year lock, therefore need these timestamp-related variables
 let currentTimestamp = Math.floor(Date.now() / 1000);;
@@ -167,7 +167,7 @@ module.exports = {
   sushiTokenAddress,
   wethAddress,
   radiantDlpAddress,
-  radiantLockZapAddress,
+  radiantLendingPoolAddress,
   sushiPid,
   gasLimit,
   rRewardTokens,

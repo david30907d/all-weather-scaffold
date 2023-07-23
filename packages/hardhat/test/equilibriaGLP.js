@@ -5,7 +5,7 @@ const { fetch1InchSwapData,
   sushiMiniChefV2Address,
   wethAddress,
   radiantDlpAddress,
-  radiantLockZapAddress,
+  radiantLendingPoolAddress,
   sushiPid,
   radiantLendingPoolAddress,
   multiFeeDistributionAddress,
@@ -64,12 +64,12 @@ describe("All Weather Protocol", function () {
     pendleToken = await ethers.getContractAt("IERC20", pendleTokenAddress);
     // we can check our balance in equilibria with this reward pool
     glpRewardPool = await ethers.getContractAt("IERC20", "0x245f1d70AcAaCD219564FCcB75f108917037A960");
-    radiantLockZap = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
+    radiantLendingPool = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
     multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
     await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit: 2057560 });
     
     const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
-    radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLockZapAddress);
+    radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLendingPoolAddress);
     await radiantVault.deployed();
     
     const DpxArbitrumVault = await ethers.getContractFactory("DpxArbitrumVault");
