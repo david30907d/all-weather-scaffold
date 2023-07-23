@@ -14,7 +14,7 @@ export default function useRebalanceSuggestions(address, pollTime = 300000) {
   const [topNStableCoins, setTopNStableCoins] = useState([]);
   const loadSuggestions = async () => {
     await axios
-      .get(`${API_URL}/address?addresses=${address}`)
+      .get(`${API_URL}/addresses?addresses=${address}`)
       .then((response) => {
         const newNetWorth = response.data.net_worth;
         setNetWorth(newNetWorth);
