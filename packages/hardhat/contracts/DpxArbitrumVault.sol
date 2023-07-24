@@ -68,19 +68,20 @@ contract DpxArbitrumVault is AbstractVault {
     );
     // TODO(david): should return those token left after `addLiquidityETH` back to user
     // recurring error: "Error: VM Exception while processing transaction: reverted with reason string '1inch failed to swap'"
-    (bool succ, bytes memory data) = address(oneInchAggregatorAddress).call(
-      oneInchData
-    );
+    // solhint-disable-next-line avoid-low-level-calls
+    (bool succ, ) = address(oneInchAggregatorAddress).call(oneInchData);
     require(succ, "1inch failed to swap");
     //  (uint256 dpxReturnedAmount, uint256 gasLeft) = abi.decode(data, (uint256, uint256));
     uint256 dpxReturnedAmount = dpxToken.balanceOf(address(this));
     SafeERC20.safeApprove(dpxToken, sushiSwapRouterAddress, dpxReturnedAmount);
     weth.withdraw(Math.mulDiv(amount, 1, 2));
+
     // deadline means current time + 5 minutes;
+    // solhint-disable-next-line not-rely-on-time
     uint256 deadline = block.timestamp + 300;
-    (uint amountToken, uint amountETH, uint liquidity) = IUniswapV2Router01(
-      sushiSwapRouterAddress
-    ).addLiquidityETH{value: address(this).balance}(
+
+    (, , uint liquidity) = IUniswapV2Router01(sushiSwapRouterAddress)
+      .addLiquidityETH{value: address(this).balance}(
       address(dpxToken),
       dpxReturnedAmount,
       Math.mulDiv(dpxReturnedAmount, 95, 100),
@@ -169,5 +170,5 @@ contract DpxArbitrumVault is AbstractVault {
   }
 
   // To receive ETH from the WETH's withdraw function (it won't work without it)
-  receive() external payable {}
+  receive() external payable;
 }

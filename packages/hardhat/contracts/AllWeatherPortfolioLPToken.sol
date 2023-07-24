@@ -68,7 +68,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   mapping(address => mapping(string => mapping(address => uint256)))
     public userRewardPerTokenPaid;
   mapping(string => mapping(address => uint256)) public rewardPerShareZappedIn;
-  uint256 public immutable UnitOfShares = 1000;
+  uint256 public immutable unitOfShares = 1000;
 
   constructor(
     address asset_,
@@ -124,7 +124,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   {
     string[] memory nameOfVaults = new string[](vaults.length);
     uint256[] memory percentages = new uint256[](vaults.length);
-    uint256 currentIndex = 0;
     for (uint256 i = 0; i < vaults.length; i++) {
       nameOfVaults[i] = vaults[i].name();
       percentages[i] = portfolioAllocation[vaults[i].name()];
@@ -142,7 +141,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   }
 
   function deposit(DepositData calldata depositData) public updateRewards {
-    require(depositData.amount > 0, "Token amount must be greater than 0");
+    require(depositData.amount > 0, "amount must > 0");
 
     // Transfer tokens from the user to the contract
     SafeERC20.safeTransferFrom(
@@ -224,11 +223,11 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     // in case the LP share is too big, lead to rounding error
     // for instance, `_calculateRewardPerShareInThisPeriod()` need to divide totalSupply()
     // reward might be zero if totalSupply() is too big
-    _mint(depositData.receiver, SafeMath.div(depositData.amount, UnitOfShares));
+    _mint(depositData.receiver, SafeMath.div(depositData.amount, unitOfShares));
     emit Transfer(
       address(0),
       depositData.receiver,
-      SafeMath.div(depositData.amount, UnitOfShares)
+      SafeMath.div(depositData.amount, unitOfShares)
     );
   }
 
@@ -358,9 +357,9 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   }
 
   function getClaimableRewards(
-    address payable receiver
+    address payable owner
   ) public view returns (ClaimableRewardOfAProtocol[] memory) {
-    uint256 userShares = balanceOf(receiver);
+    uint256 userShares = balanceOf(owner);
     uint256 portfolioShares = totalSupply();
     if (userShares == 0 || portfolioShares == 0) {
       return new ClaimableRewardOfAProtocol[](0);
@@ -418,7 +417,11 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       SafeERC20.safeTransfer(
         IERC20(erc20Rewards[i].token),
         receiver,
-        erc20Rewards[i].amount
+        _checkUserRewardPerShares(
+          erc20Rewards[i].amount,
+          userShares,
+          portfolioShares
+        )
       );
     }
   }
@@ -469,7 +472,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     );
     require(
       address(this).balance >= amountOfEthToTransfer,
-      "Insufficient eth balance in contract"
+      "Insufficient eth to withdraw"
     );
     receiver.transfer(amountOfEthToTransfer);
   }
@@ -567,5 +570,5 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     payable(owner()).transfer(amount);
   }
 
-  receive() external payable {}
+  receive() external payable;
 }
