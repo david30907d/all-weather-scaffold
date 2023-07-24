@@ -570,5 +570,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     payable(owner()).transfer(amount);
   }
 
-  receive() external payable;
+  // solhint-disable-next-line no-empty-blocks
+  receive() external payable {}
 }

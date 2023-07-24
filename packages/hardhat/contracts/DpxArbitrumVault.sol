@@ -170,5 +170,6 @@ contract DpxArbitrumVault is AbstractVault {
   }
 
   // To receive ETH from the WETH's withdraw function (it won't work without it)
-  receive() external payable;
+  // solhint-disable-next-line no-empty-blocks
+  receive() external payable {}
 }
