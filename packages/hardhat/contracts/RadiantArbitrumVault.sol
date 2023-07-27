@@ -80,7 +80,7 @@ contract RadiantArbitrumVault is AbstractVault {
     return shares;
   }
 
-  function redeem() public override returns (uint256) {
+  function redeem() public returns (uint256) {
     // TODO(david): should only redeem _shares amount of dLP
     uint256 radiantDlpShares = multiFeeDistribution
       .withdrawExpiredLocksForWithOptions(address(this), 1, true);
