@@ -1,23 +1,28 @@
 const { expect } = require("chai");
-const { Router, toAddress } = require('@pendle/sdk-v2');
 const { fetch1InchSwapData,
   myImpersonatedWalletAddress,
   sushiSwapDpxLpTokenAddress,
   sushiMiniChefV2Address,
   wethAddress,
   radiantDlpAddress,
-  radiantLockZapAddress,
-  sushiPid,
   radiantLendingPoolAddress,
+  radiantLockZapPoolAddress,
+  sushiPid,
   multiFeeDistributionAddress,
   radiantAmount,
   fsGLPAddress,
   getPendleZapInData,
   getPendleZapOutData,
-  glpMarketPoolAddress,
+  gDAIMarketPoolAddress,
   dpxAmount,
   dpxTokenAddress,
+  mineBlocks,
+  gDAIAddress,
+  pendleTokenAddress,
   gasLimit,
+  daiAddress,
+  gDAIRewardPoolAddress,
+  glpMarketPoolAddress,
   getLiFiCrossChainContractCallCallData
 } = require("./utils");
 
@@ -26,65 +31,150 @@ let wallet;
 let weth;
 let radiantVault;
 let portfolioContract;
-let fsGLP
-let currentTimestamp = Math.floor(Date.now() / 1000);;
+let oneInchSwapDataForDpx;
+let oneInchSwapDataForGDAI;
+let pendleGLPZapInData;
+let pendleGDAIZapInData;
+let portfolioShares;
+
+
+async function deposit() {
+  const depositData = {
+    amount: dpxAmount,
+    receiver: wallet.address,
+    oneInchDataDpx: oneInchSwapDataForDpx.tx.data,
+    glpMinLpOut: pendleGLPZapInData[2],
+    glpGuessPtReceivedFromSy: pendleGLPZapInData[3],
+    glpInput: pendleGLPZapInData[4],
+    gdaiMinLpOut: pendleGDAIZapInData[2],
+    gdaiGuessPtReceivedFromSy: pendleGDAIZapInData[3],
+    gdaiInput: pendleGDAIZapInData[4],
+    gdaiOneInchDataGDAI: oneInchSwapDataForGDAI.tx.data
+  }
+  return await (await portfolioContract.connect(wallet).deposit(depositData)).wait();
+}
+
 
 describe("All Weather Protocol", function () {
   beforeEach(async () => {
+    console.log("!!!!!!!!!!!!!!!!!!!")
     this.timeout(120000); // Set timeout to 120 seconds
     wallet = await ethers.getImpersonatedSigner(myImpersonatedWalletAddress);
     dpxSLP = await ethers.getContractAt('IERC20Uniswap', sushiSwapDpxLpTokenAddress);
     weth = await ethers.getContractAt('IWETH', wethAddress);
     dlpToken = await ethers.getContractAt("MockDAI", radiantDlpAddress);
     fsGLP = await ethers.getContractAt("IERC20", fsGLPAddress);
+    pendleGlpMarketLPT = await ethers.getContractAt("IERC20", glpMarketPoolAddress);
+    pendleGDAIMarketLPT = await ethers.getContractAt("IERC20", gDAIMarketPoolAddress);
+    pendleToken = await ethers.getContractAt("IERC20", pendleTokenAddress);
+    daiToken = await ethers.getContractAt("IERC20", daiAddress);
+    gDAIToken = await ethers.getContractAt("IERC20", gDAIAddress);
     // we can check our balance in equilibria with this reward pool
-    glpRewardPool = await ethers.getContractAt("IERC20", "0x245f1d70AcAaCD219564FCcB75f108917037A960");
-    radiantLockZap = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
+    dGDAIRewardPool = await ethers.getContractAt("IERC20", gDAIRewardPoolAddress);
+    radiantLendingPool = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
+    radiantLockZap = await ethers.getContractAt("ILockZap", radiantLockZapPoolAddress);
     multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
-    await weth.connect(wallet).withdraw(ethers.utils.parseEther("0.1"), { gasLimit: 2057560 });
-    
+    await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit: 2057560 });
+    console.log(await radiantLockZap.populateTransaction.zap(false, ethers.utils.parseUnits('1', 18), 0, 3))
+    // getLiFiCrossChainContractCallCallData(fromChain, fromToken, fromAddress, toChain, toToken, toAmount, crossChainTransaction, toContractGasLimit, contractOutputsToken)
+
     const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
-    radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLockZapAddress);
+    radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLendingPoolAddress);
     await radiantVault.deployed();
     
     const DpxArbitrumVault = await ethers.getContractFactory("DpxArbitrumVault");
     dpxVault = await DpxArbitrumVault.deploy(dpxSLP.address, sushiMiniChefV2Address, sushiPid);
     await dpxVault.deployed();
-    
+
     const EquilibriaGlpVault = await ethers.getContractFactory("EquilibriaGlpVault");
-    equilibriaGlpVault = await EquilibriaGlpVault.deploy(fsGLP.address);
+    equilibriaGlpVault = await EquilibriaGlpVault.deploy(pendleGlpMarketLPT.address);
     await equilibriaGlpVault.deployed();
+
+    const EquilibriaGDAIVault = await ethers.getContractFactory("EquilibriaGDAIVault");
+    equilibriaGDAIVault = await EquilibriaGDAIVault.deploy(pendleGDAIMarketLPT.address, "AllWeatherLP-Equilibria-GDAI", "ALP-EQB-GDAI");
+    await equilibriaGDAIVault.deployed();
     
     const AllWeatherPortfolioLPToken = await ethers.getContractFactory("AllWeatherPortfolioLPToken");
-    portfolioContract = await AllWeatherPortfolioLPToken.connect(wallet).deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address);
+    portfolioContract = await AllWeatherPortfolioLPToken.connect(wallet).deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address);
     await portfolioContract.connect(wallet).deployed();
-    await portfolioContract.setVaultAllocations([{protocol: "AllWeatherLP-RadiantBSC-DLP", percentage: 100}]).then((tx) => tx.wait());
-    await (await weth.connect(wallet).approve(portfolioContract.address, radiantAmount, { gasLimit: 2057560 })).wait();
+    await portfolioContract.setVaultAllocations([{protocol: "AllWeatherLP-Equilibria-GDAI", percentage: 100}]).then((tx) => tx.wait());
+    await (await weth.connect(wallet).approve(portfolioContract.address, radiantAmount, { gasLimit: gasLimit })).wait();
 
+    oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount.div(2), wallet.address, 50);
+    oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount, wallet.address, 50);
+    pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, dpxAmount, 0.99);
+    pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount).mul(50).div(100), 0.99, daiToken.address);
+    portfolioShares = dpxAmount.div(await portfolioContract.unitOfShares());
   });
 
   describe("Portfolio LP Contract Test", function () {
-    it("Should be able to zapin with WETH into Radiant dLP", async function () {
-      const oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxTokenAddress, radiantAmount.div(2), wallet.address);
-      const pendleZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, dpxAmount, 0.1);
-      const receipt = await portfolioContract.populateTransaction.deposit(dpxAmount, oneInchSwapDataForDpx, pendleZapInData[2], pendleZapInData[3], pendleZapInData[4]);
-      fromChain, fromToken, fromAddress, toChain, toToken, toAmount, crossChainTransaction, toContractGasLimit, contractOutputsToken
-      getLiFiCrossChainContractCallCallData()
-    //   diamond
-      0x1231DEB6f5749EF6cE6943a275A1D3E7486F4EaE
+    it("Should be able to zapin with WETH into equilibria GDAI", async function () {
+      // this.timeout(120000); // Set timeout to 120 seconds
+      // const receipt = await deposit();
+      // // Iterate over the events and find the Deposit event
+      // for (const event of receipt.events) {
+      //   if (event.topics.includes(equilibriaGDAIVault.interface.getEventTopic('Deposit'))) {
+      //     const decodedEvent = equilibriaGDAIVault.interface.decodeEventLog('Deposit', event.data, event.topics);
+
+      //     expect(await equilibriaGDAIVault.balanceOf(portfolioContract.address)).to.equal(decodedEvent.shares);
+      //     expect((await equilibriaGDAIVault.totalAssets())).to.equal(decodedEvent.shares);
+      //     expect(await portfolioContract.balanceOf(wallet.address)).to.equal(portfolioShares);
+      //     expect((await dGDAIRewardPool.balanceOf(equilibriaGDAIVault.address))).to.equal(decodedEvent.shares);
+      //   }
+      // }
     });
-
-
-    // it("Should not be able to withdraw Radiant dLP", async function () {
-    //   const oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxTokenAddress, radiantAmount.div(2), wallet.address);
-    //   await (await portfolioContract.deposit(radiantAmount, [{protocol: "radiant", percentage: 100}], oneInchSwapDataForDpx, { gasLimit: gasLimit })).wait();
-    //   const totalAssets = await radiantVault.totalAssets();
-    //   const totalLockedAssets = await radiantVault.totalLockedAssets();
-    //   const totalUnlockedAssets = await radiantVault.totalUnstakedAssets();
-    //   await (await portfolioContract.redeem(radiantAmount, wallet.address, { gasLimit: gasLimit })).wait();
-    //   expect(await radiantVault.totalAssets()).to.equal(totalAssets);
-    //   expect(await radiantVault.totalLockedAssets()).to.equal(totalLockedAssets);
-    //   expect(await radiantVault.totalStakedButWithoutLockedAssets()).to.equal(totalUnlockedAssets);
+    // it("Should be able to withdraw GDAI from equilibria", async function () {
+    //   this.timeout(120000); // Set timeout to 120 seconds
+    //   const radiantLockedDlpBalanceBeforeDeposit = await radiantVault.totalAssets();
+    //   expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
+    //   const receipt = await deposit();
+    //   let shares;
+    //   for (const event of receipt.events) {
+    //     if (event.topics.includes(equilibriaGDAIVault.interface.getEventTopic('Deposit'))) {
+    //       const decodedEvent = equilibriaGDAIVault.interface.decodeEventLog('Deposit', event.data, event.topics);
+    //       shares = decodedEvent.shares;
+    //     }
+    //   }
+    //   const pendleZapOutData = await getPendleZapOutData(42161, gDAIMarketPoolAddress, daiToken.address, shares, 1);
+    //   // // withdraw
+    //   await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, pendleZapOutData[3], { gasLimit: 4675600 })).wait();
+    //   expect(await pendleGDAIMarketLPT.balanceOf(wallet.address)).to.equal(shares);
+    //   expect(await equilibriaGDAIVault.totalAssets()).to.equal(0);
     // });
+
+    // it("Should be able to claim rewards", async function () {
+    //   this.timeout(120000); // Set timeout to 120 seconds
+    //   const radiantLockedDlpBalanceBeforeDeposit = await radiantVault.totalAssets();
+    //   expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
+    //   await deposit();
+    //   await mineBlocks(100); // Mine 100 blocks
+    //   const originalPendleToken = await pendleToken.balanceOf(wallet.address);
+    //   const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
+    //   let pendleClaimableReward;
+    //   for (const claimableReward of claimableRewards) {
+    //     if (claimableReward.protocol !== "AllWeatherLP-Equilibria-GDAI") {
+    //       expect(claimableReward.claimableRewards).to.deep.equal([]);
+    //     } else {
+    //       expect(claimableReward.claimableRewards.length).to.equal(1);
+    //       pendleClaimableReward = claimableReward.claimableRewards[0].amount;
+    //       expect(pendleClaimableReward).to.be.gt(0);
+    //     }
+    //   }
+
+    //   const equilibriaPids = [2];
+    //   await portfolioContract.connect(wallet).claim(wallet.address);
+    //   // NOTE: using `to.be.gt` instead of `to.equal` because the reward would somehow be increased after claim(). My hunch is that `claim()` would also claim the reward for the current block.
+    //   expect((await pendleToken.balanceOf(wallet.address)).sub(originalPendleToken)).to.be.gt(pendleClaimableReward);
+    //   const remainingClaimableRewards = await portfolioContract.connect(wallet).getClaimableRewards(wallet.address);
+    //   for (const claimableReward of remainingClaimableRewards) {
+    //     if (claimableReward.protocol === "AllWeatherLP-Equilibria-GDAI") {
+    //       expect(claimableReward.claimableRewards[0].amount).to.equal(0);
+    //     }
+    //   }
+    // })
+    // it("Should be able to check claimable rewards", async function () {
+    //   const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
+    //   expect(claimableRewards).to.deep.equal([]);
+    // })
   });
 });

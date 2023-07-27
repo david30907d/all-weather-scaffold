@@ -96,6 +96,7 @@ const getLiFiCrossChainContractCallCallData = async (fromChain, fromToken, fromA
 // common config
 // Rich guy
 const myImpersonatedWalletAddress = "0x2B9AcFd85440B7828DB8E54694Ee07b2B056B30C";
+const myImpersonatedWalletAddress2 = "0x47399364835b6c58191f6350bf63a755f80b0ffb";
 const wethAddress = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
 const gasLimit = 2675600;
 const radiantAmount = ethers.utils.parseUnits('0.01', 18);
@@ -161,6 +162,7 @@ module.exports = {
   fetch1InchSwapData,
   getUserEthBalance,
   myImpersonatedWalletAddress,
+  myImpersonatedWalletAddress2,
   sushiSwapDpxLpTokenAddress,
   sushiMiniChefV2Address,
   dpxTokenAddress,

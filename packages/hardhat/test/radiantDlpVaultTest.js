@@ -92,7 +92,7 @@ describe("All Weather Protocol", function () {
     oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount, wallet.address, 50);
     pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, radiantAmount, 0.99);
     pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount), 0.2, daiToken.address);
-    portfolioShares = radiantAmount.div(await portfolioContract.UnitOfShares());
+    portfolioShares = radiantAmount.div(await portfolioContract.unitOfShares());
   });
 
   describe("Portfolio LP Contract Test", function () {
