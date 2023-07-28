@@ -9,13 +9,13 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-import "./radiant/ILendingPool.sol";
-import "./radiant/ILockZap.sol";
-import "./radiant/IMultiFeeDistribution.sol";
-import "./radiant/IWETHGateway.sol";
-import "./radiant/IAToken.sol";
-import "./radiant/IFeeDistribution.sol";
-import "./interfaces/AbstractVault.sol";
+import "../../../radiant/ILendingPool.sol";
+import "../../../radiant/ILockZap.sol";
+import "../../../radiant/IMultiFeeDistribution.sol";
+import "../../../radiant/IWETHGateway.sol";
+import "../../../radiant/IAToken.sol";
+import "../../../radiant/IFeeDistribution.sol";
+import "../../../interfaces/AbstractVault.sol";
 
 contract RadiantArbitrumVault is AbstractVault {
   using SafeERC20 for IERC20;
@@ -79,13 +79,12 @@ contract RadiantArbitrumVault is AbstractVault {
     uint256 amount,
     bytes calldata squidCallData
   ) internal override returns (uint256) {
-    SafeERC20.safeApprove(IERC20(asset), squidRouterProxy, amount);
+    SafeERC20.safeApprove(IERC20(asset()), squidRouterProxy, amount);
     (bool succ, bytes memory data) = address(
       0xce16F69375520ab01377ce7B88f5BA8C48F8D666
     ).call(squidCallData);
     require(succ, "squid failed to swap");
-
-    return shares;
+    // return shares;
   }
 
   function redeem() public returns (uint256) {
@@ -150,7 +149,7 @@ contract RadiantArbitrumVault is AbstractVault {
         require(
           withdrawAmount > 0,
           string(
-            abi.encoacked(
+            abi.encodePacked(
               "failed to withdraw rToken ",
               radiantRewardNativeTokenAddresses[i]
             )
