@@ -108,6 +108,8 @@ contract DpxArbitrumVault is AbstractVault {
     override
     returns (IFeeDistribution.RewardData[] memory)
   {
+    // TODO(david): current implementation doesn't support multiple portfolio vaults
+    // since harvet() would harvest all of the rewards, which is owned by multiple portfolio vaults
     IFeeDistribution.RewardData[]
       memory claimableRewards = getClaimableRewards();
     if (claimableRewards.length != 0) {

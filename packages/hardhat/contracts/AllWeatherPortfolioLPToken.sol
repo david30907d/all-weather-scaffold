@@ -220,9 +220,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       }
     }
 
-    // in case the LP share is too big, lead to rounding error
-    // for instance, `_calculateRewardPerShareInThisPeriod()` need to divide totalSupply()
-    // reward might be zero if totalSupply() is too big
     _mint(depositData.receiver, SafeMath.div(depositData.amount, unitOfShares));
     emit Transfer(
       address(0),
@@ -517,13 +514,14 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   }
 
   function _checkUserRewardPerShares(
-    uint256 tokenOfPortfolio,
+    uint256 tokenBalanceOfThisPortfolio,
     uint256 userShares,
     uint256 portfolioShares
   ) internal view returns (uint256) {
     // TODO: current implementation is not accurate
     // need to implement the user reward per token paid like what convex and equilibria do
-    return Math.mulDiv(tokenOfPortfolio, userShares, portfolioShares);
+    return
+      Math.mulDiv(tokenBalanceOfThisPortfolio, userShares, portfolioShares);
   }
 
   function _calcualteUserEarnedBeforeThisUpdateAction(
