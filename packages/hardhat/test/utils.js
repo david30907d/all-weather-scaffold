@@ -208,7 +208,6 @@ module.exports = {
   sushiPid,
   gasLimit,
   rRewardTokens,
-  radiantLendingPoolAddress,
   multiFeeDistributionAddress,
   radiantAmount,
   dpxAmount,
