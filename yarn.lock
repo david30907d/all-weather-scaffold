@@ -2,6 +2,14 @@
 # yarn lockfile v1
 
 
+"@0xsquid/sdk@^1.7.4":
+  version "1.7.4"
+  resolved "https://registry.yarnpkg.com/@0xsquid/sdk/-/sdk-1.7.4.tgz#44e7f6421b2c31be6fe8b5d7bbbd704a11be7d5a"
+  integrity sha512-Kc0yVtC5RNN9bJCt/kk7CxSYxHJc4yxCLQb6H/NZUvQ2jgrd63hIEHIQ6AgQns5MypHAiS3CCEBIDwMIxbo4BQ==
+  dependencies:
+    axios "^0.27.2"
+    ethers "^5.7.1"
+
 "@ant-design/colors@^6.0.0":
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/@ant-design/colors/-/colors-6.0.0.tgz#9b9366257cffcc47db42b9d0203bb592c13c0298"

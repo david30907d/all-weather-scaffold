@@ -1,0 +1,59 @@
+David — 2023/07/02 11:28
+Hi there, uncle grapa925 want me to file a ticket about this
+⁠💻developers⁠
+ 
+forgive my ignorance, but I zapOut from GLP pool back to sGLP token with removeLiquiditySingleToken(). Can only zapOut to weth. I guess the culprit is because the wrong zapOut address?
+Here's my code
+const { config } = require('dotenv');
+const { Router, toAddress, createERC20, MarketEntity } = require('@pendle/sdk-v2');
+const { ethers, BigNumber: BN } = require('ethers');
+
+config();
+展開
+arbitrum_pendle.js
+3 KB
+you can uncomment these address ranges from line 61~63
+    WETH_ADDRESS, // works
+    // GLP_SY_ADDRESS, // doesn't work
+    // SGLP_ADDRESS, // doesn't work
+about those params extracted from SDK: Why I'm gettings empty extCalldata from time to time? Seems to me that there's 2 kinds of swapData would be returned. May I ask why is that?
+    swapData: {
+      swapType: 0,
+      extRouter: '0x0000000000000000000000000000000000000000',
+      extCalldata: [],
+      needScale: false
+    }
+
+
+    swapData: {
+      swapType: 1,
+      extRouter: '0x6131b5fae19ea4f9d964eac0408e4408b66337b5',
+      extCalldata: '0xe21fd0e90000000000000000000000000000000000000000000000000000000000000020000000000000000000000000caa00aaf6fbc769d627d825b4faedc3aad8805970000000000000000000.....
+    }
+UncleGrandpa925 — 昨天 15:53
+Hey sorry for the delayed response. Team is a bit busy internally atm, will get to you in at most 48 hours!
+Thank you!
+darkkcyan — 今天 13:29
+Hello. So for your first question about extract params before approving, the Pendle SDK Router should actually work out of the box. If you receive any error when doing that, please report us.
+
+For questions 2 and 3, I think we need to elborate more on the inner working of Pendle Contract + SDK.
+
+The zap in and zap out process, without using aggregator (KyberSwap in this case), will only works with SY contract's TokensIn and TokensOut, respectively. The list of tokens in/out of SY contract can be obtained with getTokensIn/getTokensOut functions.
+Pendle SDK also support that, please refer to https://pendle-finance.github.io/pendle-sdk-core-v2-public/classes/SyEntity.html
+
+With an aggregator (again, KyberSwap), we can allow zap in/out with abitrary swappable tokens with the aggregator. So for zap in, Pendle SDK will swap the input token to one of the tokens in, and then use that token in to do further job. The same thing happens with the zap out process but in reverse: SDK will zap out to one of tokens out, and swap that to the output token.
+
+Now for the second question.
+In your code, WETH is swappable to one of the tokens out, therefore it works.
+SY is not swappable on KyberSwap, so it wont work. The same thing for SGLP.
+
+Nice observation on the third question. So that part is also very close to low level work of Pendle Router contract. You see, if your input token equal to the chosen token in, there won't be a need for KyberSwap. Hence you will get empty extCalldata with empty extRouter.
+
+For the other cases, such as with KyberSwap, the data will be filled. So yeah everything are working as intended. All are features not bugs.
+SyEntity | @pendle/sdk-v2
+Documentation for @pendle/sdk-v2
+Also we are developing a playground template for Pendle SDK, with fancy stuffs like local fork (so you won't lose actual money), account impersonation, .... For your example above, I have added your code (with some changes). You can see it here https://stackblitz.com/edit/stackblitz-starters-esghny?file=README.md&view=editor
+David — 今天 17:34
+no worries, thx for the prompt reply~
+David — 今天 17:36
+oh I see, thx for all these detailed explanations and playground. Will take a closer look and revamp my SDK usage 🙇‍♂️

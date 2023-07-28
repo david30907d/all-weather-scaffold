@@ -23,7 +23,11 @@ const { fetch1InchSwapData,
   daiAddress,
   gDAIRewardPoolAddress,
   glpMarketPoolAddress,
-  getLiFiCrossChainContractCallCallData
+  getLiFiCrossChainContractCallCallData,
+  squidRouterProxyAddress,
+  getSquidCrossChainContractCallCallData,
+  wbnbAddress,
+  radiantBscLockZapPoolAddress
 } = require("./utils");
 
 
@@ -57,11 +61,11 @@ async function deposit() {
 
 describe("All Weather Protocol", function () {
   beforeEach(async () => {
-    console.log("!!!!!!!!!!!!!!!!!!!")
     this.timeout(120000); // Set timeout to 120 seconds
     wallet = await ethers.getImpersonatedSigner(myImpersonatedWalletAddress);
     dpxSLP = await ethers.getContractAt('IERC20Uniswap', sushiSwapDpxLpTokenAddress);
     weth = await ethers.getContractAt('IWETH', wethAddress);
+    wbnb = await ethers.getContractAt('IERC20', wbnbAddress)
     dlpToken = await ethers.getContractAt("MockDAI", radiantDlpAddress);
     fsGLP = await ethers.getContractAt("IERC20", fsGLPAddress);
     pendleGlpMarketLPT = await ethers.getContractAt("IERC20", glpMarketPoolAddress);
@@ -74,9 +78,27 @@ describe("All Weather Protocol", function () {
     radiantLendingPool = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
     radiantLockZap = await ethers.getContractAt("ILockZap", radiantLockZapPoolAddress);
     multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
-    await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit: 2057560 });
-    console.log(await radiantLockZap.populateTransaction.zap(false, ethers.utils.parseUnits('1', 18), 0, 3))
-    // getLiFiCrossChainContractCallCallData(fromChain, fromToken, fromAddress, toChain, toToken, toAmount, crossChainTransaction, toContractGasLimit, contractOutputsToken)
+    await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("5"), gasLimit: 2057560 });
+
+    const approveRadiantTx  = await wbnb.populateTransaction.approve(radiantBscLockZapPoolAddress, radiantAmount);
+    const radiantTx  = await radiantLockZap.populateTransaction.zap(false, radiantAmount, 0, 3);
+    const squidCallData = await getSquidCrossChainContractCallCallData('42161', '56', wethAddress, wbnbAddress, radiantAmount.toString(), wallet.address, '99', [
+      {
+        payload: {tokenAddress: wbnbAddress,
+        inputPos: '1'}, callType: '1', target: radiantBscLockZapPoolAddress, callData: approveRadiantTx.data
+      },
+      {
+        payload: {tokenAddress: wbnbAddress,
+        inputPos: '1'}, callType: '1', target: radiantBscLockZapPoolAddress, callData: radiantTx.data
+      }
+    ])
+    // const result = await wallet.call({
+    //   to: squidRouterProxyAddress,
+    //   data: squidCallData.route.transactionRequest.data,
+    // });
+  
+    // console.log("Result:", result);
+    // // getLiFiCrossChainContractCallCallData(fromChain, fromToken, fromAddress, toChain, toToken, toAmount, crossChainTransaction, toContractGasLimit, contractOutputsToken)
 
     const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
     radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLendingPoolAddress);
@@ -99,12 +121,13 @@ describe("All Weather Protocol", function () {
     await portfolioContract.connect(wallet).deployed();
     await portfolioContract.setVaultAllocations([{protocol: "AllWeatherLP-Equilibria-GDAI", percentage: 100}]).then((tx) => tx.wait());
     await (await weth.connect(wallet).approve(portfolioContract.address, radiantAmount, { gasLimit: gasLimit })).wait();
-
-    oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount.div(2), wallet.address, 50);
-    oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount, wallet.address, 50);
-    pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, dpxAmount, 0.99);
-    pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount).mul(50).div(100), 0.99, daiToken.address);
-    portfolioShares = dpxAmount.div(await portfolioContract.unitOfShares());
+    console.log(squidCallData.route.transactionRequest.data)
+    await portfolioContract.connect(wallet).test(radiantAmount, squidCallData.route.transactionRequest.data).then((tx) => tx.wait());
+    // oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount.div(2), wallet.address, 50);
+    // oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount, wallet.address, 50);
+    // pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, dpxAmount, 0.99);
+    // pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount).mul(50).div(100), 0.99, daiToken.address);
+    // portfolioShares = dpxAmount.div(await portfolioContract.unitOfShares());
   });
 
   describe("Portfolio LP Contract Test", function () {
