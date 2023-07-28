@@ -17,7 +17,7 @@ import "../../../radiant/IAToken.sol";
 import "../../../radiant/IFeeDistribution.sol";
 import "../../../interfaces/AbstractVault.sol";
 
-contract RadiantArbitrumVault is AbstractVault {
+contract RadiantBscVault is AbstractVault {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
