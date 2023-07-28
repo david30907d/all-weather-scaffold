@@ -298,6 +298,11 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         ) {
           // equilibria needs `output` to be passed in
           vaults[i].redeem(vaultShares, output);
+        } else if (
+          bytesOfvaultName ==
+          keccak256(bytes("AllWeatherLP-RadiantArbitrum-DLP"))
+        ) {
+          vaults[i].redeem();
         } else {
           vaults[i].redeem(vaultShares);
         }
@@ -484,7 +489,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       address addressOfReward = totalClaimableRewards[i]
         .claimableRewards[j]
         .token;
-      uint256 oneOfTheUnclaimedRewardsBelongsToThisProfolio = totalClaimableRewards[
+      uint256 oneOfTheUnclaimedRewardsBelongsToThisPortfolio = totalClaimableRewards[
           i
         ].claimableRewards[j].amount;
       uint256 thisRewardPerSharePaid = userRewardPerTokenPaid[msg.sender][
@@ -496,7 +501,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       ] = _calculateRewardPerShareInThisPeriod(
         protocolOfThatVault,
         addressOfReward,
-        oneOfTheUnclaimedRewardsBelongsToThisProfolio
+        oneOfTheUnclaimedRewardsBelongsToThisPortfolio
       );
 
       rewardsOfInvestedProtocols[msg.sender][protocolOfThatVault][
@@ -504,7 +509,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       ] += _calcualteUserEarnedBeforeThisUpdateAction(
         protocolOfThatVault,
         addressOfReward,
-        oneOfTheUnclaimedRewardsBelongsToThisProfolio,
+        oneOfTheUnclaimedRewardsBelongsToThisPortfolio,
         thisRewardPaid
       );
       userRewardPerTokenPaid[msg.sender][protocolOfThatVault][
@@ -527,14 +532,14 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   function _calcualteUserEarnedBeforeThisUpdateAction(
     string memory protocolOfThatVault,
     address addressOfReward,
-    uint256 oneOfTheUnclaimedRewardsBelongsToThisProfolio,
+    uint256 oneOfTheUnclaimedRewardsBelongsToThisPortfolio,
     uint256 thisRewardPaid
   ) public view returns (uint) {
     return
       _calculateRewardPerShareInThisPeriod(
         protocolOfThatVault,
         addressOfReward,
-        oneOfTheUnclaimedRewardsBelongsToThisProfolio
+        oneOfTheUnclaimedRewardsBelongsToThisPortfolio
       ) *
       balanceOf(msg.sender) -
       thisRewardPaid;
@@ -543,7 +548,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   function _calculateRewardPerShareInThisPeriod(
     string memory protocolOfThatVault,
     address addressOfReward,
-    uint256 oneOfTheUnclaimedRewardsBelongsToThisProfolio
+    uint256 oneOfTheUnclaimedRewardsBelongsToThisPortfolio
   ) internal view returns (uint) {
     if (totalSupply() == 0) {
       return rewardPerShareZappedIn[protocolOfThatVault][addressOfReward];
@@ -551,7 +556,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     return
       rewardPerShareZappedIn[protocolOfThatVault][addressOfReward] +
       SafeMath.div(
-        oneOfTheUnclaimedRewardsBelongsToThisProfolio,
+        oneOfTheUnclaimedRewardsBelongsToThisPortfolio,
         totalSupply()
       );
   }

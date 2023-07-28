@@ -139,7 +139,7 @@ describe("All Weather Protocol", function () {
           expect(await radiantVault.totalLockedAssets()).to.equal(totalLockedAssets);
           expect(await radiantVault.totalStakedButWithoutLockedAssets()).to.equal(totalUnlockedAssets);
         } else {
-          throw error("Unexpected error occurred");
+          throw new Error("Unexpected error occurred");
         }
       }
     });
