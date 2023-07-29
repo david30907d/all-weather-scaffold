@@ -64,7 +64,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   mapping(string => uint256) public portfolioAllocation;
   AbstractVault[] public vaults;
   mapping(address => mapping(string => mapping(address => uint256)))
-    public rewardsOfInvestedProtocols;
+    public userRewardsOfInvestedProtocols;
   mapping(address => mapping(string => mapping(address => uint256)))
     public userRewardPerTokenPaid;
   mapping(string => mapping(address => uint256)) public rewardPerShareZappedIn;
@@ -95,13 +95,22 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     // pretty much copied from https://solidity-by-example.org/defi/staking-rewards/
     ClaimableRewardOfAProtocol[]
       memory totalClaimableRewards = getClaimableRewards(payable(msg.sender));
-    for (uint i = 0; i < totalClaimableRewards.length; i++) {
+    for (
+      uint vaultIdx = 0;
+      vaultIdx < totalClaimableRewards.length;
+      vaultIdx++
+    ) {
       for (
-        uint j = 0;
-        j < totalClaimableRewards[i].claimableRewards.length;
-        j++
+        uint rewardIdxOfThisVault = 0;
+        rewardIdxOfThisVault <
+        totalClaimableRewards[vaultIdx].claimableRewards.length;
+        rewardIdxOfThisVault++
       ) {
-        _updateSpecificReward(totalClaimableRewards, i, j);
+        _updateSpecificReward(
+          totalClaimableRewards,
+          vaultIdx,
+          rewardIdxOfThisVault
+        );
       }
     }
     _;
@@ -317,42 +326,32 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   }
 
   function claim(address payable receiver) public updateRewards {
+    ClaimableRewardOfAProtocol[]
+      memory totalClaimableRewards = getClaimableRewards(payable(msg.sender));
     uint256 userShares = balanceOf(msg.sender);
-    uint256 portfolioShares = totalSupply();
-    if (userShares == 0 || portfolioShares == 0) {
+    if (userShares == 0) {
       return;
     }
-    for (uint256 i = 0; i < vaults.length; i++) {
-      IFeeDistribution.RewardData[] memory rewardsOfThisVault;
-      bytes32 bytesOfvaultName = keccak256(bytes(vaults[i].name()));
-      rewardsOfThisVault = vaults[i].claim();
-      if (
-        bytesOfvaultName == keccak256(bytes("AllWeatherLP-SushSwap-DpxETH"))
+    for (
+      uint vaultIdx = 0;
+      vaultIdx < totalClaimableRewards.length;
+      vaultIdx++
+    ) {
+      for (
+        uint rewardIdxOfThisVault = 0;
+        rewardIdxOfThisVault <
+        totalClaimableRewards[vaultIdx].claimableRewards.length;
+        rewardIdxOfThisVault++
       ) {
-        _distributeERC20UserRewardProRata(
+        address addressOfReward = totalClaimableRewards[vaultIdx]
+          .claimableRewards[rewardIdxOfThisVault]
+          .token;
+        SafeERC20.safeTransfer(
+          IERC20(addressOfReward),
           receiver,
-          userShares,
-          portfolioShares,
-          rewardsOfThisVault
-        );
-      } else if (
-        bytesOfvaultName == keccak256(bytes("AllWeatherLP-RadiantArbitrum-DLP"))
-      ) {
-        _distributeRadiantUserRewardProRata(
-          receiver,
-          userShares,
-          portfolioShares
-        );
-      } else if (
-        bytesOfvaultName == keccak256(bytes("AllWeatherLP-Equilibria-GDAI")) ||
-        bytesOfvaultName == keccak256(bytes("AllWeatherLP-Equilibria-GLP"))
-      ) {
-        // equilibria needs `output` to be passed in
-        _distributeERC20UserRewardProRata(
-          receiver,
-          userShares,
-          portfolioShares,
-          rewardsOfThisVault
+          userRewardsOfInvestedProtocols[msg.sender][protocolNameOfThisVault][
+            addressOfReward
+          ]
         );
       }
     }
@@ -362,8 +361,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     address payable owner
   ) public view returns (ClaimableRewardOfAProtocol[] memory) {
     uint256 userShares = balanceOf(owner);
-    uint256 portfolioShares = totalSupply();
-    if (userShares == 0 || portfolioShares == 0) {
+    if (userShares == 0) {
       return new ClaimableRewardOfAProtocol[](0);
     }
 
@@ -371,190 +369,97 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       memory totalClaimableRewards = new ClaimableRewardOfAProtocol[](
         vaults.length
       );
-    for (uint256 i = 0; i < vaults.length; i++) {
-      bytes32 bytesOfvaultName = keccak256(bytes(vaults[i].name()));
-      if (
-        bytesOfvaultName == keccak256(bytes("AllWeatherLP-RadiantArbitrum-DLP"))
+    for (uint256 vaultIdx = 0; vaultIdx < vaults.length; vaultIdx++) {
+      string memory protocolNameOfThisVault = vaults[vaultIdx].name();
+      claimableRewardsOfThisVaultArr = new IFeeDistribution.RewardData[](
+        vaults[vaultIdx].getClaimableRewards().length
+      );
+      IFeeDistribution.RewardData[] memory claimablerewardsOfThisVault = vaults[
+        vaultIdx
+      ].getClaimableRewards();
+      for (
+        uint256 rewardIdx = 0;
+        rewardIdx < claimablerewardsOfThisVault.length;
+        rewardIdx++
       ) {
-        totalClaimableRewards[i] = ClaimableRewardOfAProtocol({
-          protocol: vaults[i].name(),
-          claimableRewards: _multiplyProRataRatioToClaimableRewards(
-            vaults[i].getClaimableRewards(),
-            userShares,
-            portfolioShares
-          )
-        });
-      } else {
-        totalClaimableRewards[i] = ClaimableRewardOfAProtocol({
-          protocol: vaults[i].name(),
-          claimableRewards: vaults[i].getClaimableRewards()
-        });
+        address addressOfReward = claimablerewardsOfThisVault[rewardIdx].token;
+        claimableRewardsOfThisVaultArr.push(
+          IFeeDistribution.RewardData({
+            token: addressOfReward,
+            amount: userRewardsOfInvestedProtocols[owner][
+              protocolNameOfThisVault
+            ][addressOfReward] +
+              _calcualteUserEarnedBeforeThisUpdateAction(
+                protocolNameOfThisVault,
+                addressOfReward,
+                claimablerewardsOfThisVault[rewardIdx].amount
+              )
+          })
+        );
       }
+      totalClaimableRewards[i] = ClaimableRewardOfAProtocol({
+        protocol: protocolNameOfThisVault,
+        claimableRewards: claimableRewardsOfThisVaultArr
+      });
     }
     return totalClaimableRewards;
   }
 
-  function _multiplyProRataRatioToClaimableRewards(
-    IFeeDistribution.RewardData[] memory claimableRewards,
-    uint256 userShares,
-    uint256 portfolioShares
-  ) internal pure returns (IFeeDistribution.RewardData[] memory) {
-    for (uint i = 0; i < claimableRewards.length; i++) {
-      claimableRewards[i].amount = Math.mulDiv(
-        claimableRewards[i].amount,
-        userShares,
-        portfolioShares
-      );
-    }
-    return claimableRewards;
-  }
-
-  function _distributeERC20UserRewardProRata(
-    address receiver,
-    uint256 userShares,
-    uint256 portfolioShares,
-    IFeeDistribution.RewardData[] memory erc20Rewards
-  ) internal {
-    for (uint i = 0; i < erc20Rewards.length; i++) {
-      SafeERC20.safeTransfer(
-        IERC20(erc20Rewards[i].token),
-        receiver,
-        _checkUserRewardPerShares(
-          erc20Rewards[i].amount,
-          userShares,
-          portfolioShares
-        )
-      );
-    }
-  }
-
-  function _distributeRadiantUserRewardProRata(
-    address payable receiver,
-    uint256 userShares,
-    uint256 portfolioShares
-  ) internal {
-    // rToken
-    _distributeRtokenRewardProRata(receiver, userShares, portfolioShares);
-    // weth
-    _distributeEthRewardProRata(receiver, userShares, portfolioShares);
-  }
-
-  function _distributeRtokenRewardProRata(
-    address payable receiver,
-    uint256 userShares,
-    uint256 portfolioShares
-  ) internal {
-    address[] memory radiantRewardNativeTokenAddresses = RadiantArbitrumVault(
-      radiantVaultAddr
-    ).getRadiantRewardNativeTokenAddresses();
-    // rToken
-    for (uint i = 0; i < radiantRewardNativeTokenAddresses.length; i++) {
-      uint256 userReward = _checkUserRewardPerShares(
-        IERC20(radiantRewardNativeTokenAddresses[i]).balanceOf(address(this)),
-        userShares,
-        portfolioShares
-      );
-      SafeERC20.safeTransfer(
-        IERC20(radiantRewardNativeTokenAddresses[i]),
-        receiver,
-        userReward
-      );
-    }
-  }
-
-  function _distributeEthRewardProRata(
-    address payable receiver,
-    uint256 userShares,
-    uint256 portfolioShares
-  ) internal {
-    uint256 amountOfEthToTransfer = _checkUserRewardPerShares(
-      address(this).balance,
-      userShares,
-      portfolioShares
-    );
-    require(
-      address(this).balance >= amountOfEthToTransfer,
-      "Insufficient eth to withdraw"
-    );
-    receiver.transfer(amountOfEthToTransfer);
-  }
-
   function _updateSpecificReward(
     ClaimableRewardOfAProtocol[] memory totalClaimableRewards,
-    uint256 i,
-    uint256 j
+    uint256 vaultIdx,
+    uint256 rewardIdxOfThisVault
   ) internal {
     if (msg.sender != address(0)) {
-      string memory protocolOfThatVault = totalClaimableRewards[i].protocol;
-      address addressOfReward = totalClaimableRewards[i]
-        .claimableRewards[j]
+      string memory protocolNameOfThisVault = totalClaimableRewards[vaultIdx]
+        .protocol;
+      address addressOfReward = totalClaimableRewards[vaultIdx]
+        .claimableRewards[rewardIdxOfThisVault]
         .token;
       uint256 oneOfTheUnclaimedRewardsBelongsToThisPortfolio = totalClaimableRewards[
           i
-        ].claimableRewards[j].amount;
-      uint256 thisRewardPerSharePaid = userRewardPerTokenPaid[msg.sender][
-        protocolOfThatVault
-      ][addressOfReward];
-      uint256 thisRewardPaid = thisRewardPerSharePaid * balanceOf(msg.sender);
-      rewardPerShareZappedIn[protocolOfThatVault][
+        ].claimableRewards[rewardIdxOfThisVault].amount;
+      rewardPerShareZappedIn[protocolNameOfThisVault][
         addressOfReward
-      ] = _calculateRewardPerShareInThisPeriod(
-        protocolOfThatVault,
+      ] += _calculateRewardPerShareDuringThisPeriod(
+        protocolNameOfThisVault,
         addressOfReward,
         oneOfTheUnclaimedRewardsBelongsToThisPortfolio
       );
-
-      rewardsOfInvestedProtocols[msg.sender][protocolOfThatVault][
+      userRewardsOfInvestedProtocols[msg.sender][protocolNameOfThisVault][
         addressOfReward
       ] += _calcualteUserEarnedBeforeThisUpdateAction(
-        protocolOfThatVault,
+        protocolNameOfThisVault,
         addressOfReward,
-        oneOfTheUnclaimedRewardsBelongsToThisPortfolio,
-        thisRewardPaid
+        oneOfTheUnclaimedRewardsBelongsToThisPortfolio
       );
-      userRewardPerTokenPaid[msg.sender][protocolOfThatVault][
+      userRewardPerTokenPaid[msg.sender][protocolNameOfThisVault][
         addressOfReward
-      ] = rewardPerShareZappedIn[protocolOfThatVault][addressOfReward];
+      ] = rewardPerShareZappedIn[protocolNameOfThisVault][addressOfReward];
     }
   }
 
-  function _checkUserRewardPerShares(
-    uint256 tokenBalanceOfThisPortfolio,
-    uint256 userShares,
-    uint256 portfolioShares
-  ) internal view returns (uint256) {
-    // TODO: current implementation is not accurate
-    // need to implement the user reward per token paid like what convex and equilibria do
-    return
-      Math.mulDiv(tokenBalanceOfThisPortfolio, userShares, portfolioShares);
-  }
-
   function _calcualteUserEarnedBeforeThisUpdateAction(
-    string memory protocolOfThatVault,
+    string memory protocolNameOfThisVault,
     address addressOfReward,
-    uint256 oneOfTheUnclaimedRewardsBelongsToThisPortfolio,
-    uint256 thisRewardPaid
+    uint256 oneOfTheUnclaimedRewardsBelongsToThisPortfolio
   ) public view returns (uint) {
     return
-      _calculateRewardPerShareInThisPeriod(
-        protocolOfThatVault,
-        addressOfReward,
-        oneOfTheUnclaimedRewardsBelongsToThisPortfolio
-      ) *
-      balanceOf(msg.sender) -
-      thisRewardPaid;
+      (rewardPerShareZappedIn[protocolNameOfThisVault][addressOfReward] -
+        userRewardPerTokenPaid[msg.sender][protocolNameOfThisVault][
+          addressOfReward
+        ]) * balanceOf(msg.sender);
   }
 
-  function _calculateRewardPerShareInThisPeriod(
-    string memory protocolOfThatVault,
+  function _calculateRewardPerShareDuringThisPeriod(
+    string memory protocolNameOfThisVault,
     address addressOfReward,
     uint256 oneOfTheUnclaimedRewardsBelongsToThisPortfolio
   ) internal view returns (uint) {
     if (totalSupply() == 0) {
-      return rewardPerShareZappedIn[protocolOfThatVault][addressOfReward];
+      return 0;
     }
     return
-      rewardPerShareZappedIn[protocolOfThatVault][addressOfReward] +
       SafeMath.div(
         oneOfTheUnclaimedRewardsBelongsToThisPortfolio,
         totalSupply()
