@@ -353,6 +353,9 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
             addressOfReward
           ]
         );
+        userRewardsOfInvestedProtocols[msg.sender][protocolNameOfThisVault][
+          addressOfReward
+        ] = 0;
       }
     }
   }
