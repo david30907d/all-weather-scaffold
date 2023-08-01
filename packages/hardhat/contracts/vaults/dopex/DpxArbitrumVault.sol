@@ -8,14 +8,14 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-import "./dpx/IMiniChefV2.sol";
-import "./dpx/ICloneRewarderTime.sol";
+import "../../dpx/IMiniChefV2.sol";
+import "../../dpx/ICloneRewarderTime.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
-import "./sushiSwap/IUniswapV2Router01.sol";
-import "./utils/IWETH.sol";
-import "./interfaces/AbstractVault.sol";
-import "./radiant/IFeeDistribution.sol";
+import "../../sushiSwap/IUniswapV2Router01.sol";
+import "../../utils/IWETH.sol";
+import "../../interfaces/AbstractVault.sol";
+import "../../radiant/IFeeDistribution.sol";
 
 contract DpxArbitrumVault is AbstractVault {
   using SafeMath for uint256;
