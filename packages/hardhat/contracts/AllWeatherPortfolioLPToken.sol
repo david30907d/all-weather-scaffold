@@ -110,11 +110,12 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         rewardIdxOfThisVault++
       ) {
         _updateSpecificReward(
-          totalClaimableRewards,
-          vaultIdx,
-          rewardIdxOfThisVault
+          totalClaimableRewards[vaultIdx].protocol,
+          totalClaimableRewards[vaultIdx].claimableRewards[rewardIdxOfThisVault]
         );
       }
+      // empty the claimable rewards in these vaults, so that we won't re-calculate the `amount` back to `_updateSpecificReward()`
+      vaults[vaultIdx].claim();
     }
     _;
   }
@@ -342,6 +343,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     ) {
       string memory protocolNameOfThisVault = totalClaimableRewards[vaultIdx]
         .protocol;
+      vaults[vaultIdx].claim();
       for (
         uint rewardIdxOfThisVault = 0;
         rewardIdxOfThisVault <
@@ -393,27 +395,11 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         rewardIdx++
       ) {
         address addressOfReward = claimablerewardsOfThisVault[rewardIdx].token;
-        uint256 rewardAmount;
-        if (owner == address(this)) {
-          rewardAmount = claimablerewardsOfThisVault[rewardIdx].amount;
-        } else {
-          rewardAmount =
-            balanceOf(owner) *
-            (rewardPerShareZappedIn[protocolNameOfThisVault][addressOfReward] +
-              _calculateRewardPerShareDuringThisPeriod(
-                protocolNameOfThisVault,
-                addressOfReward,
-                claimablerewardsOfThisVault[rewardIdx].amount
-              ) -
-              userRewardPerTokenPaid[owner][protocolNameOfThisVault][
-                addressOfReward
-              ]) +
-            userRewardsOfInvestedProtocols[owner][protocolNameOfThisVault][
-              addressOfReward
-            ];
-        }
         claimableRewardsOfThisVaultArr[rewardIdx] = IFeeDistribution
-          .RewardData({token: addressOfReward, amount: rewardAmount});
+          .RewardData({
+            token: addressOfReward,
+            amount: _getRewardAmount(addressOfReward)
+          });
       }
       totalClaimableRewards[vaultIdx] = ClaimableRewardOfAProtocol({
         protocol: protocolNameOfThisVault,
@@ -423,20 +409,39 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     return totalClaimableRewards;
   }
 
+  function _getRewardAmount(
+    address addressOfReward
+  ) internal returns (uint256 rewardAmount) {
+    uint256 rewardAmount;
+    if (owner == address(this)) {
+      rewardAmount = claimablerewardsOfThisVault[rewardIdx].amount;
+    } else {
+      rewardAmount =
+        balanceOf(owner) *
+        (rewardPerShareZappedIn[protocolNameOfThisVault][addressOfReward] +
+          _calculateRewardPerShareDuringThisPeriod(
+            protocolNameOfThisVault,
+            addressOfReward,
+            claimablerewardsOfThisVault[rewardIdx].amount
+          ) -
+          userRewardPerTokenPaid[owner][protocolNameOfThisVault][
+            addressOfReward
+          ]) +
+        userRewardsOfInvestedProtocols[owner][protocolNameOfThisVault][
+          addressOfReward
+        ];
+    }
+    return rewardAmount;
+  }
+
   function _updateSpecificReward(
-    ClaimableRewardOfAProtocol[] memory totalClaimableRewards,
-    uint256 vaultIdx,
-    uint256 rewardIdxOfThisVault
+    string calldata protocolNameOfThisVault,
+    IFeeDistribution.RewardData calldata claimableReward
   ) internal {
     if (msg.sender != address(0)) {
-      string memory protocolNameOfThisVault = totalClaimableRewards[vaultIdx]
-        .protocol;
-      address addressOfReward = totalClaimableRewards[vaultIdx]
-        .claimableRewards[rewardIdxOfThisVault]
-        .token;
-      uint256 oneOfTheUnclaimedRewardsBelongsToThisPortfolio = totalClaimableRewards[
-          vaultIdx
-        ].claimableRewards[rewardIdxOfThisVault].amount;
+      address addressOfReward = claimableReward.token;
+      uint256 oneOfTheUnclaimedRewardsBelongsToThisPortfolio = claimableReward
+        .amount;
       rewardPerShareZappedIn[protocolNameOfThisVault][
         addressOfReward
       ] += _calculateRewardPerShareDuringThisPeriod(
