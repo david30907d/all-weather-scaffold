@@ -194,9 +194,12 @@ describe("All Weather Protocol", function () {
             expect(rewardPerShareZappedIn3).to.be.gt(rewardPerShareZappedIn2);
 
         })
-        // it("userRewardsOfInvestedProtocols should be reset to 0 after redeem()", async function () {
-        //     await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, fakePendleZapOut, { gasLimit: gasLimit })).wait();
-        //     expect(userRewardsOfInvestedProtocols).to.equal(0);
-        // })
+        it("userRewardsOfInvestedProtocols should be reset to 0 after redeem()", async function () {
+            await deposit(wallet);
+            await (await portfolioContract.connect(wallet).redeem(portfolioContract.balanceOf(wallet.address), wallet.address, fakePendleZapOut, { gasLimit: gasLimit })).wait();
+            expect(userRewardsOfInvestedProtocols).to.equal(0);
+            expect(await portfolioContract.userRewardPerTokenPaid(wallet.address, radiantVault.name(), radiantRTokens[0])).to.equal(await portfolioContract.rewardPerShareZappedIn(radiantVault.name(), radiantRTokens[0]));
+            expect(await portfolioContract.rewardPerShareZappedIn(radiantVault.name(), radiantRTokens[0])).to.be.gt(0);
+        })
     });
 });
