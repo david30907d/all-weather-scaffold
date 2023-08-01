@@ -53,6 +53,9 @@ abstract contract BaseEquilibriaVault is AbstractVault {
   ) public virtual returns (uint256) {
     uint256 originalShares = totalStakedButWithoutLockedAssets();
     SafeERC20.safeApprove(zapInToken, address(eqbZap), amount);
+
+    // Error: VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xfa711db2)
+    // It means the swap would exceed the max slippage
     eqbZap.zapIn(pid, minLpOut, guessPtReceivedFromSy, input, true);
     return totalStakedButWithoutLockedAssets().sub(originalShares);
   }
@@ -109,7 +112,6 @@ abstract contract BaseEquilibriaVault is AbstractVault {
   function getClaimableRewards()
     public
     view
-    virtual
     override
     returns (IFeeDistribution.RewardData[] memory rewards)
   {

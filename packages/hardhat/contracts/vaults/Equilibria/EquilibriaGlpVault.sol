@@ -15,7 +15,7 @@ import "../../equilibria/IBaseRewardPool.sol";
 import "../../pendle/IPendleRouter.sol";
 import "../../pendle/IPendleBooster.sol";
 
-contract EquilibriaGlpVault is AbstractVault {
+contract EquilibriaGlpVault is BaseEquilibriaVault {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
@@ -34,122 +34,9 @@ contract EquilibriaGlpVault is AbstractVault {
     fsGLP = IERC20(0x1aDDD80E6039594eE970E5872D247bf0414C8903);
   }
 
-  function totalLockedAssets() public view override returns (uint256) {
-    return 0;
-  }
-
-  function totalStakedButWithoutLockedAssets()
-    public
-    view
-    override
-    returns (uint256)
-  {
-    (, , address rewardpool, ) = pendleBooster.poolInfo(pid);
-    return IERC20(rewardpool).balanceOf(address(this));
-  }
-
   function totalUnstakedAssets() public view override returns (uint256) {
     // ideally, the asset() of this vault should be fsGLP
     // return fsGLP.balanceOf(address(this));
     return IERC20(asset()).balanceOf(address(this));
-  }
-
-  function deposit(
-    uint256 amount,
-    uint256 minLpOut,
-    IPendleRouter.ApproxParams calldata guessPtReceivedFromSy,
-    IPendleRouter.TokenInput calldata input
-  ) public override returns (uint256) {
-    require(amount <= maxDeposit(msg.sender), "ERC4626: deposit more than max");
-
-    SafeERC20.safeTransferFrom(weth, msg.sender, address(this), amount);
-    SafeERC20.safeApprove(weth, address(eqbZap), amount);
-    uint256 originalShares = totalStakedButWithoutLockedAssets();
-    // Error: VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xfa711db2)
-    // It means the swap would exceed the max slippage
-
-    eqbZap.zapIn(pid, minLpOut, guessPtReceivedFromSy, input, true);
-    uint256 shares = totalStakedButWithoutLockedAssets().sub(originalShares);
-    _mint(msg.sender, shares);
-
-    emit Deposit(_msgSender(), msg.sender, amount, shares);
-    return shares;
-  }
-
-  /* solhint-disable no-unused-vars */
-  function redeem(
-    uint256 shares,
-    IPendleRouter.TokenOutput calldata output
-  ) public override returns (uint256) {
-    (, , address rewardPool, ) = pendleBooster.poolInfo(pid);
-    SafeERC20.safeApprove(
-      IBaseRewardPool(rewardPool).stakingToken(),
-      address(eqbZap),
-      shares
-    );
-    // this would only withdraw GLP-LPT, not fsGLP
-    eqbZap.withdraw(pid, shares);
-
-    // ideal solution: use eqbZap.zapOut
-    // eqbZap.zapOut(pid, 1, output, false);
-
-    // alternative: use pendleRouter.removeLiquiditySingleToken
-    // _approveTokenIfNeeded(0x7D49E5Adc0EAAD9C027857767638613253eF125f, address(pendleRouter), shares);
-    // pendleRouter.removeLiquiditySingleToken(
-    //     address(this),
-    //     0x7D49E5Adc0EAAD9C027857767638613253eF125f,
-    //     shares,
-    //     output
-    // );
-    claim();
-    uint256 shares = super.redeem(shares, msg.sender, msg.sender);
-    return shares;
-  }
-
-  /* solhint-enable no-unused-vars */
-
-  function claim()
-    public
-    override
-    returns (IFeeDistribution.RewardData[] memory)
-  {
-    IFeeDistribution.RewardData[]
-      memory claimableRewards = getClaimableRewards();
-    if (claimableRewards.length != 0) {
-      uint256[] memory pids = new uint256[](1);
-      pids[0] = pid;
-      eqbZap.claimRewards(pids);
-      super.claimRewardsFromVaultToPortfolioVault(claimableRewards);
-    }
-    return claimableRewards;
-  }
-
-  function getClaimableRewards()
-    public
-    view
-    override
-    returns (IFeeDistribution.RewardData[] memory rewards)
-  {
-    // pro rata: user's share divided by total shares, is the ratio of the reward
-    uint256 portfolioSharesInThisVault = balanceOf(msg.sender);
-    uint256 totalVaultShares = totalSupply();
-    if (portfolioSharesInThisVault == 0 || totalVaultShares == 0) {
-      return new IFeeDistribution.RewardData[](0);
-    }
-    rewards = new IFeeDistribution.RewardData[](2);
-    (, , address rewardpool, ) = pendleBooster.poolInfo(pid);
-    address[] memory rewardTokens = IBaseRewardPool(rewardpool)
-      .getRewardTokens();
-    for (uint256 i = 0; i < rewardTokens.length; i++) {
-      rewards[i] = IFeeDistribution.RewardData({
-        token: rewardTokens[i],
-        amount: Math.mulDiv(
-          IBaseRewardPool(rewardpool).earned(address(this), rewardTokens[i]),
-          portfolioSharesInThisVault,
-          totalVaultShares
-        )
-      });
-    }
-    return rewards;
   }
 }
