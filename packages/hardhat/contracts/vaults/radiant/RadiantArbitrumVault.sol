@@ -129,7 +129,7 @@ contract RadiantArbitrumVault is AbstractVault {
       );
   }
 
-  function withdrawRTokenToReceiver() public {
+  function withdrawRTokenToReceiver() external {
     for (uint256 i = 0; i < radiantRewardNativeTokenAddresses.length; i++) {
       try
         radiantLending.withdraw(
@@ -153,7 +153,7 @@ contract RadiantArbitrumVault is AbstractVault {
     }
   }
 
-  function withdrawETHRewardToReceiver() public {
+  function withdrawETHRewardToReceiver() external {
     IAToken aWETH = IAToken(
       radiantLending.getReserveData(address(weth)).aTokenAddress
     );

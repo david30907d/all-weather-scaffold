@@ -12,16 +12,16 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./RadiantArbitrumVault.sol";
-import "./DpxArbitrumVault.sol";
+import "./vaults/radiant/RadiantArbitrumVault.sol";
+import "./vaults/dopex/DpxArbitrumVault.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "./radiant/IFeeDistribution.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./pendle/IPendleRouter.sol";
-import "./vaults/EquilibriaGlpVault.sol";
-import "./vaults/Equilibria/EquilibriaGDAIVault.sol";
+import "./vaults/equilibria/EquilibriaGlpVault.sol";
+import "./vaults/equilibria/EquilibriaGDAIVault.sol";
 import "./interfaces/AbstractVault.sol";
 import "hardhat/console.sol";
 
@@ -382,24 +382,24 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       );
     for (uint256 vaultIdx = 0; vaultIdx < vaults.length; vaultIdx++) {
       string memory protocolNameOfThisVault = vaults[vaultIdx].name();
-      IFeeDistribution.RewardData[] memory claimablerewardsOfThisVault = vaults[
+      IFeeDistribution.RewardData[] memory claimableRewardsOfThisVault = vaults[
         vaultIdx
       ].getClaimableRewards();
       IFeeDistribution.RewardData[]
         memory claimableRewardsOfThisVaultArr = new IFeeDistribution.RewardData[](
-          claimablerewardsOfThisVault.length
+          claimableRewardsOfThisVault.length
         );
       for (
         uint256 rewardIdx = 0;
-        rewardIdx < claimablerewardsOfThisVault.length;
+        rewardIdx < claimableRewardsOfThisVault.length;
         rewardIdx++
       ) {
-        address addressOfReward = claimablerewardsOfThisVault[rewardIdx].token;
-        claimableRewardsOfThisVaultArr[rewardIdx] = IFeeDistribution
-          .RewardData({
-            token: addressOfReward,
-            amount: _getRewardAmount(addressOfReward)
-          });
+        address addressOfReward = claimableRewardsOfThisVault[rewardIdx].token;
+        // claimableRewardsOfThisVaultArr[rewardIdx] = IFeeDistribution
+        //   .RewardData({
+        //     token: addressOfReward,
+        //     amount: _getRewardAmount(owner, claimableRewardsOfThisVault[rewardIdx].amount, protocolNameOfThisVault, addressOfReward)
+        //   });
       }
       totalClaimableRewards[vaultIdx] = ClaimableRewardOfAProtocol({
         protocol: protocolNameOfThisVault,
@@ -410,11 +410,14 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   }
 
   function _getRewardAmount(
+    address owner,
+    uint256 claimableRewardsAmountOfThisVault,
+    string memory protocolNameOfThisVault,
     address addressOfReward
   ) internal returns (uint256 rewardAmount) {
     uint256 rewardAmount;
     if (owner == address(this)) {
-      rewardAmount = claimablerewardsOfThisVault[rewardIdx].amount;
+      rewardAmount = claimableRewardsAmountOfThisVault;
     } else {
       rewardAmount =
         balanceOf(owner) *
@@ -422,7 +425,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
           _calculateRewardPerShareDuringThisPeriod(
             protocolNameOfThisVault,
             addressOfReward,
-            claimablerewardsOfThisVault[rewardIdx].amount
+            claimableRewardsAmountOfThisVault
           ) -
           userRewardPerTokenPaid[owner][protocolNameOfThisVault][
             addressOfReward
@@ -435,8 +438,8 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   }
 
   function _updateSpecificReward(
-    string calldata protocolNameOfThisVault,
-    IFeeDistribution.RewardData calldata claimableReward
+    string memory protocolNameOfThisVault,
+    IFeeDistribution.RewardData memory claimableReward
   ) internal {
     if (msg.sender != address(0)) {
       address addressOfReward = claimableReward.token;

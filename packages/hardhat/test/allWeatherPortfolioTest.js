@@ -79,7 +79,7 @@ describe("All Weather Protocol", function () {
         await dpxVault.deployed();
 
         const EquilibriaGlpVault = await ethers.getContractFactory("EquilibriaGlpVault");
-        equilibriaGlpVault = await EquilibriaGlpVault.deploy(pendleGlpMarketLPT.address);
+        equilibriaGlpVault = await EquilibriaGlpVault.deploy(pendleGlpMarketLPT.address, "AllWeatherLP-Equilibria-GLP", "ALP-EQB-GLP");
         await equilibriaGlpVault.deployed();
 
         const EquilibriaGDAIVault = await ethers.getContractFactory("EquilibriaGDAIVault");

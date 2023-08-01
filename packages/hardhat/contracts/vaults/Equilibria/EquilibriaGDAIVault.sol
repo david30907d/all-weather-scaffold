@@ -15,8 +15,6 @@ contract EquilibriaGDAIVault is BaseEquilibriaVault {
     string memory symbol
   ) BaseEquilibriaVault(asset_, name, symbol) {
     pid = 2;
-    eqbZap = IEqbZap(0xc7517f481Cc0a645e63f870830A4B2e580421e32);
-    pendleBooster = IPendleBooster(0x4D32C8Ff2fACC771eC7Efc70d6A8468bC30C26bF);
     // // asset
     DAI = IERC20(0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1);
   }

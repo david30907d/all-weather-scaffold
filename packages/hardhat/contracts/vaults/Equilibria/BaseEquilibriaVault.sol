@@ -21,14 +21,16 @@ abstract contract BaseEquilibriaVault is AbstractVault {
 
   IEqbZap public eqbZap;
   IPendleBooster public pendleBooster;
-  IPendleRouter public pendleRouter;
   uint256 public pid;
 
   constructor(
     IERC20Metadata asset_,
     string memory name,
     string memory symbol
-  ) ERC4626(asset_) ERC20(name, symbol) {}
+  ) ERC4626(asset_) ERC20(name, symbol) {
+    eqbZap = IEqbZap(0xc7517f481Cc0a645e63f870830A4B2e580421e32);
+    pendleBooster = IPendleBooster(0x4D32C8Ff2fACC771eC7Efc70d6A8468bC30C26bF);
+  }
 
   function totalLockedAssets() public view override returns (uint256) {
     return 0;
@@ -45,14 +47,13 @@ abstract contract BaseEquilibriaVault is AbstractVault {
   }
 
   function _zapIn(
-    IERC20 zapInToken,
     uint256 amount,
     uint256 minLpOut,
     IPendleRouter.ApproxParams calldata guessPtReceivedFromSy,
     IPendleRouter.TokenInput calldata input
-  ) public virtual returns (uint256) {
+  ) internal override returns (uint256) {
     uint256 originalShares = totalStakedButWithoutLockedAssets();
-    SafeERC20.safeApprove(zapInToken, address(eqbZap), amount);
+    SafeERC20.safeApprove(weth, address(eqbZap), amount);
 
     // Error: VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xfa711db2)
     // It means the swap would exceed the max slippage

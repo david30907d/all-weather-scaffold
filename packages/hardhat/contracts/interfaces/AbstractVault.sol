@@ -64,13 +64,7 @@ abstract contract AbstractVault is ERC4626, Ownable {
     IPendleRouter.TokenInput calldata input
   ) public virtual returns (uint256) {
     _prepareForDeposit(amount);
-    uint256 shares = _zapIn(
-      amount,
-      oneInchData,
-      minLpOut,
-      guessPtReceivedFromSy,
-      input
-    );
+    uint256 shares = _zapIn(amount, minLpOut, guessPtReceivedFromSy, input);
     return _mintShares(shares, shares);
   }
 
@@ -118,6 +112,19 @@ abstract contract AbstractVault is ERC4626, Ownable {
 
   /* solhint-disable no-unused-vars */
   function _zapIn(
+    uint256 amount,
+    uint256 minLpOut,
+    IPendleRouter.ApproxParams calldata guessPtReceivedFromSy,
+    IPendleRouter.TokenInput calldata input
+  ) internal virtual returns (uint256) {
+    revert("_zapIn not implemented");
+  }
+
+  /* solhint-enable no-unused-vars */
+
+  /* solhint-disable no-unused-vars */
+  function _zapIn(
+    IERC20 zapInToken,
     uint256 amount,
     uint256 minLpOut,
     IPendleRouter.ApproxParams calldata guessPtReceivedFromSy,
