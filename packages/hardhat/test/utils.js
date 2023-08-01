@@ -132,7 +132,7 @@ const wethAddress = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
 const gasLimit = 2675600;
 const radiantAmount = ethers.utils.parseUnits('0.01', 18);
 const dpxAmount = ethers.utils.parseUnits('0.001', 18);
-const end2endTestingAmount = ethers.utils.parseUnits('0.02', 18);
+const end2endTestingAmount = ethers.utils.parseUnits('0.1', 18);
 
 // sushi dpx
 const sushiSwapDpxLpTokenAddress = "0x0C1Cf6883efA1B496B01f654E247B9b419873054";
@@ -146,6 +146,8 @@ const radiantDlpAddress = "0x32dF62dc3aEd2cD6224193052Ce665DC18165841";
 const radiantLendingPoolAddress = "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1";
 const radiantLockZapPoolAddress = "0x8991C4C347420E476F1cf09C03abA224A76E2997";
 const multiFeeDistributionAddress = "0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE";
+const radiantRTokens = ["0xd69D402D1bDB9A2b8c3d88D98b9CEaf9e4Cd72d9",          "0x48a29E756CC1C097388f3B2f3b570ED270423b3d",          "0x0D914606f3424804FA1BbBE56CCC3416733acEC6",          "0x0dF5dfd95966753f01cb80E76dc20EA958238C46",          "0x42C248D137512907048021B30d9dA17f48B5b7B2",          "0x2dADe5b7df9DA3a7e1c9748d169Cd6dFf77e3d01"]
+
 // radiant-bsc
 const wbnbAddress = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 const radiantBscLockZapPoolAddress = '0x13Ef2A9e127aE8d9e9b863c7e375Ba68E1a42Ac6';
@@ -227,5 +229,6 @@ module.exports = {
   squidRouterProxyAddress,
   getSquidCrossChainContractCallCallData,
   wbnbAddress,
-  radiantBscLockZapPoolAddress
+  radiantBscLockZapPoolAddress,
+  radiantRTokens
 };

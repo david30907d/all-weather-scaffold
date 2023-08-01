@@ -20,7 +20,8 @@ const { fetch1InchSwapData,
     daiAddress,
     gDAIRewardPoolAddress,
     glpMarketPoolAddress,
-    getUserEthBalance
+    getUserEthBalance,
+    radiantRTokens
 } = require("./utils");
 let {currentTimestamp} = require("./utils");
 
@@ -114,7 +115,6 @@ describe("All Weather Protocol", function () {
           await mineBlocks(1000);
           const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
           await portfolioContract.connect(wallet).claim(randomWallet.address);
-          const radiantRTokens = ["0xd69D402D1bDB9A2b8c3d88D98b9CEaf9e4Cd72d9",          "0x48a29E756CC1C097388f3B2f3b570ED270423b3d",          "0x0D914606f3424804FA1BbBE56CCC3416733acEC6",          "0x0dF5dfd95966753f01cb80E76dc20EA958238C46",          "0x42C248D137512907048021B30d9dA17f48B5b7B2",          "0x2dADe5b7df9DA3a7e1c9748d169Cd6dFf77e3d01"]
           for (const claimableReward of claimableRewards) {
             for (const reward of claimableReward.claimableRewards) {
               if (radiantRTokens.includes(reward.token)) {
