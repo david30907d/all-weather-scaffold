@@ -100,8 +100,7 @@ contract RadiantArbitrumVault is AbstractVault {
       memory claimableRewards = getClaimableRewards();
     if (claimableRewards.length != 0) {
       multiFeeDistribution.getAllRewards();
-      _withdrawRTokenToReceiver();
-      _withdrawETHRewardToReceiver();
+      super.claimRewardsFromVaultToPortfolioVault(claimableRewards);
     }
     return claimableRewards;
   }
@@ -130,7 +129,7 @@ contract RadiantArbitrumVault is AbstractVault {
       );
   }
 
-  function _withdrawRTokenToReceiver() internal {
+  function withdrawRTokenToReceiver() public {
     for (uint256 i = 0; i < radiantRewardNativeTokenAddresses.length; i++) {
       try
         radiantLending.withdraw(
@@ -154,7 +153,7 @@ contract RadiantArbitrumVault is AbstractVault {
     }
   }
 
-  function _withdrawETHRewardToReceiver() internal {
+  function withdrawETHRewardToReceiver() public {
     IAToken aWETH = IAToken(
       radiantLending.getReserveData(address(weth)).aTokenAddress
     );
