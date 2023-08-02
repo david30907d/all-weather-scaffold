@@ -119,7 +119,7 @@ contract DpxArbitrumVault is AbstractVault {
     return claimableRewards;
   }
 
-  function totalLockedAssets() public view override returns (uint256) {
+  function totalLockedAssets() public pure override returns (uint256) {
     return 0;
   }
 

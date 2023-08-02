@@ -55,7 +55,7 @@ contract RadiantArbitrumVault is AbstractVault {
 
   function totalStakedButWithoutLockedAssets()
     public
-    view
+    pure
     override
     returns (uint256)
   {
@@ -129,13 +129,13 @@ contract RadiantArbitrumVault is AbstractVault {
       );
   }
 
-  function withdrawRTokenToReceiver() external {
+  function withdrawRTokenToReceiver(address payable receiver) external {
     for (uint256 i = 0; i < radiantRewardNativeTokenAddresses.length; i++) {
       try
         radiantLending.withdraw(
           radiantRewardNativeTokenAddresses[i],
           type(uint256).max,
-          msg.sender
+          receiver
         )
       returns (uint256 withdrawAmount) {
         require(
@@ -153,7 +153,7 @@ contract RadiantArbitrumVault is AbstractVault {
     }
   }
 
-  function withdrawETHRewardToReceiver() external {
+  function withdrawETHRewardToReceiver(address payable receiver) external {
     IAToken aWETH = IAToken(
       radiantLending.getReserveData(address(weth)).aTokenAddress
     );
@@ -161,7 +161,7 @@ contract RadiantArbitrumVault is AbstractVault {
     wethGateway.withdrawETH(
       address(radiantLending),
       type(uint256).max,
-      msg.sender
+      receiver
     );
   }
 
@@ -169,7 +169,7 @@ contract RadiantArbitrumVault is AbstractVault {
     IFeeDistribution.RewardData[] memory radiantRewardData,
     uint256 portfolioSharesInThisVault,
     uint256 totalVaultShares
-  ) internal view returns (IFeeDistribution.RewardData[] memory rewards) {
+  ) internal pure returns (IFeeDistribution.RewardData[] memory rewards) {
     for (uint256 i = 0; i < radiantRewardData.length; i++) {
       if (radiantRewardData[i].amount == 0) {
         continue;

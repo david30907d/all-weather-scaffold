@@ -369,8 +369,10 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
 
   function withdrawAllWrappedRewards(address payable receiver) external {
     // executed by user
-    RadiantArbitrumVault(radiantVaultAddr).withdrawRTokenToReceiver();
-    RadiantArbitrumVault(radiantVaultAddr).withdrawETHRewardToReceiver();
+    RadiantArbitrumVault(radiantVaultAddr).withdrawRTokenToReceiver(receiver);
+    RadiantArbitrumVault(radiantVaultAddr).withdrawETHRewardToReceiver(
+      receiver
+    );
   }
 
   function getClaimableRewards(
@@ -395,11 +397,16 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         rewardIdx++
       ) {
         address addressOfReward = claimableRewardsOfThisVault[rewardIdx].token;
-        // claimableRewardsOfThisVaultArr[rewardIdx] = IFeeDistribution
-        //   .RewardData({
-        //     token: addressOfReward,
-        //     amount: _getRewardAmount(owner, claimableRewardsOfThisVault[rewardIdx].amount, protocolNameOfThisVault, addressOfReward)
-        //   });
+        claimableRewardsOfThisVaultArr[rewardIdx] = IFeeDistribution
+          .RewardData({
+            token: addressOfReward,
+            amount: _getRewardAmount(
+              owner,
+              claimableRewardsOfThisVault[rewardIdx].amount,
+              protocolNameOfThisVault,
+              addressOfReward
+            )
+          });
       }
       totalClaimableRewards[vaultIdx] = ClaimableRewardOfAProtocol({
         protocol: protocolNameOfThisVault,
@@ -410,11 +417,11 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   }
 
   function _getRewardAmount(
-    address owner,
+    address payable owner,
     uint256 claimableRewardsAmountOfThisVault,
     string memory protocolNameOfThisVault,
     address addressOfReward
-  ) internal returns (uint256 rewardAmount) {
+  ) internal view returns (uint256) {
     uint256 rewardAmount;
     if (owner == address(this)) {
       rewardAmount = claimableRewardsAmountOfThisVault;
@@ -423,8 +430,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         balanceOf(owner) *
         (rewardPerShareZappedIn[protocolNameOfThisVault][addressOfReward] +
           _calculateRewardPerShareDuringThisPeriod(
-            protocolNameOfThisVault,
-            addressOfReward,
             claimableRewardsAmountOfThisVault
           ) -
           userRewardPerTokenPaid[owner][protocolNameOfThisVault][
@@ -448,16 +453,13 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       rewardPerShareZappedIn[protocolNameOfThisVault][
         addressOfReward
       ] += _calculateRewardPerShareDuringThisPeriod(
-        protocolNameOfThisVault,
-        addressOfReward,
         oneOfTheUnclaimedRewardsBelongsToThisPortfolio
       );
       userRewardsOfInvestedProtocols[msg.sender][protocolNameOfThisVault][
         addressOfReward
       ] += _calcualteUserEarnedBeforeThisUpdateAction(
         protocolNameOfThisVault,
-        addressOfReward,
-        oneOfTheUnclaimedRewardsBelongsToThisPortfolio
+        addressOfReward
       );
       userRewardPerTokenPaid[msg.sender][protocolNameOfThisVault][
         addressOfReward
@@ -467,8 +469,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
 
   function _calcualteUserEarnedBeforeThisUpdateAction(
     string memory protocolNameOfThisVault,
-    address addressOfReward,
-    uint256 oneOfTheUnclaimedRewardsBelongsToThisPortfolio
+    address addressOfReward
   ) public view returns (uint) {
     return
       (rewardPerShareZappedIn[protocolNameOfThisVault][addressOfReward] -
@@ -478,8 +479,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   }
 
   function _calculateRewardPerShareDuringThisPeriod(
-    string memory protocolNameOfThisVault,
-    address addressOfReward,
     uint256 oneOfTheUnclaimedRewardsBelongsToThisPortfolio
   ) internal view returns (uint) {
     if (totalSupply() == 0) {

@@ -32,7 +32,7 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     pendleBooster = IPendleBooster(0x4D32C8Ff2fACC771eC7Efc70d6A8468bC30C26bF);
   }
 
-  function totalLockedAssets() public view override returns (uint256) {
+  function totalLockedAssets() public pure override returns (uint256) {
     return 0;
   }
 
@@ -90,8 +90,8 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     //     output
     // );
     claim();
-    uint256 shares = super.redeem(shares, msg.sender, msg.sender);
-    return shares;
+    uint256 redeemShares = super.redeem(shares, msg.sender, msg.sender);
+    return redeemShares;
   }
 
   function claim()

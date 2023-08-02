@@ -34,9 +34,7 @@ contract EquilibriaGDAIVault is BaseEquilibriaVault {
     // swap weth to DAI with 1inch
     uint256 originalDaiBalance = DAI.balanceOf(address(this));
     SafeERC20.safeApprove(weth, oneInchAggregatorAddress, amount);
-    (bool succ, bytes memory data) = address(oneInchAggregatorAddress).call(
-      oneInchData
-    );
+    (bool succ, ) = address(oneInchAggregatorAddress).call(oneInchData);
     require(succ, "1inch failed to swap");
     // TODO(david): need to figure out how to decode
     // (uint256 returnAmount, uint256, uint256) = abi.decode(data, (uint256, uint256, uint256));
