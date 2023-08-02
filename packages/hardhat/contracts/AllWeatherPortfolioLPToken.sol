@@ -57,6 +57,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   }
 
   IERC20 public immutable asset;
+  uint256 public balanceOfProtocolFee;
   address public radiantVaultAddr;
   address payable public dpxVaultAddr;
   address public equilibriaVaultAddr;
@@ -163,11 +164,14 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       address(this),
       depositData.amount
     );
+    uint256 amountAfterDeductingFee = _getAmountAfterDeductingFee(
+      depositData.amount
+    );
 
     for (uint256 idx = 0; idx < vaults.length; idx++) {
       bytes32 bytesOfvaultName = keccak256(bytes(vaults[idx].name()));
       uint256 zapInAmountForThisVault = Math.mulDiv(
-        depositData.amount,
+        amountAfterDeductingFee,
         portfolioAllocation[vaults[idx].name()],
         100
       );
@@ -364,6 +368,10 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     return totalClaimableRewards;
   }
 
+  function claimProtocolFee() external onlyOwner {
+    SafeERC20.safeTransfer(asset, msg.sender, balanceOfProtocolFee);
+  }
+
   function rescueFunds(
     address tokenAddress,
     uint256 amount
@@ -449,6 +457,14 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         oneOfTheUnclaimedRewardsBelongsToThisPortfolio,
         totalSupply()
       );
+  }
+
+  function _getAmountAfterDeductingFee(
+    uint256 depositAmount
+  ) internal returns (uint256) {
+    uint256 protocolFee = Math.mulDiv(depositAmount, 3, 1000);
+    balanceOfProtocolFee += protocolFee;
+    return depositAmount - protocolFee;
   }
 
   // solhint-disable-next-line no-empty-blocks
