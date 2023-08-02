@@ -99,12 +99,12 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         payable(address(this))
       );
     for (
-      uint vaultIdx = 0;
+      uint256 vaultIdx = 0;
       vaultIdx < totalClaimableRewards.length;
       vaultIdx++
     ) {
       for (
-        uint rewardIdxOfThisVault = 0;
+        uint256 rewardIdxOfThisVault = 0;
         rewardIdxOfThisVault <
         totalClaimableRewards[vaultIdx].claimableRewards.length;
         rewardIdxOfThisVault++
@@ -184,31 +184,29 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         bytesOfvaultName == keccak256(bytes("AllWeatherLP-SushSwap-DpxETH"))
       ) {
         require(
-          _depositDpxLP(
-            idx,
+          vaults[idx].deposit(
             zapInAmountForThisVault,
             depositData.oneInchDataDpx
-          ),
+          ) > 0,
           "Buying Dpx LP token failed"
         );
       } else if (
         bytesOfvaultName == keccak256(bytes("AllWeatherLP-RadiantArbitrum-DLP"))
       ) {
         require(
-          _depositRadiantLP(idx, zapInAmountForThisVault),
+          vaults[idx].deposit(zapInAmountForThisVault) > 0,
           "Buying Radiant LP token failed"
         );
       } else if (
         bytesOfvaultName == keccak256(bytes("AllWeatherLP-Equilibria-GLP"))
       ) {
         require(
-          _depositEquilibriaGLP(
-            idx,
+          vaults[idx].deposit(
             zapInAmountForThisVault,
             depositData.glpMinLpOut,
             depositData.glpGuessPtReceivedFromSy,
             depositData.glpInput
-          ),
+          ) > 0,
           "Zap Into Equilibria GLP failed"
         );
       } else if (
@@ -220,14 +218,13 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         // since there's 2 steps: weth -> dai -> gdai
         // so slippage is the culprit to get this error
         require(
-          _depositEquilibriaGDAI(
-            idx,
+          vaults[idx].deposit(
             zapInAmountForThisVault,
             depositData.gdaiOneInchDataGDAI,
             depositData.gdaiMinLpOut,
             depositData.gdaiGuessPtReceivedFromSy,
             depositData.gdaiInput
-          ),
+          ) > 0,
           "Zap Into Equilibria GDAI failed"
         );
       }
@@ -239,55 +236,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       depositData.receiver,
       SafeMath.div(depositData.amount, unitOfShares)
     );
-  }
-
-  function _depositDpxLP(
-    uint256 idx,
-    uint256 zapInAmountForThisVault,
-    bytes calldata oneInchDataDpx
-  ) internal returns (bool) {
-    return vaults[idx].deposit(zapInAmountForThisVault, oneInchDataDpx) > 0;
-  }
-
-  function _depositRadiantLP(
-    uint256 idx,
-    uint256 zapInAmountForThisVault
-  ) internal returns (bool) {
-    return vaults[idx].deposit(zapInAmountForThisVault) > 0;
-  }
-
-  function _depositEquilibriaGLP(
-    uint256 idx,
-    uint256 zapInAmountForThisVault,
-    uint256 glpMinLpOut,
-    IPendleRouter.ApproxParams calldata glpGuessPtReceivedFromSy,
-    IPendleRouter.TokenInput calldata glpInput
-  ) internal returns (bool) {
-    return
-      vaults[idx].deposit(
-        zapInAmountForThisVault,
-        glpMinLpOut,
-        glpGuessPtReceivedFromSy,
-        glpInput
-      ) > 0;
-  }
-
-  function _depositEquilibriaGDAI(
-    uint256 idx,
-    uint256 zapInAmountForThisVault,
-    bytes calldata gdaiOneInchDataGDAI,
-    uint256 gdaiMinLpOut,
-    IPendleRouter.ApproxParams calldata gdaiGuessPtReceivedFromSy,
-    IPendleRouter.TokenInput calldata gdaiInput
-  ) internal returns (bool) {
-    return
-      vaults[idx].deposit(
-        zapInAmountForThisVault,
-        gdaiOneInchDataGDAI,
-        gdaiMinLpOut,
-        gdaiGuessPtReceivedFromSy,
-        gdaiInput
-      ) > 0;
   }
 
   function redeem(
@@ -337,7 +285,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       return;
     }
     for (
-      uint vaultIdx = 0;
+      uint256 vaultIdx = 0;
       vaultIdx < totalClaimableRewards.length;
       vaultIdx++
     ) {
@@ -345,7 +293,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         .protocol;
       vaults[vaultIdx].claim();
       for (
-        uint rewardIdxOfThisVault = 0;
+        uint256 rewardIdxOfThisVault = 0;
         rewardIdxOfThisVault <
         totalClaimableRewards[vaultIdx].claimableRewards.length;
         rewardIdxOfThisVault++
@@ -416,6 +364,18 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     return totalClaimableRewards;
   }
 
+  function rescueFunds(
+    address tokenAddress,
+    uint256 amount
+  ) external onlyOwner {
+    require(tokenAddress != address(0), "Invalid token address");
+    SafeERC20.safeTransfer(IERC20(tokenAddress), owner(), amount);
+  }
+
+  function rescueETH(uint256 amount) external onlyOwner {
+    payable(owner()).transfer(amount);
+  }
+
   function _getRewardAmount(
     address payable owner,
     uint256 claimableRewardsAmountOfThisVault,
@@ -470,7 +430,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   function _calcualteUserEarnedBeforeThisUpdateAction(
     string memory protocolNameOfThisVault,
     address addressOfReward
-  ) public view returns (uint) {
+  ) public view returns (uint256) {
     return
       (rewardPerShareZappedIn[protocolNameOfThisVault][addressOfReward] -
         userRewardPerTokenPaid[msg.sender][protocolNameOfThisVault][
@@ -480,7 +440,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
 
   function _calculateRewardPerShareDuringThisPeriod(
     uint256 oneOfTheUnclaimedRewardsBelongsToThisPortfolio
-  ) internal view returns (uint) {
+  ) internal view returns (uint256) {
     if (totalSupply() == 0) {
       return 0;
     }
@@ -489,18 +449,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         oneOfTheUnclaimedRewardsBelongsToThisPortfolio,
         totalSupply()
       );
-  }
-
-  function rescueFunds(
-    address tokenAddress,
-    uint256 amount
-  ) external onlyOwner {
-    require(tokenAddress != address(0), "Invalid token address");
-    IERC20(tokenAddress).safeTransfer(owner(), amount);
-  }
-
-  function rescueETH(uint256 amount) external onlyOwner {
-    payable(owner()).transfer(amount);
   }
 
   // solhint-disable-next-line no-empty-blocks

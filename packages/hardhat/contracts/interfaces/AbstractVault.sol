@@ -207,7 +207,7 @@ abstract contract AbstractVault is ERC4626, Ownable {
     uint256 amount
   ) external onlyOwner {
     require(tokenAddress != address(0), "Invalid token address");
-    IERC20(tokenAddress).safeTransfer(owner(), amount);
+    SafeERC20.safeTransfer(IERC20(tokenAddress), owner(), amount);
   }
 
   function rescueETH(uint256 amount) external onlyOwner {
