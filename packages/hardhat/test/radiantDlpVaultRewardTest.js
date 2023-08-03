@@ -14,6 +14,7 @@ const { fetch1InchSwapData, getUserEthBalance, sushiSwapDpxLpTokenAddress, sushi
   daiAddress,
   dpxAmount,
   simulateAYearLater,
+  radiantRTokens,
 } = require("./utils");
 let {currentTimestamp} = require("./utils");
 
@@ -95,33 +96,34 @@ describe("All Weather Protocol", function () {
       await simulateAYearLater();
 
       const randomWallet = ethers.Wallet.createRandom();
-      const nativeRewardTokens = await radiantVault.getRadiantRewardNativeTokenAddresses();
       let balancesBeforeClaim = [];
-      for (const nativeRewardToken of nativeRewardTokens) {
-        const nativeToken = await ethers.getContractAt("MockDAI", nativeRewardToken);
-        const balanceBeforeClaim = await nativeToken.balanceOf(randomWallet.address);
+      for (const rToken of radiantRTokens) {
+        const rTokenContract = await ethers.getContractAt("MockDAI", rToken);
+        const balanceBeforeClaim = await rTokenContract.balanceOf(randomWallet.address);
         balancesBeforeClaim.push(balanceBeforeClaim);
         expect(balanceBeforeClaim).to.equal(0);
       }
-      const ethBalanceBeforeClaim = await getUserEthBalance(randomWallet.address);
-      expect(ethBalanceBeforeClaim).to.equal(0);
 
       const claimableRewards = await portfolioContract.connect(wallet).getClaimableRewards(wallet.address);
       expect(claimableRewards[1].protocol).to.equal("AllWeatherLP-RadiantArbitrum-DLP");
       // Error: VM Exception while processing transaction: reverted with reason string 'SafeERC20: low-level call failed'
       // means you probably transfer a pretty weird token
       await (await portfolioContract.connect(wallet).claim(randomWallet.address, { gasLimit: 30000000 })).wait();
-      for (const nativeRewardToken of nativeRewardTokens) {
-        const nativeToken = await ethers.getContractAt("MockDAI", nativeRewardToken);
-        const balanceAfterClaim = await nativeToken.balanceOf(randomWallet.address);
+      for (const rToken of radiantRTokens) {
+        const rTokenContract = await ethers.getContractAt("MockDAI", rToken);
+        const balanceAfterClaim = await rTokenContract.balanceOf(randomWallet.address);
         expect(balanceAfterClaim).to.gt(balancesBeforeClaim.pop());
       }
-      const ethBalanceAfterClaim = await getUserEthBalance(randomWallet.address);
-      expect(ethBalanceAfterClaim).to.gt(ethBalanceBeforeClaim);
     });
     it("Should be able to check claimable rewards", async function () {
       const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
-      expect(claimableRewards).to.deep.equal([]);
+      const claimableRewardsTestData = [
+        ["AllWeatherLP-SushSwap-DpxETH", []],
+        ["AllWeatherLP-RadiantArbitrum-DLP", []],
+        ["AllWeatherLP-Equilibria-GLP", []],
+        ["AllWeatherLP-Equilibria-GDAI", []]
+      ];
+      expect(claimableRewards).to.deep.equal(claimableRewardsTestData);
     })
   });
 });

@@ -319,14 +319,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     }
   }
 
-  function withdrawAllWrappedRewards(address payable receiver) external {
-    // executed by user
-    RadiantArbitrumVault(radiantVaultAddr).withdrawRTokenToReceiver(receiver);
-    RadiantArbitrumVault(radiantVaultAddr).withdrawETHRewardToReceiver(
-      receiver
-    );
-  }
-
   function getClaimableRewards(
     address payable owner
   ) public view returns (ClaimableRewardOfAProtocol[] memory) {

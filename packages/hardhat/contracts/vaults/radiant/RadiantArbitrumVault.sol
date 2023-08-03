@@ -129,42 +129,6 @@ contract RadiantArbitrumVault is AbstractVault {
       );
   }
 
-  function withdrawRTokenToReceiver(address payable receiver) external {
-    for (uint256 i = 0; i < radiantRewardNativeTokenAddresses.length; i++) {
-      try
-        radiantLending.withdraw(
-          radiantRewardNativeTokenAddresses[i],
-          type(uint256).max,
-          receiver
-        )
-      returns (uint256 withdrawAmount) {
-        require(
-          withdrawAmount > 0,
-          string(
-            abi.encodePacked(
-              "failed to withdraw rToken ",
-              radiantRewardNativeTokenAddresses[i]
-            )
-          )
-        );
-      } catch (bytes memory /* error */) {
-        emit WithdrawFailed(radiantRewardNativeTokenAddresses[i]);
-      }
-    }
-  }
-
-  function withdrawETHRewardToReceiver(address payable receiver) external {
-    IAToken aWETH = IAToken(
-      radiantLending.getReserveData(address(weth)).aTokenAddress
-    );
-    SafeERC20.safeApprove(aWETH, address(wethGateway), type(uint256).max);
-    wethGateway.withdrawETH(
-      address(radiantLending),
-      type(uint256).max,
-      receiver
-    );
-  }
-
   function _calculateClaimableRewards(
     IFeeDistribution.RewardData[] memory radiantRewardData,
     uint256 portfolioSharesInThisVault,
