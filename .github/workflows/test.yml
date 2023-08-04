@@ -34,3 +34,4 @@ jobs:
           BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/equilibriaGDAI.js;
           BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/allWeatherPortfolioTest.js
           BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/allWeatherPortfolioRewardTest.js
+          BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/updateRewardsTest.js

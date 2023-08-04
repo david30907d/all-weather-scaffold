@@ -119,6 +119,8 @@ describe("All Weather Protocol", function () {
       await simulateAYearLater();
 
       // withdraw
+      // Error: VM Exception while processing transaction: reverted with reason string 'SafeERC20: low-level call failed'
+      // it means out of gas
       await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, fakePendleZapOut, { gasLimit: gasLimit })).wait();
       const radiantLockedDlpAfterRedeem = await radiantVault.totalAssets();
       expect(radiantLockedDlpAfterRedeem).to.equal(0);
