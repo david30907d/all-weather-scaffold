@@ -10,7 +10,6 @@ import "../radiant/IFeeDistribution.sol";
 import "../utils/IWETH.sol";
 
 import "../pendle/IPendleRouter.sol";
-import "hardhat/console.sol";
 
 abstract contract AbstractVault is ERC4626, Ownable {
   using SafeERC20 for IERC20;

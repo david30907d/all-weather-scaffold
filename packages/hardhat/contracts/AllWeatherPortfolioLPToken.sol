@@ -23,7 +23,6 @@ import "./pendle/IPendleRouter.sol";
 import "./vaults/equilibria/EquilibriaGlpVault.sol";
 import "./vaults/equilibria/EquilibriaGDAIVault.sol";
 import "./interfaces/AbstractVault.sol";
-import "hardhat/console.sol";
 
 contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   using SafeERC20 for IERC20;

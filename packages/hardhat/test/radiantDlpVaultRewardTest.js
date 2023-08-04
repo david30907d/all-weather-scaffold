@@ -15,6 +15,7 @@ const { fetch1InchSwapData, getUserEthBalance, sushiSwapDpxLpTokenAddress, sushi
   dpxAmount,
   simulateAYearLater,
   radiantRTokens,
+  end2endTestingAmount
 } = require("./utils");
 let {currentTimestamp} = require("./utils");
 
@@ -27,22 +28,23 @@ let oneInchSwapDataForGDAI;
 let pendleGLPZapInData;
 let pendleGDAIZapInData;
 
-async function deposit() {
+async function deposit(passingInWallet=wallet) {
+  await (await weth.connect(passingInWallet).approve(portfolioContract.address, end2endTestingAmount, { gasLimit: 30000000 })).wait();
   const depositData = {
-    amount: radiantAmount,
-    receiver: wallet.address,
-    oneInchDataDpx: oneInchSwapDataForDpx.tx.data,
-    glpMinLpOut: pendleGLPZapInData[2],
-    glpGuessPtReceivedFromSy: pendleGLPZapInData[3],
-    glpInput: pendleGLPZapInData[4],
-    gdaiMinLpOut: pendleGDAIZapInData[2],
-    gdaiGuessPtReceivedFromSy: pendleGDAIZapInData[3],
-    gdaiInput: pendleGDAIZapInData[4],
-    gdaiOneInchDataGDAI: oneInchSwapDataForGDAI.tx.data
+      amount: end2endTestingAmount,
+      receiver: passingInWallet.address,
+      oneInchDataDpx: oneInchSwapDataForDpx.tx.data,
+      glpMinLpOut: pendleGLPZapInData[2],
+      glpGuessPtReceivedFromSy: pendleGLPZapInData[3],
+      glpInput: pendleGLPZapInData[4],
+      gdaiMinLpOut: pendleGDAIZapInData[2],
+      gdaiGuessPtReceivedFromSy: pendleGDAIZapInData[3],
+      gdaiInput: pendleGDAIZapInData[4],
+      gdaiOneInchDataGDAI: oneInchSwapDataForGDAI.tx.data
+    }
+    return await (await portfolioContract.connect(passingInWallet).deposit(depositData, { gasLimit: 30000000 })).wait();
   }
-  return await (await portfolioContract.connect(wallet).deposit(depositData)).wait();
-}
-
+  
 describe("All Weather Protocol", function () {
   beforeEach(async () => {
     this.timeout(120000); // Set timeout to 120 seconds
@@ -88,9 +90,9 @@ describe("All Weather Protocol", function () {
 
   describe("Portfolio LP Contract Test", function () {
     it("Should be able to claim reward", async function () {
-      this.timeout(120000); // Set timeout to 120 seconds
-      await deposit();
-      await mineBlocks(100); // Mine 100 blocks
+      this.timeout(240000); // Set timeout to 120 seconds
+      await deposit(wallet);
+      await mineBlocks(20000); // Mine 100 blocks
 
       currentTimestamp += 12 * 31 * 24 * 60 * 60; // Increment timestamp
       await simulateAYearLater();
@@ -104,7 +106,7 @@ describe("All Weather Protocol", function () {
         expect(balanceBeforeClaim).to.equal(0);
       }
 
-      const claimableRewards = await portfolioContract.connect(wallet).getClaimableRewards(wallet.address);
+      const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
       expect(claimableRewards[1].protocol).to.equal("AllWeatherLP-RadiantArbitrum-DLP");
       // Error: VM Exception while processing transaction: reverted with reason string 'SafeERC20: low-level call failed'
       // means you probably transfer a pretty weird token
