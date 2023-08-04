@@ -22,6 +22,7 @@ const { fetch1InchSwapData,
   daiAddress,
   gDAIRewardPoolAddress,
   glpMarketPoolAddress,
+  claimableRewardsTestData
 } = require("./utils");
 
 
@@ -168,7 +169,7 @@ describe("All Weather Protocol", function () {
     })
     it("Should be able to check claimable rewards", async function () {
       const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
-      expect(claimableRewards).to.deep.equal([]);
+      expect(claimableRewards).to.deep.equal(claimableRewardsTestData);
     })
   });
 });

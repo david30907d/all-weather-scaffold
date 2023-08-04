@@ -234,11 +234,14 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       }
     }
 
-    _mint(depositData.receiver, SafeMath.div(depositData.amount, unitOfShares));
+    _mint(
+      depositData.receiver,
+      SafeMath.div(amountAfterDeductingFee, unitOfShares)
+    );
     emit Transfer(
       address(0),
       depositData.receiver,
-      SafeMath.div(depositData.amount, unitOfShares)
+      SafeMath.div(amountAfterDeductingFee, unitOfShares)
     );
   }
 

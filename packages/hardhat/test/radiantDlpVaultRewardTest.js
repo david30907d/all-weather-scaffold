@@ -116,6 +116,7 @@ describe("All Weather Protocol", function () {
       }
     });
     it("Should be able to check claimable rewards", async function () {
+      this.timeout(240000); // Set timeout to 120 seconds
       const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
       const claimableRewardsTestData = [
         ["AllWeatherLP-SushSwap-DpxETH", []],

@@ -133,6 +133,13 @@ const gasLimit = 30000000;
 const radiantAmount = ethers.utils.parseUnits('0.01', 18);
 const dpxAmount = ethers.utils.parseUnits('0.001', 18);
 const end2endTestingAmount = ethers.utils.parseUnits('0.1', 18);
+const amountAfterChargingFee = end2endTestingAmount.mul(997).div(1000);
+const claimableRewardsTestData = [
+  ["AllWeatherLP-SushSwap-DpxETH", []],
+  ["AllWeatherLP-RadiantArbitrum-DLP", []],
+  ["AllWeatherLP-Equilibria-GLP", []],
+  ["AllWeatherLP-Equilibria-GDAI", []]
+];
 
 // sushi dpx
 const sushiSwapDpxLpTokenAddress = "0x0C1Cf6883efA1B496B01f654E247B9b419873054";
@@ -230,5 +237,7 @@ module.exports = {
   getSquidCrossChainContractCallCallData,
   wbnbAddress,
   radiantBscLockZapPoolAddress,
-  radiantRTokens
+  radiantRTokens,
+  claimableRewardsTestData,
+  amountAfterChargingFee
 };
