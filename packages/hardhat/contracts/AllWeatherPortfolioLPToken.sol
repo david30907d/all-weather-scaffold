@@ -242,12 +242,21 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     );
   }
 
+  function redeemAndClaim(
+    uint256 shares,
+    address payable receiver,
+    IPendleRouter.TokenOutput calldata output
+  ) public updateRewards {
+    redeem(shares, receiver, output);
+  }
+
   function redeem(
     uint256 shares,
     address payable receiver,
     IPendleRouter.TokenOutput calldata output
   ) public updateRewards {
     require(shares <= totalSupply(), "Shares exceed total supply");
+    claim(receiver);
     for (uint256 i = 0; i < vaults.length; i++) {
       uint256 vaultShares = Math.mulDiv(
         vaults[i].balanceOf(address(this)),
@@ -295,7 +304,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     ) {
       string memory protocolNameOfThisVault = totalClaimableRewards[vaultIdx]
         .protocol;
-      vaults[vaultIdx].claim();
       for (
         uint256 rewardIdxOfThisVault = 0;
         rewardIdxOfThisVault <

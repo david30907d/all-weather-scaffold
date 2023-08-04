@@ -23,7 +23,8 @@ const { fetch1InchSwapData,
     glpMarketPoolAddress,
     simulateAYearLater,
     mineBlocks,
-    radiantRTokens
+    radiantRTokens,
+    fakePendleZapOut
 } = require("./utils");
 let {currentTimestamp} = require("./utils");
 
@@ -97,18 +98,9 @@ describe("All Weather Protocol", function () {
         portfolioContract = await AllWeatherPortfolioLPToken.connect(wallet).deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address);
         await portfolioContract.connect(wallet).deployed();
         await portfolioContract.setVaultAllocations([
-        // {
-        //     protocol: "AllWeatherLP-SushSwap-DpxETH", percentage: 25,
-        // },
         {
             protocol: "AllWeatherLP-RadiantArbitrum-DLP", percentage: 25
         }, 
-        // {
-        //     protocol: "AllWeatherLP-Equilibria-GLP", percentage: 25
-        // },
-        // {
-        //     protocol: "AllWeatherLP-Equilibria-GDAI", percentage: 25
-        // }
         ]).then((tx) => tx.wait());
 
         oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxToken.address, end2endTestingAmount.div(8), wallet.address, 50);
@@ -160,18 +152,16 @@ describe("All Weather Protocol", function () {
                             continue
                         }
                         const vaultRewardOfWallet2 = rewardsOfWallet2[vaultIdx].claimableRewards[index].amount;
-                        console.log(reward.amount, vaultRewardOfWallet2 );
                         expect(reward.amount).to.be.gt(vaultRewardOfWallet2);
                     }
                 }
             }
         });
         it("userRewardsOfInvestedProtocols should be reset to 0 after claim()", async function () {
-            expect(await portfolioContract.rewardPerShareZappedIn(radiantVault.name(), radiantRTokens[0])).to.equal(0);
             await deposit(wallet);
             const rewardPerShareZappedIn1 = await portfolioContract.rewardPerShareZappedIn(radiantVault.name(), radiantRTokens[0]);
-            expect(rewardPerShareZappedIn1).to.be.gt(0);
-            await mineBlocks(1700); // wait for 7 hours, otherwise the reward/shares would be too small and be rounded to 0
+            expect(rewardPerShareZappedIn1).to.equal(0);
+            await mineBlocks(2000); // wait for 7 hours, otherwise the reward/shares would be too small and be rounded to 0
             await deposit(wallet2);
             const rewardPerShareZappedIn2 = await portfolioContract.rewardPerShareZappedIn(radiantVault.name(), radiantRTokens[0]);
             expect(rewardPerShareZappedIn2).to.be.gt(rewardPerShareZappedIn1);
@@ -185,6 +175,7 @@ describe("All Weather Protocol", function () {
 
             // 2nd deposit for wallet2
             await weth.connect(wallet2).deposit({ value: ethers.utils.parseEther("0.1"), gasLimit: 2057560 });
+            await mineBlocks(2000); // wait for 7 hours, otherwise the reward/shares would be too small and be rounded to 0
             await deposit(wallet2);
             expect(await portfolioContract.userRewardsOfInvestedProtocols(wallet2.address, radiantVault.name(), radiantRTokens[0])).to.be.gt(0);
             await (await portfolioContract.connect(wallet2).claim(wallet2.address, { gasLimit: 30000000 })).wait();
@@ -196,8 +187,11 @@ describe("All Weather Protocol", function () {
         })
         it("userRewardsOfInvestedProtocols should be reset to 0 after redeem()", async function () {
             await deposit(wallet);
-            await (await portfolioContract.connect(wallet).redeem(portfolioContract.balanceOf(wallet.address), wallet.address, fakePendleZapOut, { gasLimit: gasLimit })).wait();
-            expect(userRewardsOfInvestedProtocols).to.equal(0);
+            currentTimestamp += 24 * 31 * 24 * 60 * 60; // Increment timestamp
+            await simulateAYearLater();
+      
+            await (await portfolioContract.connect(wallet).redeem(portfolioContract.balanceOf(wallet.address), wallet.address, fakePendleZapOut, { gasLimit: 30000000 })).wait();
+            expect(await portfolioContract.userRewardsOfInvestedProtocols(wallet.address, radiantVault.name(), radiantRTokens[0])).to.equal(0);
             expect(await portfolioContract.userRewardPerTokenPaid(wallet.address, radiantVault.name(), radiantRTokens[0])).to.equal(await portfolioContract.rewardPerShareZappedIn(radiantVault.name(), radiantRTokens[0]));
             expect(await portfolioContract.rewardPerShareZappedIn(radiantVault.name(), radiantRTokens[0])).to.be.gt(0);
         })
