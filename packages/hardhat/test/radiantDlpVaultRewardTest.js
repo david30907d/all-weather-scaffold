@@ -15,7 +15,8 @@ const { fetch1InchSwapData, getUserEthBalance, sushiSwapDpxLpTokenAddress, sushi
   simulateAYearLater,
   radiantRTokens,
   end2endTestingAmount,
-  amountAfterChargingFee
+  amountAfterChargingFee,
+  gasLimit
 } = require("./utils");
 let {currentTimestamp} = require("./utils");
 
