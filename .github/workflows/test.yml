@@ -29,9 +29,9 @@ jobs:
           DECIMAL_BLOCK_NUMBER=$(printf "%d" "$block_number")
           # BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/dpxArbitrumVaultTest.js;
           # BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/radiantDlpVaultTest.js;
-          BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/radiantDlpVaultRewardTest.js;
-          BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/equilibriaGLP.js;
-          BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/equilibriaGDAI.js;
-          BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/allWeatherPortfolioTest.js
-          BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/allWeatherPortfolioRewardTest.js
-          BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/updateRewardsTest.js
+          # BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/radiantDlpVaultRewardTest.js;
+          BLOCK_NUMBER=118310681 yarn test test/equilibriaGLP.js;
+          BLOCK_NUMBER=118310681 yarn test test/equilibriaGDAI.js;
+          BLOCK_NUMBER=118310681 yarn test test/allWeatherPortfolioTest.js
+          BLOCK_NUMBER=118310681 yarn test test/allWeatherPortfolioRewardTest.js
+          BLOCK_NUMBER=118310681 yarn test test/updateRewardsTest.js
