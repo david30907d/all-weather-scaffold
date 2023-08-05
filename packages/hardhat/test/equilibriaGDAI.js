@@ -70,7 +70,7 @@ describe("All Weather Protocol", function () {
     dGDAIRewardPool = await ethers.getContractAt("IERC20", gDAIRewardPoolAddress);
     radiantLendingPool = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
     multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
-    await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit: 2057560 });
+    await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit });
     
     const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
     radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLendingPoolAddress);
@@ -131,7 +131,7 @@ describe("All Weather Protocol", function () {
       }
       const pendleZapOutData = await getPendleZapOutData(42161, gDAIMarketPoolAddress, daiToken.address, shares, 1);
       // // withdraw
-      await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, pendleZapOutData[3], { gasLimit: 4675600 })).wait();
+      await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, pendleZapOutData[3], { gasLimit })).wait();
       expect(await pendleGDAIMarketLPT.balanceOf(wallet.address)).to.equal(shares);
       expect(await equilibriaGDAIVault.totalAssets()).to.equal(0);
     });

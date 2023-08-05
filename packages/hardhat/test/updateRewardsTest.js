@@ -75,8 +75,8 @@ describe("All Weather Protocol", function () {
         dGDAIRewardPool = await ethers.getContractAt("IERC20", gDAIRewardPoolAddress);
         radiantLendingPool = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
         multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
-        await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit: 2057560 });
-        await weth.connect(wallet2).deposit({ value: ethers.utils.parseEther("0.1"), gasLimit: 2057560 });
+        await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit });
+        await weth.connect(wallet2).deposit({ value: ethers.utils.parseEther("0.1"), gasLimit });
 
         const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
         radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLendingPoolAddress);
@@ -174,7 +174,7 @@ describe("All Weather Protocol", function () {
             expect(await portfolioContract.userRewardsOfInvestedProtocols(wallet2.address, radiantVault.name(), radiantRTokens[0])).to.equal(0);
 
             // 2nd deposit for wallet2
-            await weth.connect(wallet2).deposit({ value: ethers.utils.parseEther("0.1"), gasLimit: 2057560 });
+            await weth.connect(wallet2).deposit({ value: ethers.utils.parseEther("0.1"), gasLimit });
             await mineBlocks(2000); // wait for 7 hours, otherwise the reward/shares would be too small and be rounded to 0
             await deposit(wallet2);
             expect(await portfolioContract.userRewardsOfInvestedProtocols(wallet2.address, radiantVault.name(), radiantRTokens[0])).to.be.gt(0);

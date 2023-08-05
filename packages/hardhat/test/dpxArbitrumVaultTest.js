@@ -39,7 +39,7 @@ async function deposit() {
       gdaiInput: pendleGDAIZapInData[4],
       gdaiOneInchDataGDAI: oneInchSwapDataForGDAI.tx.data
   }
-  return await (await portfolioContract.connect(wallet).deposit(depositData, { gasLimit: 30000000 })).wait();
+  return await (await portfolioContract.connect(wallet).deposit(depositData, { gasLimit })).wait();
 }
 
 describe("All Weather Protocol", function () {
@@ -76,10 +76,10 @@ describe("All Weather Protocol", function () {
     const AllWeatherPortfolioLPToken = await ethers.getContractFactory("AllWeatherPortfolioLPToken");
     portfolioContract = await AllWeatherPortfolioLPToken.connect(wallet).deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address);
     await portfolioContract.connect(wallet).deployed();
-    await portfolioContract.setVaultAllocations([{protocol: "AllWeatherLP-SushSwap-DpxETH", percentage: 100}], { gasLimit: 1057560 }).then((tx) => tx.wait());
+    await portfolioContract.setVaultAllocations([{protocol: "AllWeatherLP-SushSwap-DpxETH", percentage: 100}], { gasLimit }).then((tx) => tx.wait());
 
-    await (await weth.connect(wallet).approve(portfolioContract.address, end2endTestingAmount, { gasLimit: gasLimit })).wait();
-    await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit: 2057560 });
+    await (await weth.connect(wallet).approve(portfolioContract.address, end2endTestingAmount, { gasLimit })).wait();
+    await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit });
 
     oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address,
       dpxTokenAddress,
@@ -141,7 +141,7 @@ describe("All Weather Protocol", function () {
           expect(await dpxToken.balanceOf(dpxVault.address)).to.equal(0);
 
           // check dpxSLP balance
-          await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, fakePendleZapOut, { gasLimit: gasLimit })).wait();
+          await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, fakePendleZapOut, { gasLimit })).wait();
           expect((await miniChefV2.userInfo(sushiPid, dpxVault.address))[0]).to.equal(0);
           expect(await dpxSLP.balanceOf(dpxVault.address)).to.equal(0);
           expect(await dpxSLP.balanceOf(wallet.address)).to.equal(decodedEvent.shares);

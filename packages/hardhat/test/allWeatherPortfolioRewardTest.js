@@ -48,7 +48,7 @@ async function deposit() {
     gdaiInput: pendleGDAIZapInData[4],
     gdaiOneInchDataGDAI: oneInchSwapDataForGDAI.tx.data
   }
-  return await (await portfolioContract.connect(wallet).deposit(depositData, { gasLimit: 30000000 })).wait();
+  return await (await portfolioContract.connect(wallet).deposit(depositData, { gasLimit })).wait();
 }
 
 describe("All Weather Protocol", function () {
@@ -68,7 +68,7 @@ describe("All Weather Protocol", function () {
         dGDAIRewardPool = await ethers.getContractAt("IERC20", gDAIRewardPoolAddress);
         radiantLendingPool = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
         multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
-        await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit: 2057560 });
+        await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit: gasLimit });
 
         const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
         radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLendingPoolAddress);

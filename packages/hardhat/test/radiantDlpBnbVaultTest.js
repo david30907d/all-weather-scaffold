@@ -78,7 +78,7 @@ describe("All Weather Protocol", function () {
     radiantLendingPool = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
     radiantLockZap = await ethers.getContractAt("ILockZap", radiantLockZapPoolAddress);
     multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
-    await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("5"), gasLimit: 2057560 });
+    await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("5"), gasLimit });
 
     const approveRadiantTx  = await wbnb.populateTransaction.approve(radiantBscLockZapPoolAddress, radiantAmount);
     const radiantTx  = await radiantLockZap.populateTransaction.zap(false, radiantAmount, 0, 3);
@@ -120,7 +120,7 @@ describe("All Weather Protocol", function () {
     portfolioContract = await AllWeatherPortfolioLPToken.connect(wallet).deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address);
     await portfolioContract.connect(wallet).deployed();
     await portfolioContract.setVaultAllocations([{protocol: "AllWeatherLP-Equilibria-GDAI", percentage: 100}]).then((tx) => tx.wait());
-    await (await weth.connect(wallet).approve(portfolioContract.address, radiantAmount, { gasLimit: gasLimit })).wait();
+    await (await weth.connect(wallet).approve(portfolioContract.address, radiantAmount, { gasLimit })).wait();
     console.log(squidCallData.route.transactionRequest.data)
     await portfolioContract.connect(wallet).test(radiantAmount, squidCallData.route.transactionRequest.data).then((tx) => tx.wait());
     // oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount.div(2), wallet.address, 50);
