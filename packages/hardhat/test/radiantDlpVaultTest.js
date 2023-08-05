@@ -85,7 +85,7 @@ describe("All Weather Protocol", function () {
 
 
     await (await weth.connect(wallet).approve(portfolioContract.address, end2endTestingAmount, { gasLimit: 2057560 })).wait();
-    await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit: 2057560 });
+    await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit: 2057560 }).then((tx) => tx.wait());
 
     oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxTokenAddress, amountAfterChargingFee.div(2), wallet.address, 50);
     oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, amountAfterChargingFee, wallet.address, 50);
