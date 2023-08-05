@@ -106,11 +106,12 @@ describe("All Weather Protocol", function () {
       for (const event of receipt.events) {
         if (event.topics.includes(equilibriaGlpVault.interface.getEventTopic('Deposit'))) {
           const decodedEvent = equilibriaGlpVault.interface.decodeEventLog('Deposit', event.data, event.topics);
-
-          expect(await equilibriaGlpVault.balanceOf(portfolioContract.address)).to.equal(decodedEvent.shares);
-          expect((await equilibriaGlpVault.totalAssets())).to.equal(decodedEvent.shares);
-          expect(await portfolioContract.balanceOf(wallet.address)).to.equal(portfolioShares);
-          expect((await glpRewardPool.balanceOf(equilibriaGlpVault.address))).to.equal(decodedEvent.shares);
+          if (decodedEvent.owner === portfolioContract.address) {
+            expect(await equilibriaGlpVault.balanceOf(portfolioContract.address)).to.equal(decodedEvent.shares);
+            expect((await equilibriaGlpVault.totalAssets())).to.equal(decodedEvent.shares);
+            expect(await portfolioContract.balanceOf(wallet.address)).to.equal(portfolioShares);
+            expect((await glpRewardPool.balanceOf(equilibriaGlpVault.address))).to.equal(decodedEvent.shares);
+          }
         }
       }
 
@@ -124,7 +125,9 @@ describe("All Weather Protocol", function () {
       for (const event of receipt.events) {
         if (event.topics.includes(equilibriaGlpVault.interface.getEventTopic('Deposit'))) {
           const decodedEvent = equilibriaGlpVault.interface.decodeEventLog('Deposit', event.data, event.topics);
-          shares = decodedEvent.shares;
+          if (decodedEvent.owner === portfolioContract.address) {
+            shares = decodedEvent.shares;
+          }
         }
       }
       // TODO(david): need to change tokenOutAddress to GLP later

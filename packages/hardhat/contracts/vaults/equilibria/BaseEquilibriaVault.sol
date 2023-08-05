@@ -47,13 +47,14 @@ abstract contract BaseEquilibriaVault is AbstractVault {
   }
 
   function _zapIn(
+    IERC20 zapInToken,
     uint256 amount,
     uint256 minLpOut,
     IPendleRouter.ApproxParams calldata guessPtReceivedFromSy,
     IPendleRouter.TokenInput calldata input
   ) internal override returns (uint256) {
     uint256 originalShares = totalStakedButWithoutLockedAssets();
-    SafeERC20.safeApprove(WETH, address(eqbZap), amount);
+    SafeERC20.safeApprove(zapInToken, address(eqbZap), amount);
 
     // Error: VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xfa711db2)
     // It means the swap would exceed the max slippage

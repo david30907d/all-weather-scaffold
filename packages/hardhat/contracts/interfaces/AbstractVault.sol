@@ -64,7 +64,13 @@ abstract contract AbstractVault is ERC4626, Ownable {
     IPendleRouter.TokenInput calldata input
   ) public virtual returns (uint256) {
     _prepareForDeposit(amount);
-    uint256 shares = _zapIn(amount, minLpOut, guessPtReceivedFromSy, input);
+    uint256 shares = _zapIn(
+      WETH,
+      amount,
+      minLpOut,
+      guessPtReceivedFromSy,
+      input
+    );
     return _mintShares(shares, shares);
   }
 
