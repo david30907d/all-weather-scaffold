@@ -30,7 +30,7 @@ jobs:
       - name: Install dependencies
         run: |
           yarn;
-          npm install -g solhint
+          npm install -g solhint@3.3.7
 
       - name: Run solhint
         run: |
