@@ -8,13 +8,11 @@ const { fetch1InchSwapData,
   radiantLendingPoolAddress,
   sushiPid,
   multiFeeDistributionAddress,
-  radiantAmount,
+  end2endTestingAmount,
   fsGLPAddress,
   getPendleZapInData,
   getPendleZapOutData,
   gDAIMarketPoolAddress,
-  dpxAmount,
-  dpxTokenAddress,
   mineBlocks,
   gDAIAddress,
   pendleTokenAddress,
@@ -22,7 +20,8 @@ const { fetch1InchSwapData,
   daiAddress,
   gDAIRewardPoolAddress,
   glpMarketPoolAddress,
-  claimableRewardsTestData
+  claimableRewardsTestData,
+  amountAfterChargingFee
 } = require("./utils");
 
 
@@ -39,7 +38,7 @@ let portfolioShares;
 
 async function deposit() {
   const depositData = {
-    amount: dpxAmount,
+    amount: end2endTestingAmount,
     receiver: wallet.address,
     oneInchDataDpx: oneInchSwapDataForDpx.tx.data,
     glpMinLpOut: pendleGLPZapInData[2],
@@ -93,13 +92,13 @@ describe("All Weather Protocol", function () {
     portfolioContract = await AllWeatherPortfolioLPToken.connect(wallet).deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address);
     await portfolioContract.connect(wallet).deployed();
     await portfolioContract.setVaultAllocations([{protocol: "AllWeatherLP-Equilibria-GDAI", percentage: 100}]).then((tx) => tx.wait());
-    await (await weth.connect(wallet).approve(portfolioContract.address, radiantAmount, { gasLimit: gasLimit })).wait();
+    await (await weth.connect(wallet).approve(portfolioContract.address, end2endTestingAmount, { gasLimit: gasLimit })).wait();
 
-    oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount.div(2), wallet.address, 50);
-    oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount, wallet.address, 50);
-    pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, dpxAmount, 0.99);
+    oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, daiToken.address, amountAfterChargingFee.div(2), wallet.address, 50);
+    oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, amountAfterChargingFee, wallet.address, 50);
+    pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, amountAfterChargingFee, 0.99);
     pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount).mul(50).div(100), 0.99, daiToken.address);
-    portfolioShares = dpxAmount.div(await portfolioContract.unitOfShares());
+    portfolioShares = amountAfterChargingFee.div(await portfolioContract.unitOfShares());
   });
 
   describe("Portfolio LP Contract Test", function () {

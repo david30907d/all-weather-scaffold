@@ -20,7 +20,7 @@ const { fetch1InchSwapData,
   gasLimit,
   daiAddress,
   claimableRewardsTestData,
-  amountAfterChargingFee
+  amountAfterChargingFee,
 } = require("./utils");
 
 
