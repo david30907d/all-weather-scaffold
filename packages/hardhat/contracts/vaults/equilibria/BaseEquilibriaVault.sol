@@ -53,7 +53,7 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     IPendleRouter.TokenInput calldata input
   ) internal override returns (uint256) {
     uint256 originalShares = totalStakedButWithoutLockedAssets();
-    SafeERC20.safeApprove(weth, address(eqbZap), amount);
+    SafeERC20.safeApprove(WETH, address(eqbZap), amount);
 
     // Error: VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xfa711db2)
     // It means the swap would exceed the max slippage

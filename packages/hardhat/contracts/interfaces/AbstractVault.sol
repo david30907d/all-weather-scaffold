@@ -43,7 +43,7 @@ abstract contract AbstractVault is ERC4626, Ownable {
 
   function deposit(uint256 amount) public virtual returns (uint256) {
     _prepareForDeposit(amount);
-    uint256 shares = _zapIn(amount = amount);
+    uint256 shares = _zapIn(amount);
     return _mintShares(shares, amount);
   }
 
@@ -52,7 +52,7 @@ abstract contract AbstractVault is ERC4626, Ownable {
     bytes calldata oneInchData
   ) public virtual returns (uint256) {
     _prepareForDeposit(amount);
-    uint256 shares = _zapIn(amount = amount, oneInchData = oneInchData);
+    uint256 shares = _zapIn(amount, oneInchData);
     return _mintShares(shares, amount);
   }
 
@@ -64,12 +64,7 @@ abstract contract AbstractVault is ERC4626, Ownable {
     IPendleRouter.TokenInput calldata input
   ) public virtual returns (uint256) {
     _prepareForDeposit(amount);
-    uint256 shares = _zapIn(
-      amount = amount,
-      minLpOut = minLpOut,
-      guessPtReceivedFromSy = guessPtReceivedFromSy,
-      input = input
-    );
+    uint256 shares = _zapIn(amount, minLpOut, guessPtReceivedFromSy, input);
     return _mintShares(shares, shares);
   }
 
@@ -84,11 +79,11 @@ abstract contract AbstractVault is ERC4626, Ownable {
   ) public virtual returns (uint256) {
     _prepareForDeposit(amount);
     uint256 shares = _zapIn(
-      amount = amount,
-      oneInchData = oneInchData,
-      minLpOut = minLpOut,
-      guessPtReceivedFromSy = guessPtReceivedFromSy,
-      input = input
+      amount,
+      oneInchData,
+      minLpOut,
+      guessPtReceivedFromSy,
+      input
     );
     return _mintShares(shares, shares);
   }

@@ -62,7 +62,7 @@ contract DpxArbitrumVault is AbstractVault {
     bytes calldata oneInchData
   ) internal override returns (uint256) {
     SafeERC20.safeApprove(
-      weth,
+      WETH,
       oneInchAggregatorAddress,
       Math.mulDiv(amount, 1, 2)
     );
@@ -74,7 +74,7 @@ contract DpxArbitrumVault is AbstractVault {
     //  (uint256 dpxReturnedAmount, uint256 gasLeft) = abi.decode(data, (uint256, uint256));
     uint256 dpxReturnedAmount = dpxToken.balanceOf(address(this));
     SafeERC20.safeApprove(dpxToken, sushiSwapRouterAddress, dpxReturnedAmount);
-    weth.withdraw(Math.mulDiv(amount, 1, 2));
+    WETH.withdraw(Math.mulDiv(amount, 1, 2));
 
     // deadline means current time + 5 minutes;
     // solhint-disable-next-line not-rely-on-time

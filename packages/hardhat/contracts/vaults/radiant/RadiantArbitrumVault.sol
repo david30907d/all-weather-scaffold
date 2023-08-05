@@ -75,7 +75,7 @@ contract RadiantArbitrumVault is AbstractVault {
   }
 
   function _zapIn(uint256 amount) internal override returns (uint256) {
-    SafeERC20.safeApprove(weth, address(lockZap), amount);
+    SafeERC20.safeApprove(WETH, address(lockZap), amount);
     uint256 shares = lockZap.zap(false, amount, 0, 3);
     return shares;
   }

@@ -33,7 +33,7 @@ contract EquilibriaGDAIVault is BaseEquilibriaVault {
   ) internal override returns (uint256) {
     // swap weth to DAI with 1inch
     uint256 originalDaiBalance = DAI.balanceOf(address(this));
-    SafeERC20.safeApprove(weth, oneInchAggregatorAddress, amount);
+    SafeERC20.safeApprove(WETH, oneInchAggregatorAddress, amount);
     (bool succ, ) = address(oneInchAggregatorAddress).call(oneInchData);
     require(succ, "1inch failed to swap");
     // TODO(david): need to figure out how to decode
