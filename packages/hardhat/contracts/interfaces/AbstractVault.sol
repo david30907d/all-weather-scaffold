@@ -15,7 +15,7 @@ abstract contract AbstractVault is ERC4626, Ownable {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
-  IWETH public immutable weth =
+  IWETH public immutable WETH =
     IWETH(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1);
 
   function totalLockedAssets() public view virtual returns (uint256);
@@ -43,7 +43,7 @@ abstract contract AbstractVault is ERC4626, Ownable {
 
   function deposit(uint256 amount) public virtual returns (uint256) {
     _prepareForDeposit(amount);
-    uint256 shares = _zapIn(amount);
+    uint256 shares = _zapIn(amount = amount);
     return _mintShares(shares, amount);
   }
 
@@ -52,7 +52,7 @@ abstract contract AbstractVault is ERC4626, Ownable {
     bytes calldata oneInchData
   ) public virtual returns (uint256) {
     _prepareForDeposit(amount);
-    uint256 shares = _zapIn(amount, oneInchData);
+    uint256 shares = _zapIn(amount = amount, oneInchData = oneInchData);
     return _mintShares(shares, amount);
   }
 
@@ -64,7 +64,12 @@ abstract contract AbstractVault is ERC4626, Ownable {
     IPendleRouter.TokenInput calldata input
   ) public virtual returns (uint256) {
     _prepareForDeposit(amount);
-    uint256 shares = _zapIn(amount, minLpOut, guessPtReceivedFromSy, input);
+    uint256 shares = _zapIn(
+      amount = amount,
+      minLpOut = minLpOut,
+      guessPtReceivedFromSy = guessPtReceivedFromSy,
+      input = input
+    );
     return _mintShares(shares, shares);
   }
 
@@ -79,18 +84,18 @@ abstract contract AbstractVault is ERC4626, Ownable {
   ) public virtual returns (uint256) {
     _prepareForDeposit(amount);
     uint256 shares = _zapIn(
-      amount,
-      oneInchData,
-      minLpOut,
-      guessPtReceivedFromSy,
-      input
+      amount = amount,
+      oneInchData = oneInchData,
+      minLpOut = minLpOut,
+      guessPtReceivedFromSy = guessPtReceivedFromSy,
+      input = input
     );
     return _mintShares(shares, shares);
   }
 
   function _prepareForDeposit(uint256 amount) public virtual {
     require(amount <= maxDeposit(msg.sender), "ERC4626: deposit more than max");
-    SafeERC20.safeTransferFrom(weth, msg.sender, address(this), amount);
+    SafeERC20.safeTransferFrom(WETH, msg.sender, address(this), amount);
   }
 
   /* solhint-disable no-unused-vars */
