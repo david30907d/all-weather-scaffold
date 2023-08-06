@@ -132,7 +132,7 @@ describe("All Weather Protocol", function () {
           }
         }
       }
-      const pendleZapOutData = await getPendleZapOutData(42161, gDAIMarketPoolAddress, daiToken.address, shares, 1);
+      const pendleZapOutData = await getPendleZapOutData(42161, gDAIMarketPoolAddress, gDAIToken.address, shares, 0.99);
       // // withdraw
       await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, pendleZapOutData[3], { gasLimit })).wait();
       expect(await pendleGDAIMarketLPT.balanceOf(wallet.address)).to.equal(shares);
@@ -158,7 +158,6 @@ describe("All Weather Protocol", function () {
         }
       }
 
-      const equilibriaPids = [2];
       await portfolioContract.connect(wallet).claim(wallet.address);
       // NOTE: using `to.be.gt` instead of `to.equal` because the reward would somehow be increased after claim(). My hunch is that `claim()` would also claim the reward for the current block.
       expect((await pendleToken.balanceOf(wallet.address)).sub(originalPendleToken)).to.be.gt(pendleClaimableReward);

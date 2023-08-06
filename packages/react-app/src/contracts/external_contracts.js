@@ -5851,10 +5851,6 @@ module.exports = {
         address: "0xE5C1DB3d984458863aADbCF2b9684bA3a15123B7",
         abi: Multicall2ABI,
       },
-      OneInch: {
-        address: "0x1111111254fb6c44bAC0beD2854e76F90643097d",
-        abi: OneInchABI,
-      },
     },
   },
 };

@@ -3,6 +3,7 @@ const { network, ethers } = require("hardhat");
 const got = require('got');
 const { Router, toAddress, MarketEntity } = require('@pendle/sdk-v2');
 const {Squid} = require('@0xsquid/sdk');
+
 config();
 const getSDK = ()  => {
   const squid = new Squid({
@@ -17,7 +18,7 @@ async function mineBlocks(numBlocks) {
 }
 
 async function fetch1InchSwapData(fromTokenAddress, toTOkenAddress, amount, fromAddress, slippage) {
-  const res = await got(`https://api.1inch.io/v5.0/42161/swap?fromTokenAddress=${fromTokenAddress}&toTokenAddress=${toTOkenAddress}&amount=${amount.toString()}&fromAddress=${fromAddress}&slippage=${slippage}&disableEstimate=true`, {
+  const res = await got(`https://api.1inch.io/v5.2/42161/swap?src=${fromTokenAddress}&dst=${toTOkenAddress}&amount=${amount.toString()}&from=${fromAddress}&slippage=50&disableEstimate=true&allowPartialFill=true`, {
     retry: {
       limit: 3, // Number of retries
       methods: ['GET'], // Retry only for GET requests
@@ -25,9 +26,9 @@ async function fetch1InchSwapData(fromTokenAddress, toTOkenAddress, amount, from
       calculateDelay: ({ attemptCount }) => attemptCount * 3000, // Delay between retries in milliseconds
     },
   })
-  // if (!res.ok) {
-  //   throw new Error(`HTTP error! status: ${res.status}`);
-  // }
+  if (res.statusCode !== 200) {
+    throw new Error(`HTTP error! status: ${res.statusCode}`);
+  }
   return JSON.parse(res.body);
 }
 
@@ -58,7 +59,7 @@ async function getPendleZapInData(chainId, poolAddress, amount, slippage, tokenI
 async function getPendleZapOutData(chainId, poolAddress, tokenOutAddress, amount, slippage){
   const provider = new ethers.providers.JsonRpcProvider(process.env.API_URL);
   const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
-  const marketContract = new MarketEntity(poolAddress, {
+  const marketContract = new MarketEntity(toAddress(poolAddress), {
       chainId: chainId,
       provider,
       signer: signer
@@ -69,10 +70,11 @@ async function getPendleZapOutData(chainId, poolAddress, tokenOutAddress, amount
     signer,
   });
   // TODO(david): ask pendle team about this. Is it possible to extract Param before approving contract?
-  // await marketContract.approve(router.address, amount).then((tx) => tx.wait());
+  // await marketContract.approve(router.address, amount).then((tx)=> tx.wait());
+  // await marketContract.approve(router.address, ethers.BigNumber.from('115792089237316195423570985008687907853269984665640564039457')).then((tx) => tx.wait());
   
   return await router.removeLiquiditySingleToken(
-    poolAddress,
+    toAddress(poolAddress),
     amount,
     toAddress(tokenOutAddress),
     slippage,
@@ -177,6 +179,31 @@ const pendleTokenAddress = "0x0c880f6761F1af8d9Aa9C466984b80DAb9a8c9e8";
 const glpMarketPoolAddress = "0x7D49E5Adc0EAAD9C027857767638613253eF125f";
 const gDAIMarketPoolAddress = "0xa0192f6567f8f5DC38C53323235FD08b318D2dcA";
 const gDAIRewardPoolAddress = "0x03b86b5b4f49FD2059c813B3f928c0b276C88E4E";
+const fakePendleZapIn = [
+  '0x78000b0605e81ea9df54b33f72ebc61b5f5c8077',
+  '0xa0192f6567f8f5dc38c53323235fd08b318d2dca',
+  "78925691164010869783",
+  {
+    guessMin: "34771702314189672095",
+    guessMax: "86929255785474180238",
+    guessOffchain: "43464627892737090119",
+    maxIteration: 14,
+    eps: '1000000000000000'
+  },
+  {
+    tokenIn: '0xda10009cbd5d07dd0cecc66161fc93d7c9000da1',
+    netTokenIn: "182355886656552718835",
+    tokenMintSy: '0xda10009cbd5d07dd0cecc66161fc93d7c9000da1',
+    bulk: '0x0000000000000000000000000000000000000000',
+    pendleSwap: '0x0000000000000000000000000000000000000000',
+    swapData: {
+      swapType: 0,
+      extRouter: '0x0000000000000000000000000000000000000000',
+      extCalldata: [],
+      needScale: false
+    }
+  }
+];
 const fakePendleZapOut = {
   // Token/Sy data
   tokenOut: "0x1aDDD80E6039594eE970E5872D247bf0414C8903", // address
@@ -225,6 +252,7 @@ module.exports = {
   gDAIMarketPoolAddress,
   getLiFiCrossChainContractCallCallData,
   pendleTokenAddress,
+  fakePendleZapIn,
   fakePendleZapOut,
   daiAddress,
   gDAIRewardPoolAddress,
