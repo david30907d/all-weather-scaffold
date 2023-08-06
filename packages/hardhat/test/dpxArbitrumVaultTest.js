@@ -15,6 +15,7 @@ const { fetch1InchSwapData, mineBlocks, myImpersonatedWalletAddress,
   daiAddress,
   end2endTestingAmount,
   amountAfterChargingFee,
+  fakePendleZapIn,
   claimableRewardsTestData } = require("./utils");
 
 let wallet;
