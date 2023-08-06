@@ -66,13 +66,13 @@ contract DpxArbitrumVault is AbstractVault {
       oneInchAggregatorAddress,
       Math.mulDiv(amount, 1, 2)
     );
-    // TODO(david): should return those token left after `addLiquidityETH` back to user
-    // recurring error: "Error: VM Exception while processing transaction: reverted with reason string '1inch failed to swap'"
     // solhint-disable-next-line avoid-low-level-calls
-    (bool succ, ) = address(oneInchAggregatorAddress).call(oneInchData);
+    (bool succ, bytes memory data) = address(oneInchAggregatorAddress).call(
+      oneInchData
+    );
     require(succ, "1inch failed to swap");
-    //  (uint256 dpxReturnedAmount, uint256 gasLeft) = abi.decode(data, (uint256, uint256));
-    uint256 dpxReturnedAmount = dpxToken.balanceOf(address(this));
+    // (uint256 dpxReturnedAmount, uint256 gasLeft) = abi.decode(data, (uint256, uint256));
+    uint256 dpxReturnedAmount = abi.decode(data, (uint256));
     SafeERC20.safeApprove(dpxToken, sushiSwapRouterAddress, dpxReturnedAmount);
     WETH.withdraw(Math.mulDiv(amount, 1, 2));
 
