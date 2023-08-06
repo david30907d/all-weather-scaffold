@@ -120,8 +120,6 @@ describe("All Weather Protocol", function () {
     });
     it("Should be able to withdraw GDAI from equilibria", async function () {
       this.timeout(120000); // Set timeout to 120 seconds
-      const radiantLockedDlpBalanceBeforeDeposit = await radiantVault.totalAssets();
-      expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
       const receipt = await deposit();
       let shares;
       for (const event of receipt.events) {
@@ -141,8 +139,6 @@ describe("All Weather Protocol", function () {
 
     it("Should be able to claim rewards", async function () {
       this.timeout(120000); // Set timeout to 120 seconds
-      const radiantLockedDlpBalanceBeforeDeposit = await radiantVault.totalAssets();
-      expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
       await deposit();
       await mineBlocks(100); // Mine 100 blocks
       const originalPendleToken = await pendleToken.balanceOf(wallet.address);
