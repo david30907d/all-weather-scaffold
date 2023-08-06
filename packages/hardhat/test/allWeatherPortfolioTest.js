@@ -104,8 +104,8 @@ describe("All Weather Protocol", function () {
 
         oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxToken.address, amountAfterChargingFee.div(8), wallet.address, 50);
         oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, amountAfterChargingFee.div(4), wallet.address, 50);
-        // oneInchSwapDataForGDAI.toTokenAmount).div(2): due to the 1inch slippage, need to multiple by 0.95 to pass pendle zap in
-        pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount).mul(50).div(100), 0.2, daiToken.address);
+        // oneInchSwapDataForGDAI.toAmount).div(2): due to the 1inch slippage, need to multiple by 0.95 to pass pendle zap in
+        pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toAmount).mul(50).div(100), 0.2, daiToken.address);
         pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, amountAfterChargingFee.div(4), 0.99);
         portfolioShares = amountAfterChargingFee.div(await portfolioContract.unitOfShares());
     });
@@ -147,7 +147,9 @@ describe("All Weather Protocol", function () {
           for (const event of receipt.events) {
             if (event.topics.includes(equilibriaGDAIVault.interface.getEventTopic('Deposit'))) {
               const decodedEvent = equilibriaGDAIVault.interface.decodeEventLog('Deposit', event.data, event.topics);
-              shares = decodedEvent.shares;
+              if (decodedEvent.owner === portfolioContract.address) {
+                  shares = decodedEvent.shares;
+              }
             }
           }
           const pendleZapOutData = await getPendleZapOutData(42161, gDAIMarketPoolAddress, daiToken.address, shares, 1);
