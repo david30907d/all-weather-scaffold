@@ -4,8 +4,6 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./BaseEquilibriaVault.sol";
 
-import "hardhat/console.sol";
-
 contract EquilibriaGDAIVault is BaseEquilibriaVault {
   address public immutable oneInchAggregatorAddress =
     0x1111111254EEB25477B68fb85Ed929f73A960582;

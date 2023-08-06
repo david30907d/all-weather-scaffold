@@ -27,11 +27,12 @@ jobs:
         run: |
           block_number=$(curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' ${{ secrets.ARBITRUM_RPC }} | jq -r '.result')
           DECIMAL_BLOCK_NUMBER=$(printf "%d" "$block_number")
-          BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/dpxArbitrumVaultTest.js;
-          # BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/radiantDlpVaultTest.js;
-          # BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/radiantDlpVaultRewardTest.js;
-          BLOCK_NUMBER=118310681 yarn test test/equilibriaGLP.js;
-          BLOCK_NUMBER=118310681 yarn test test/equilibriaGDAI.js;
-          BLOCK_NUMBER=118310681 yarn test test/allWeatherPortfolioTest.js
-          BLOCK_NUMBER=118310681 yarn test test/allWeatherPortfolioRewardTest.js
-          BLOCK_NUMBER=118310681 yarn test test/updateRewardsTest.js
+          BLOCK_NUMBER=118710947 yarn test test/dpxArbitrumVaultTest.js;
+          # BLOCK_NUMBER=118710947 yarn test test/radiantDlpVaultTest.js;
+          # BLOCK_NUMBER=118710947 yarn test test/radiantDlpVaultRewardTest.js;
+          BLOCK_NUMBER=118710947 yarn test test/equilibriaGLP.js;
+          BLOCK_NUMBER=118710947 yarn test test/equilibriaGDAI.js;
+          # TODO(david): test all weather portfolio in Beta verion
+          # BLOCK_NUMBER=118710947 yarn test test/allWeatherPortfolioTest.js
+          # BLOCK_NUMBER=118710947 yarn test test/allWeatherPortfolioRewardTest.js
+          BLOCK_NUMBER=118710947 yarn test test/updateRewardsTest.js
