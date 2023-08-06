@@ -152,7 +152,7 @@ describe("All Weather Protocol", function () {
               }
             }
           }
-          const pendleZapOutData = await getPendleZapOutData(42161, gDAIMarketPoolAddress, daiToken.address, shares, 1);
+          const pendleZapOutData = await getPendleZapOutData(42161, gDAIMarketPoolAddress, gDAIToken.address, shares, 1);
 
           currentTimestamp += 12 * 31 * 24 * 60 * 60; // Increment timestamp
           await simulateAYearLater();

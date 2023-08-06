@@ -158,7 +158,7 @@ describe("All Weather Protocol", function () {
     //       shares = decodedEvent.shares;
     //     }
     //   }
-    //   const pendleZapOutData = await getPendleZapOutData(42161, gDAIMarketPoolAddress, daiToken.address, shares, 1);
+    //   const pendleZapOutData = await getPendleZapOutData(42161, gDAIMarketPoolAddress, gDAIToken.address, shares, 1);
     //   // // withdraw
     //   await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, pendleZapOutData[3], { gasLimit: 4675600 })).wait();
     //   expect(await pendleGDAIMarketLPT.balanceOf(wallet.address)).to.equal(shares);
