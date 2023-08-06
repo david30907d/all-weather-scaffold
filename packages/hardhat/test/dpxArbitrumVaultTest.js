@@ -15,8 +15,7 @@ const { fetch1InchSwapData, mineBlocks, myImpersonatedWalletAddress,
   daiAddress,
   end2endTestingAmount,
   amountAfterChargingFee,
-  claimableRewardsTestData,
-  fakePendleZapIn } = require("./utils");
+  claimableRewardsTestData } = require("./utils");
 
 let wallet;
 let dpxVault;
@@ -24,6 +23,31 @@ let portfolioContract;
 let oneInchSwapDataForDpx;
 let oneInchSwapDataForGDAI;
 let portfolioShares;
+const fakePendleZapIn = [
+  '0x78000b0605e81ea9df54b33f72ebc61b5f5c8077',
+  '0xa0192f6567f8f5dc38c53323235fd08b318d2dca',
+  "78925691164010869783",
+  {
+    guessMin: "34771702314189672095",
+    guessMax: "86929255785474180238",
+    guessOffchain: "43464627892737090119",
+    maxIteration: 14,
+    eps: '1000000000000000'
+  },
+  {
+    tokenIn: '0xda10009cbd5d07dd0cecc66161fc93d7c9000da1',
+    netTokenIn: "182355886656552718835",
+    tokenMintSy: '0xda10009cbd5d07dd0cecc66161fc93d7c9000da1',
+    bulk: '0x0000000000000000000000000000000000000000',
+    pendleSwap: '0x0000000000000000000000000000000000000000',
+    swapData: {
+      swapType: 0,
+      extRouter: '0x0000000000000000000000000000000000000000',
+      extCalldata: [],
+      needScale: false
+    }
+  }
+];
 
 async function deposit() {
   const depositData = {
