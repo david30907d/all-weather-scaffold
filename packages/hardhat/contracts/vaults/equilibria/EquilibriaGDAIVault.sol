@@ -8,7 +8,7 @@ import "./BaseEquilibriaVault.sol";
 
 contract EquilibriaGDAIVault is BaseEquilibriaVault {
   address public immutable oneInchAggregatorAddress =
-    0x1111111254fb6c44bAC0beD2854e76F90643097d;
+    0x1111111254EEB25477B68fb85Ed929f73A960582;
   IERC20 public immutable DAI;
 
   constructor(

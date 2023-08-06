@@ -97,7 +97,7 @@ describe("All Weather Protocol", function () {
     oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, daiToken.address, amountAfterChargingFee.div(2), wallet.address, 50);
     oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, amountAfterChargingFee, wallet.address, 50);
     pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, amountAfterChargingFee, 0.99);
-    pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toTokenAmount).mul(50).div(100), 0.99, daiToken.address);
+    pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toAmount).mul(50).div(100), 0.99, daiToken.address);
     portfolioShares = amountAfterChargingFee.div(await portfolioContract.unitOfShares());
   });
 
@@ -109,11 +109,12 @@ describe("All Weather Protocol", function () {
       for (const event of receipt.events) {
         if (event.topics.includes(equilibriaGDAIVault.interface.getEventTopic('Deposit'))) {
           const decodedEvent = equilibriaGDAIVault.interface.decodeEventLog('Deposit', event.data, event.topics);
-
-          expect(await equilibriaGDAIVault.balanceOf(portfolioContract.address)).to.equal(decodedEvent.shares);
-          expect((await equilibriaGDAIVault.totalAssets())).to.equal(decodedEvent.shares);
-          expect(await portfolioContract.balanceOf(wallet.address)).to.equal(portfolioShares);
-          expect((await dGDAIRewardPool.balanceOf(equilibriaGDAIVault.address))).to.equal(decodedEvent.shares);
+          if (decodedEvent.owner === portfolioContract.address) {
+            expect(await equilibriaGDAIVault.balanceOf(portfolioContract.address)).to.equal(decodedEvent.shares);
+            expect((await equilibriaGDAIVault.totalAssets())).to.equal(decodedEvent.shares);
+            expect(await portfolioContract.balanceOf(wallet.address)).to.equal(portfolioShares);
+            expect((await dGDAIRewardPool.balanceOf(equilibriaGDAIVault.address))).to.equal(decodedEvent.shares);
+          }
         }
       }
     });
@@ -126,7 +127,9 @@ describe("All Weather Protocol", function () {
       for (const event of receipt.events) {
         if (event.topics.includes(equilibriaGDAIVault.interface.getEventTopic('Deposit'))) {
           const decodedEvent = equilibriaGDAIVault.interface.decodeEventLog('Deposit', event.data, event.topics);
-          shares = decodedEvent.shares;
+          if (decodedEvent.owner === portfolioContract.address) {
+            shares = decodedEvent.shares;
+          }
         }
       }
       const pendleZapOutData = await getPendleZapOutData(42161, gDAIMarketPoolAddress, daiToken.address, shares, 1);
