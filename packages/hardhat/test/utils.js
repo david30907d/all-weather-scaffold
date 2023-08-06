@@ -137,10 +137,15 @@ const dpxAmount = ethers.utils.parseUnits('0.001', 18);
 const end2endTestingAmount = ethers.utils.parseUnits('0.1', 18);
 const amountAfterChargingFee = end2endTestingAmount.mul(997).div(1000);
 const claimableRewardsTestData = [
-  ["AllWeatherLP-SushSwap-DpxETH", []],
-  ["AllWeatherLP-RadiantArbitrum-DLP", []],
-  ["AllWeatherLP-Equilibria-GLP", []],
-  ["AllWeatherLP-Equilibria-GDAI", []]
+  ["SushSwap-DpxETH", []],
+  ["RadiantArbitrum-DLP", []],
+  ["Equilibria-GLP", []],
+  ["Equilibria-GDAI", []]
+];
+const claimableRewardsTestDataForPermanentPortfolio = [
+  ["Equilibria-GDAI", []],
+  ["SushSwap-DpxETH", []],
+  ["Equilibria-GLP", []]
 ];
 
 // sushi dpx
@@ -267,5 +272,6 @@ module.exports = {
   radiantBscLockZapPoolAddress,
   radiantRTokens,
   claimableRewardsTestData,
-  amountAfterChargingFee
+  amountAfterChargingFee,
+  claimableRewardsTestDataForPermanentPortfolio
 };

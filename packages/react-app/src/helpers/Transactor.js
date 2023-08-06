@@ -21,7 +21,9 @@ export default function Transactor(providerOrSigner, gasPrice, etherscan) {
       if (ethers.Signer.isSigner(providerOrSigner) === true) {
         provider = providerOrSigner.provider;
         signer = providerOrSigner;
-        network = providerOrSigner.provider && (await providerOrSigner.provider.getNetwork());
+        network =
+          providerOrSigner.provider &&
+          (await providerOrSigner.provider.getNetwork());
       } else if (providerOrSigner._isProvider) {
         provider = providerOrSigner;
         signer = providerOrSigner.getSigner();
@@ -36,7 +38,7 @@ export default function Transactor(providerOrSigner, gasPrice, etherscan) {
         system: "ethereum",
         networkId: network.chainId,
         // darkMode: Boolean, // (default: false)
-        transactionHandler: txInformation => {
+        transactionHandler: (txInformation) => {
           if (DEBUG) console.log("HANDLE TX", txInformation);
           const possibleFunction = callbacks[txInformation.transaction.hash];
           if (typeof possibleFunction === "function") {
@@ -67,7 +69,7 @@ export default function Transactor(providerOrSigner, gasPrice, etherscan) {
             tx.gasPrice = gasPrice || ethers.utils.parseUnits("4.1", "gwei");
           }
           if (!tx.gasLimit) {
-            tx.gasLimit = ethers.utils.hexlify(120000);
+            tx.gasLimit = ethers.utils.hexlify(240000);
           }
           if (DEBUG) console.log("RUNNING TX", tx);
           result = await signer.sendTransaction(tx);
@@ -82,9 +84,10 @@ export default function Transactor(providerOrSigner, gasPrice, etherscan) {
         // if it is a valid Notify.js network, use that, if not, just send a default notification
         if (notify && [1, 3, 4, 5, 42, 100].indexOf(network.chainId) >= 0) {
           const { emitter } = notify.hash(result.hash);
-          emitter.on("all", transaction => {
+          emitter.on("all", (transaction) => {
             return {
-              onclick: () => window.open((etherscan || etherscanTxUrl) + transaction.hash),
+              onclick: () =>
+                window.open((etherscan || etherscanTxUrl) + transaction.hash),
             };
           });
         } else {
@@ -99,8 +102,12 @@ export default function Transactor(providerOrSigner, gasPrice, etherscan) {
             const txResult = await tx;
             const listeningInterval = setInterval(async () => {
               console.log("CHECK IN ON THE TX", txResult, provider);
-              const currentTransactionReceipt = await provider.getTransactionReceipt(txResult.hash);
-              if (currentTransactionReceipt && currentTransactionReceipt.confirmations) {
+              const currentTransactionReceipt =
+                await provider.getTransactionReceipt(txResult.hash);
+              if (
+                currentTransactionReceipt &&
+                currentTransactionReceipt.confirmations
+              ) {
                 callback({ ...txResult, ...currentTransactionReceipt });
                 clearInterval(listeningInterval);
               }

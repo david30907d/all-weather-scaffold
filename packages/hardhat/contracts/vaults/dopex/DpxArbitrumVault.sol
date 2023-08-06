@@ -52,7 +52,7 @@ contract DpxArbitrumVault is AbstractVault {
     IERC20Metadata asset_,
     address sushiSwapMiniChefV2_,
     uint256 pid_
-  ) ERC4626(asset_) ERC20("AllWeatherLP-SushSwap-DpxETH", "DPXV") {
+  ) ERC4626(asset_) ERC20("SushSwap-DpxETH", "DPXV") {
     pid = pid_;
     sushiSwapMiniChef = IMiniChefV2(sushiSwapMiniChefV2_);
   }
@@ -70,7 +70,10 @@ contract DpxArbitrumVault is AbstractVault {
     (bool succ, bytes memory data) = address(oneInchAggregatorAddress).call(
       oneInchData
     );
-    require(succ, "1inch failed to swap");
+    require(
+      succ,
+      "1inch failed to swap, please update your block_number when running hardhat test"
+    );
     // (uint256 dpxReturnedAmount, uint256 gasLeft) = abi.decode(data, (uint256, uint256));
     uint256 dpxReturnedAmount = abi.decode(data, (uint256));
     SafeERC20.safeApprove(dpxToken, sushiSwapRouterAddress, dpxReturnedAmount);

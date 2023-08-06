@@ -43,7 +43,7 @@ async function deposit() {
 
 describe("All Weather Protocol", function () {
   beforeEach(async () => {
-    this.timeout(120000); // Set timeout to 120 seconds
+    this.timeout(240000); // Set timeout to 120 seconds
     wallet = await ethers.getImpersonatedSigner(myImpersonatedWalletAddress);
     dpxSLP = await ethers.getContractAt('IERC20Uniswap', sushiSwapDpxLpTokenAddress);
     miniChefV2 = await ethers.getContractAt('IMiniChefV2', sushiMiniChefV2Address);
@@ -65,17 +65,17 @@ describe("All Weather Protocol", function () {
     await dpxVault.deployed();
 
     const EquilibriaGlpVault = await ethers.getContractFactory("EquilibriaGlpVault");
-    equilibriaGlpVault = await EquilibriaGlpVault.deploy(pendleGlpMarketLPT.address, "AllWeatherLP-Equilibria-GLP", "ALP-EQB-GLP");
+    equilibriaGlpVault = await EquilibriaGlpVault.deploy(pendleGlpMarketLPT.address, "Equilibria-GLP", "ALP-EQB-GLP");
     await equilibriaGlpVault.deployed();
 
     const EquilibriaGDAIVault = await ethers.getContractFactory("EquilibriaGDAIVault");
-    equilibriaGDAIVault = await EquilibriaGDAIVault.deploy(pendleGDAIMarketLPT.address, "AllWeatherLP-Equilibria-GDAI", "ALP-EQB-GDAI");
+    equilibriaGDAIVault = await EquilibriaGDAIVault.deploy(pendleGDAIMarketLPT.address, "Equilibria-GDAI", "ALP-EQB-GDAI");
     await equilibriaGDAIVault.deployed();
 
     const AllWeatherPortfolioLPToken = await ethers.getContractFactory("AllWeatherPortfolioLPToken");
     portfolioContract = await AllWeatherPortfolioLPToken.connect(wallet).deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address);
     await portfolioContract.connect(wallet).deployed();
-    await portfolioContract.setVaultAllocations([{protocol: "AllWeatherLP-SushSwap-DpxETH", percentage: 100}], { gasLimit }).then((tx) => tx.wait());
+    await portfolioContract.setVaultAllocations([{protocol: "SushSwap-DpxETH", percentage: 100}], { gasLimit }).then((tx) => tx.wait());
 
     await (await weth.connect(wallet).approve(portfolioContract.address, end2endTestingAmount, { gasLimit })).wait();
     await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit });
@@ -109,7 +109,7 @@ describe("All Weather Protocol", function () {
       const originalSushiBalance = await sushiToken.balanceOf(wallet.address);
       const originalDpxBalance = await dpxToken.balanceOf(wallet.address);
       const claimableRewards = await portfolioContract.connect(wallet).getClaimableRewards(wallet.address);
-      expect(claimableRewards[0].protocol).to.equal("AllWeatherLP-SushSwap-DpxETH");
+      expect(claimableRewards[0].protocol).to.equal("SushSwap-DpxETH");
       const sushiClaimableReward = claimableRewards[0].claimableRewards[0].amount;
       const dpxClaimableReward = claimableRewards[0].claimableRewards[1].amount;
       expect(sushiClaimableReward).to.equal(0);

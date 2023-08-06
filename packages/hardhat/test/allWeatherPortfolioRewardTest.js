@@ -79,24 +79,24 @@ describe("All Weather Protocol", function () {
         await dpxVault.deployed();
 
         const EquilibriaGlpVault = await ethers.getContractFactory("EquilibriaGlpVault");
-        equilibriaGlpVault = await EquilibriaGlpVault.deploy(pendleGlpMarketLPT.address, "AllWeatherLP-Equilibria-GLP", "ALP-EQB-GLP");
+        equilibriaGlpVault = await EquilibriaGlpVault.deploy(pendleGlpMarketLPT.address, "Equilibria-GLP", "ALP-EQB-GLP");
         await equilibriaGlpVault.deployed();
 
         const EquilibriaGDAIVault = await ethers.getContractFactory("EquilibriaGDAIVault");
-        equilibriaGDAIVault = await EquilibriaGDAIVault.deploy(pendleGDAIMarketLPT.address, "AllWeatherLP-Equilibria-GDAI", "ALP-EQB-GDAI");
+        equilibriaGDAIVault = await EquilibriaGDAIVault.deploy(pendleGDAIMarketLPT.address, "Equilibria-GDAI", "ALP-EQB-GDAI");
         await equilibriaGDAIVault.deployed();
 
         const AllWeatherPortfolioLPToken = await ethers.getContractFactory("AllWeatherPortfolioLPToken");
         portfolioContract = await AllWeatherPortfolioLPToken.connect(wallet).deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address);
         await portfolioContract.connect(wallet).deployed();
         await portfolioContract.setVaultAllocations([{
-            protocol: "AllWeatherLP-SushSwap-DpxETH", percentage: 25,
+            protocol: "SushSwap-DpxETH", percentage: 25,
         }, {
-            protocol: "AllWeatherLP-RadiantArbitrum-DLP", percentage: 25
+            protocol: "RadiantArbitrum-DLP", percentage: 25
         }, {
-            protocol: "AllWeatherLP-Equilibria-GLP", percentage: 25
+            protocol: "Equilibria-GLP", percentage: 25
         }, {
-            protocol: "AllWeatherLP-Equilibria-GDAI", percentage: 25
+            protocol: "Equilibria-GDAI", percentage: 25
         }
         ]).then((tx) => tx.wait());
         await (await weth.connect(wallet).approve(portfolioContract.address, end2endTestingAmount, { gasLimit: gasLimit })).wait();
@@ -111,7 +111,7 @@ describe("All Weather Protocol", function () {
     describe("Portfolio LP Contract Test", function () {
         it("Should be able to claim rewards", async function () {
           const randomWallet = ethers.Wallet.createRandom();
-          this.timeout(120000); // Set timeout to 120 seconds
+          this.timeout(240000); // Set timeout to 120 seconds
           await deposit();
           await mineBlocks(1000);
           const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);

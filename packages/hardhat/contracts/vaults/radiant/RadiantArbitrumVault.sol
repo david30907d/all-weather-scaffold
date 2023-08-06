@@ -41,7 +41,7 @@ contract RadiantArbitrumVault is AbstractVault {
   constructor(
     IERC20Metadata asset_,
     address radiantLending_
-  ) ERC4626(asset_) ERC20("AllWeatherLP-RadiantArbitrum-DLP", "ALP-ra-dlp") {
+  ) ERC4626(asset_) ERC20("RadiantArbitrum-DLP", "ALP-ra-dlp") {
     radiantLending = ILendingPool(radiantLending_);
     lockZap = ILockZap(0x8991C4C347420E476F1cf09C03abA224A76E2997);
   }

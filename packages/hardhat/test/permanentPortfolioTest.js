@@ -4,8 +4,6 @@ const { fetch1InchSwapData,
     sushiSwapDpxLpTokenAddress,
     sushiMiniChefV2Address,
     wethAddress,
-    radiantDlpAddress,
-    radiantLendingPoolAddress,
     sushiPid,
     multiFeeDistributionAddress,
     end2endTestingAmount,
@@ -21,13 +19,13 @@ const { fetch1InchSwapData,
     gDAIRewardPoolAddress,
     glpMarketPoolAddress,
     simulateAYearLater,
-    amountAfterChargingFee
+    amountAfterChargingFee,
+    claimableRewardsTestDataForPermanentPortfolio
 } = require("./utils");
 let {currentTimestamp} = require("./utils");
 
 let wallet;
 let weth;
-let radiantVault;
 let portfolioContract;
 let oneInchSwapDataForDpx;
 let oneInchSwapDataForGDAI;
@@ -57,7 +55,6 @@ describe("All Weather Protocol", function () {
         wallet = await ethers.getImpersonatedSigner(myImpersonatedWalletAddress);
         dpxSLP = await ethers.getContractAt('IERC20Uniswap', sushiSwapDpxLpTokenAddress);
         weth = await ethers.getContractAt('IWETH', wethAddress);
-        dlpToken = await ethers.getContractAt("MockDAI", radiantDlpAddress);
         dpxToken = await ethers.getContractAt("MockDAI", dpxTokenAddress);
         fsGLP = await ethers.getContractAt("IERC20", fsGLPAddress);
         pendleGlpMarketLPT = await ethers.getContractAt("IERC20", glpMarketPoolAddress);
@@ -67,13 +64,9 @@ describe("All Weather Protocol", function () {
         gDAIToken = await ethers.getContractAt("IERC20", gDAIAddress);
         // we can check our balance in equilibria with this reward pool
         dGDAIRewardPool = await ethers.getContractAt("IERC20", gDAIRewardPoolAddress);
-        radiantLendingPool = await ethers.getContractAt("ILendingPool", radiantLendingPoolAddress);
         multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
         await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit });
 
-        const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
-        radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLendingPoolAddress);
-        await radiantVault.deployed();
 
         const DpxArbitrumVault = await ethers.getContractFactory("DpxArbitrumVault");
         dpxVault = await DpxArbitrumVault.deploy(dpxSLP.address, sushiMiniChefV2Address, sushiPid);
@@ -87,13 +80,11 @@ describe("All Weather Protocol", function () {
         equilibriaGDAIVault = await EquilibriaGDAIVault.deploy(pendleGDAIMarketLPT.address, "Equilibria-GDAI", "ALP-EQB-GDAI");
         await equilibriaGDAIVault.deployed();
 
-        const AllWeatherPortfolioLPToken = await ethers.getContractFactory("AllWeatherPortfolioLPToken");
-        portfolioContract = await AllWeatherPortfolioLPToken.connect(wallet).deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address);
+        const PermanentPortfolioLPToken = await ethers.getContractFactory("PermanentPortfolioLPToken");
+        portfolioContract = await PermanentPortfolioLPToken.connect(wallet).deploy(weth.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address);
         await portfolioContract.connect(wallet).deployed();
         await portfolioContract.setVaultAllocations([{
             protocol: "SushSwap-DpxETH", percentage: 25,
-        }, {
-            protocol: "RadiantArbitrum-DLP", percentage: 25
         }, {
             protocol: "Equilibria-GLP", percentage: 25
         }, {
@@ -126,9 +117,7 @@ describe("All Weather Protocol", function () {
             const totalAssets = await portfolioContract.totalAssets();
             for (const asset of totalAssets) {
                 if (asset.vaultName === 'SushSwap-DpxETH') {
-                    // expect(asset.assets).to.equal(await dpxVault.balanceOf(portfolioContract.address));
-                } else if (asset.vaultName === 'RadiantArbitrum-DLP') {
-                    expect(asset.assets).to.equal(await radiantVault.balanceOf(portfolioContract.address));
+                    expect(asset.assets).to.equal(await dpxVault.balanceOf(portfolioContract.address));
                 } else if (asset.vaultName === 'Equilibria-GLP') {
                     expect(asset.assets).to.equal(await equilibriaGlpVault.balanceOf(portfolioContract.address));
                 } else if (asset.vaultName === 'Equilibria-GDAI') {
@@ -140,8 +129,6 @@ describe("All Weather Protocol", function () {
         });
         it("Should be able to withdraw everything from All Weather Portfolio", async function () {
           this.timeout(240000); // Set timeout to 120 seconds
-          const radiantLockedDlpBalanceBeforeDeposit = await radiantVault.totalAssets();
-          expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
           const receipt = await deposit();
           let shares;
           for (const event of receipt.events) {
@@ -162,9 +149,7 @@ describe("All Weather Protocol", function () {
           await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, pendleZapOutData[3], { gasLimit })).wait();
           for (const asset of totalAssetsWhichShouldBeWithdrew) {
             if (asset.vaultName === 'SushSwap-DpxETH') {
-                // expect(asset.assets).to.equal(await dpxSLP.balanceOf(wallet.address));
-            } else if (asset.vaultName === 'RadiantArbitrum-DLP') {
-                expect(asset.assets).to.equal(await dlpToken.balanceOf(wallet.address));
+                expect(asset.assets).to.equal(await dpxSLP.balanceOf(wallet.address));
             } else if  (asset.vaultName === 'Equilibria-GLP') {
                 expect(asset.assets).to.equal(await pendleGlpMarketLPT.balanceOf(wallet.address));
             } else if (asset.vaultName === 'Equilibria-GDAI') {
@@ -178,5 +163,26 @@ describe("All Weather Protocol", function () {
             expect(asset.assets).to.equal(0);
           }
         });
+        it("Should be able to claim rewards", async function () {
+            const randomWallet = ethers.Wallet.createRandom();
+            this.timeout(240000); // Set timeout to 120 seconds
+            await deposit();
+            await mineBlocks(1000);
+            const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
+            await portfolioContract.connect(wallet).claim(randomWallet.address);
+
+            // dpx
+            expect(await dpxToken.balanceOf(randomWallet.address)).to.be.gt(0);
+
+            // gdai
+            expect(await pendleToken.balanceOf(wallet.address)).to.be.gt(0);
+
+            // glp
+            expect(await weth.balanceOf(wallet.address)).to.be.gt(0);
+          })
+          it("Should be able to check claimable rewards", async function () {
+            const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
+            expect(claimableRewards).to.deep.equal(claimableRewardsTestDataForPermanentPortfolio);
+          })
     });
 });

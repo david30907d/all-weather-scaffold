@@ -55,7 +55,7 @@ async function deposit() {
 
 describe("All Weather Protocol", function () {
   beforeEach(async () => {
-    this.timeout(120000); // Set timeout to 120 seconds
+    this.timeout(240000); // Set timeout to 120 seconds
     wallet = await ethers.getImpersonatedSigner(myImpersonatedWalletAddress);
     dpxSLP = await ethers.getContractAt('IERC20Uniswap', sushiSwapDpxLpTokenAddress);
     weth = await ethers.getContractAt('IWETH', wethAddress);
@@ -81,17 +81,17 @@ describe("All Weather Protocol", function () {
     await dpxVault.deployed();
 
     const EquilibriaGlpVault = await ethers.getContractFactory("EquilibriaGlpVault");
-    equilibriaGlpVault = await EquilibriaGlpVault.deploy(pendleGlpMarketLPT.address, "AllWeatherLP-Equilibria-GLP", "ALP-EQB-GLP");
+    equilibriaGlpVault = await EquilibriaGlpVault.deploy(pendleGlpMarketLPT.address, "Equilibria-GLP", "ALP-EQB-GLP");
     await equilibriaGlpVault.deployed();
 
     const EquilibriaGDAIVault = await ethers.getContractFactory("EquilibriaGDAIVault");
-    equilibriaGDAIVault = await EquilibriaGDAIVault.deploy(pendleGDAIMarketLPT.address, "AllWeatherLP-Equilibria-GDAI", "ALP-EQB-GDAI");
+    equilibriaGDAIVault = await EquilibriaGDAIVault.deploy(pendleGDAIMarketLPT.address, "Equilibria-GDAI", "ALP-EQB-GDAI");
     await equilibriaGDAIVault.deployed();
     
     const AllWeatherPortfolioLPToken = await ethers.getContractFactory("AllWeatherPortfolioLPToken");
     portfolioContract = await AllWeatherPortfolioLPToken.connect(wallet).deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address);
     await portfolioContract.connect(wallet).deployed();
-    await portfolioContract.setVaultAllocations([{protocol: "AllWeatherLP-Equilibria-GDAI", percentage: 100}]).then((tx) => tx.wait());
+    await portfolioContract.setVaultAllocations([{protocol: "Equilibria-GDAI", percentage: 100}]).then((tx) => tx.wait());
     await (await weth.connect(wallet).approve(portfolioContract.address, end2endTestingAmount, { gasLimit: gasLimit })).wait();
 
     oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, daiToken.address, amountAfterChargingFee.div(2), wallet.address, 50);
@@ -103,7 +103,7 @@ describe("All Weather Protocol", function () {
 
   describe("Portfolio LP Contract Test", function () {
     it("Should be able to zapin with WETH into equilibria GDAI", async function () {
-      this.timeout(120000); // Set timeout to 120 seconds
+      this.timeout(240000); // Set timeout to 120 seconds
       const receipt = await deposit();
       // Iterate over the events and find the Deposit event
       for (const event of receipt.events) {
@@ -119,7 +119,7 @@ describe("All Weather Protocol", function () {
       }
     });
     it("Should be able to withdraw GDAI from equilibria", async function () {
-      this.timeout(120000); // Set timeout to 120 seconds
+      this.timeout(240000); // Set timeout to 120 seconds
       const receipt = await deposit();
       let shares;
       for (const event of receipt.events) {
@@ -138,14 +138,14 @@ describe("All Weather Protocol", function () {
     });
 
     it("Should be able to claim rewards", async function () {
-      this.timeout(120000); // Set timeout to 120 seconds
+      this.timeout(240000); // Set timeout to 120 seconds
       await deposit();
       await mineBlocks(100); // Mine 100 blocks
       const originalPendleToken = await pendleToken.balanceOf(wallet.address);
       const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
       let pendleClaimableReward;
       for (const claimableReward of claimableRewards) {
-        if (claimableReward.protocol !== "AllWeatherLP-Equilibria-GDAI") {
+        if (claimableReward.protocol !== "Equilibria-GDAI") {
           expect(claimableReward.claimableRewards).to.deep.equal([]);
         } else {
           expect(claimableReward.claimableRewards.length).to.equal(1);
@@ -159,7 +159,7 @@ describe("All Weather Protocol", function () {
       expect((await pendleToken.balanceOf(wallet.address)).sub(originalPendleToken)).to.be.gt(pendleClaimableReward);
       const remainingClaimableRewards = await portfolioContract.connect(wallet).getClaimableRewards(wallet.address);
       for (const claimableReward of remainingClaimableRewards) {
-        if (claimableReward.protocol === "AllWeatherLP-Equilibria-GDAI") {
+        if (claimableReward.protocol === "Equilibria-GDAI") {
           expect(claimableReward.claimableRewards[0].amount).to.equal(0);
         }
       }

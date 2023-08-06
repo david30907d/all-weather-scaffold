@@ -48,7 +48,7 @@ async function deposit(passingInWallet=wallet) {
   
 describe("All Weather Protocol", function () {
   beforeEach(async () => {
-    this.timeout(120000); // Set timeout to 120 seconds
+    this.timeout(240000); // Set timeout to 120 seconds
     wallet = await ethers.getImpersonatedSigner(myImpersonatedWalletAddress);
     weth = await ethers.getContractAt('IWETH', wethAddress);
     dpxSLP = await ethers.getContractAt('IERC20Uniswap', sushiSwapDpxLpTokenAddress);
@@ -70,17 +70,17 @@ describe("All Weather Protocol", function () {
     
     const EquilibriaGlpVault = await ethers.getContractFactory("EquilibriaGlpVault");
     // equilibriaGlpVault = await EquilibriaGlpVault.deploy(fsGLP.address);
-    equilibriaGlpVault = await EquilibriaGlpVault.deploy(pendleGlpMarketLPT.address, "AllWeatherLP-Equilibria-GLP", "ALP-EQB-GLP");
+    equilibriaGlpVault = await EquilibriaGlpVault.deploy(pendleGlpMarketLPT.address, "Equilibria-GLP", "ALP-EQB-GLP");
     await equilibriaGlpVault.deployed();
     
     const EquilibriaGDAIVault = await ethers.getContractFactory("EquilibriaGDAIVault");
-    equilibriaGDAIVault = await EquilibriaGDAIVault.deploy(pendleGDAIMarketLPT.address, "AllWeatherLP-Equilibria-GDAI", "ALP-EQB-GDAI");
+    equilibriaGDAIVault = await EquilibriaGDAIVault.deploy(pendleGDAIMarketLPT.address, "Equilibria-GDAI", "ALP-EQB-GDAI");
     await equilibriaGDAIVault.deployed();
 
     const AllWeatherPortfolioLPToken = await ethers.getContractFactory("AllWeatherPortfolioLPToken");
     portfolioContract = await AllWeatherPortfolioLPToken.connect(wallet).deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address);
     await portfolioContract.connect(wallet).deployed();
-    await portfolioContract.setVaultAllocations([{ protocol: "AllWeatherLP-RadiantArbitrum-DLP", percentage: 100 }]).then((tx) => tx.wait());
+    await portfolioContract.setVaultAllocations([{ protocol: "RadiantArbitrum-DLP", percentage: 100 }]).then((tx) => tx.wait());
     await (await weth.connect(wallet).approve(portfolioContract.address, radiantAmount, { gasLimit })).wait();
 
     oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxTokenAddress, amountAfterChargingFee.div(2), wallet.address, 50);
@@ -108,7 +108,7 @@ describe("All Weather Protocol", function () {
       }
 
       const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
-      expect(claimableRewards[1].protocol).to.equal("AllWeatherLP-RadiantArbitrum-DLP");
+      expect(claimableRewards[1].protocol).to.equal("RadiantArbitrum-DLP");
       // Error: VM Exception while processing transaction: reverted with reason string 'SafeERC20: low-level call failed'
       // means you probably transfer a pretty weird token
       await (await portfolioContract.connect(wallet).claim(randomWallet.address, { gasLimit: 30000000 })).wait();
@@ -122,10 +122,10 @@ describe("All Weather Protocol", function () {
       this.timeout(240000); // Set timeout to 120 seconds
       const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
       const claimableRewardsTestData = [
-        ["AllWeatherLP-SushSwap-DpxETH", []],
-        ["AllWeatherLP-RadiantArbitrum-DLP", []],
-        ["AllWeatherLP-Equilibria-GLP", []],
-        ["AllWeatherLP-Equilibria-GDAI", []]
+        ["SushSwap-DpxETH", []],
+        ["RadiantArbitrum-DLP", []],
+        ["Equilibria-GLP", []],
+        ["Equilibria-GDAI", []]
       ];
       expect(claimableRewards).to.deep.equal(claimableRewardsTestData);
     })

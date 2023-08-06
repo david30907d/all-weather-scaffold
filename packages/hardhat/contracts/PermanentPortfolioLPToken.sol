@@ -12,7 +12,6 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./vaults/radiant/RadiantArbitrumVault.sol";
 import "./vaults/dopex/DpxArbitrumVault.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
@@ -24,7 +23,7 @@ import "./vaults/equilibria/EquilibriaGlpVault.sol";
 import "./vaults/equilibria/EquilibriaGDAIVault.sol";
 import "./interfaces/AbstractVault.sol";
 
-contract AllWeatherPortfolioLPToken is ERC20, Ownable {
+contract PermanentPortfolioLPToken is ERC20, Ownable {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
@@ -57,7 +56,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
 
   IERC20 public immutable asset;
   uint256 public balanceOfProtocolFee;
-  address public radiantVaultAddr;
   address payable public dpxVaultAddr;
   address public equilibriaVaultAddr;
   address public equilibriaGDAIVaultAddr;
@@ -73,22 +71,19 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
 
   constructor(
     address asset_,
-    address radiantVaultAddr_,
     address payable dpxVaultAddr_,
     address equilibriaVaultAddr_,
     address equilibriaGDAIVaultAddr_
   ) ERC20("AllWeatherVaultLP", "AWVLP") {
-    radiantVaultAddr = radiantVaultAddr_;
     dpxVaultAddr = dpxVaultAddr_;
     equilibriaVaultAddr = equilibriaVaultAddr_;
     equilibriaGDAIVaultAddr = equilibriaGDAIVaultAddr_;
     asset = ERC20(asset_);
 
     vaults = [
+      AbstractVault(EquilibriaGDAIVault(equilibriaGDAIVaultAddr)),
       AbstractVault(DpxArbitrumVault(dpxVaultAddr)),
-      AbstractVault(RadiantArbitrumVault(radiantVaultAddr)),
-      AbstractVault(EquilibriaGlpVault(equilibriaVaultAddr)),
-      AbstractVault(EquilibriaGDAIVault(equilibriaGDAIVaultAddr))
+      AbstractVault(EquilibriaGlpVault(equilibriaVaultAddr))
     ];
   }
 
@@ -191,11 +186,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
           ) > 0,
           "Buying Dpx LP token failed"
         );
-      } else if (bytesOfvaultName == keccak256(bytes("RadiantArbitrum-DLP"))) {
-        require(
-          vaults[idx].deposit(zapInAmountForThisVault) > 0,
-          "Buying Radiant LP token failed"
-        );
       } else if (bytesOfvaultName == keccak256(bytes("Equilibria-GLP"))) {
         require(
           vaults[idx].deposit(
@@ -265,10 +255,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         ) {
           // equilibria needs `output` to be passed in
           vaults[i].redeem(vaultShares, output);
-        } else if (
-          bytesOfvaultName == keccak256(bytes("RadiantArbitrum-DLP"))
-        ) {
-          vaults[i].redeem();
         } else {
           vaults[i].redeem(vaultShares);
         }

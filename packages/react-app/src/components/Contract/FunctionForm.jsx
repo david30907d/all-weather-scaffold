@@ -12,9 +12,16 @@ const getFunctionInputKey = (functionInfo, input, inputIndex) => {
   return functionInfo.name + "_" + name + "_" + input.type;
 };
 
-const isReadable = fn => fn.stateMutability === "view" || fn.stateMutability === "pure";
+const isReadable = (fn) =>
+  fn.stateMutability === "view" || fn.stateMutability === "pure";
 
-export default function FunctionForm({ contractFunction, functionInfo, provider, gasPrice, triggerRefresh }) {
+export default function FunctionForm({
+  contractFunction,
+  functionInfo,
+  provider,
+  gasPrice,
+  triggerRefresh,
+}) {
   const [form, setForm] = useState({});
   const [txValue, setTxValue] = useState();
   const [returnValue, setReturnValue] = useState();
@@ -86,7 +93,8 @@ export default function FunctionForm({ contractFunction, functionInfo, provider,
         </Tooltip>
       );
     } else if (input.type === "address") {
-      const possibleAddress = form[key] && form[key].toLowerCase && form[key].toLowerCase().trim();
+      const possibleAddress =
+        form[key] && form[key].toLowerCase && form[key].toLowerCase().trim();
       if (possibleAddress && possibleAddress.length === 42) {
         buttons = (
           <Tooltip placement="right" title="blockie">
@@ -104,7 +112,7 @@ export default function FunctionForm({ contractFunction, functionInfo, provider,
           autoComplete="off"
           value={form[key]}
           name={key}
-          onChange={event => {
+          onChange={(event) => {
             const formUpdate = { ...form };
             formUpdate[event.target.name] = event.target.value;
             setForm(formUpdate);
@@ -119,7 +127,7 @@ export default function FunctionForm({ contractFunction, functionInfo, provider,
     <div style={{ margin: 2 }} key="txValueInput">
       <Input
         placeholder="transaction value"
-        onChange={e => setTxValue(e.target.value)}
+        onChange={(e) => setTxValue(e.target.value)}
         value={txValue}
         addonAfter={
           <div>
@@ -162,7 +170,7 @@ export default function FunctionForm({ contractFunction, functionInfo, provider,
     inputs.push(txValueInput);
   }
 
-  const handleForm = returned => {
+  const handleForm = (returned) => {
     if (returned) {
       setForm({});
     }
@@ -176,7 +184,7 @@ export default function FunctionForm({ contractFunction, functionInfo, provider,
   inputs.push(
     <div style={{ cursor: "pointer", margin: 2 }} key="goButton">
       <Input
-        onChange={e => setReturnValue(e.target.value)}
+        onChange={(e) => setReturnValue(e.target.value)}
         defaultValue=""
         bordered={false}
         disabled
@@ -187,12 +195,22 @@ export default function FunctionForm({ contractFunction, functionInfo, provider,
             type="default"
             onClick={async () => {
               const args = functionInfo.inputs.map((input, inputIndex) => {
-                const key = getFunctionInputKey(functionInfo, input, inputIndex);
+                const key = getFunctionInputKey(
+                  functionInfo,
+                  input,
+                  inputIndex
+                );
                 let value = form[key];
                 if (["array", "tuple"].includes(input.baseType)) {
                   value = JSON.parse(value);
                 } else if (input.type === "bool") {
-                  if (value === "true" || value === "1" || value === "0x1" || value === "0x01" || value === "0x0001") {
+                  if (
+                    value === "true" ||
+                    value === "1" ||
+                    value === "0x1" ||
+                    value === "0x01" ||
+                    value === "0x0001"
+                  ) {
                     value = 1;
                   } else {
                     value = 0;
@@ -202,7 +220,10 @@ export default function FunctionForm({ contractFunction, functionInfo, provider,
               });
 
               let result;
-              if (functionInfo.stateMutability === "view" || functionInfo.stateMutability === "pure") {
+              if (
+                functionInfo.stateMutability === "view" ||
+                functionInfo.stateMutability === "pure"
+              ) {
                 try {
                   const returned = await contractFunction(...args);
                   handleForm(returned);
@@ -219,7 +240,7 @@ export default function FunctionForm({ contractFunction, functionInfo, provider,
                   overrides.gasPrice = gasPrice;
                 }
                 // Uncomment this if you want to skip the gas estimation for each transaction
-                // overrides.gasLimit = hexlify(1200000);
+                // overrides.gasLimit = hexlify(2400000);
 
                 // console.log("Running with extras",extras)
                 const returned = await tx(contractFunction(...args, overrides));
@@ -236,7 +257,7 @@ export default function FunctionForm({ contractFunction, functionInfo, provider,
           </div>
         }
       />
-    </div>,
+    </div>
   );
 
   return (

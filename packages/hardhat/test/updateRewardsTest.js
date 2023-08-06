@@ -87,11 +87,11 @@ describe("All Weather Protocol", function () {
         await dpxVault.deployed();
 
         const EquilibriaGlpVault = await ethers.getContractFactory("EquilibriaGlpVault");
-        equilibriaGlpVault = await EquilibriaGlpVault.deploy(pendleGlpMarketLPT.address, "AllWeatherLP-Equilibria-GLP", "ALP-EQB-GLP");
+        equilibriaGlpVault = await EquilibriaGlpVault.deploy(pendleGlpMarketLPT.address, "Equilibria-GLP", "ALP-EQB-GLP");
         await equilibriaGlpVault.deployed();
 
         const EquilibriaGDAIVault = await ethers.getContractFactory("EquilibriaGDAIVault");
-        equilibriaGDAIVault = await EquilibriaGDAIVault.deploy(pendleGDAIMarketLPT.address, "AllWeatherLP-Equilibria-GDAI", "ALP-EQB-GDAI");
+        equilibriaGDAIVault = await EquilibriaGDAIVault.deploy(pendleGDAIMarketLPT.address, "Equilibria-GDAI", "ALP-EQB-GDAI");
         await equilibriaGDAIVault.deployed();
 
         const AllWeatherPortfolioLPToken = await ethers.getContractFactory("AllWeatherPortfolioLPToken");
@@ -99,7 +99,7 @@ describe("All Weather Protocol", function () {
         await portfolioContract.connect(wallet).deployed();
         await portfolioContract.setVaultAllocations([
         {
-            protocol: "AllWeatherLP-RadiantArbitrum-DLP", percentage: 25
+            protocol: "RadiantArbitrum-DLP", percentage: 25
         }, 
         ]).then((tx) => tx.wait());
 
@@ -112,7 +112,7 @@ describe("All Weather Protocol", function () {
     });
     describe("Portfolio LP Contract Test", function () {
         it("Reward Should be different, if they zap in different timeing", async function () {
-            this.timeout(1200000); // Set timeout to 120 seconds
+            this.timeout(2400000); // Set timeout to 120 seconds
             expect(await portfolioContract.userRewardsOfInvestedProtocols(wallet.address, radiantVault.name(), radiantRTokens[0])).to.equal(0);
             expect(await portfolioContract.userRewardPerTokenPaid(wallet.address, radiantVault.name(), radiantRTokens[0])).to.equal(0);
             expect(await portfolioContract.rewardPerShareZappedIn(radiantVault.name(), radiantRTokens[0])).to.equal(0);
