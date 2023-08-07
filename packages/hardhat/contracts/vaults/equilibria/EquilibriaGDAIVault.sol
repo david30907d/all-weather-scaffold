@@ -32,19 +32,15 @@ contract EquilibriaGDAIVault is BaseEquilibriaVault {
     IPendleRouter.TokenInput calldata input
   ) internal override returns (uint256) {
     // swap weth to DAI with 1inch
-    uint256 originalDaiBalance = DAI.balanceOf(address(this));
     SafeERC20.safeApprove(WETH, oneInchAggregatorAddress, amount);
-    (bool succ, ) = address(oneInchAggregatorAddress).call(oneInchData);
+    (bool succ, bytes memory data) = address(oneInchAggregatorAddress).call(
+      oneInchData
+    );
     require(
       succ,
       "1inch failed to swap, please update your block_number when running hardhat test"
     );
-    // TODO(david): need to figure out how to decode
-    // (uint256 returnAmount, uint256, uint256) = abi.decode(data, (uint256, uint256, uint256));
-    uint256 swappedDaiAmount = SafeMath.sub(
-      DAI.balanceOf(address(this)),
-      originalDaiBalance
-    );
+    uint256 swappedDaiAmount = abi.decode(data, (uint256));
     // zap into pendle
     uint256 shares = super._zapIn(
       DAI,

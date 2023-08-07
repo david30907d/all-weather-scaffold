@@ -25,30 +25,30 @@ jobs:
       - run: yarn
       - name: Test
         run: |
-          block_number=$(curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' ${{ secrets.ARBITRUM_RPC }} | jq -r '.result')
-          DECIMAL_BLOCK_NUMBER=$(printf "%d" "$block_number")
-          BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/feeTest.js;
+          # block_number=$(curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' ${{ secrets.ARBITRUM_RPC }} | jq -r '.result')
+          # DECIMAL_BLOCK_NUMBER=$(printf "%d" "$block_number")
           BLOCK_NUMBER=118979128 yarn test test/permanentPortfolioTest.js;
           BLOCK_NUMBER=118979128 yarn test test/permanentPortfolioRewardTest.js;
+          BLOCK_NUMBER=118979128 yarn test test/feeTest.js;
 
 
-          block_number=$(curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' ${{ secrets.ARBITRUM_RPC }} | jq -r '.result')
-          DECIMAL_BLOCK_NUMBER=$(printf "%d" "$block_number")
-          BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/dpxArbitrumVaultTest.js;
-          # BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/radiantDlpVaultTest.js;
-          # BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/radiantDlpVaultRewardTest.js;
+          # block_number=$(curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' ${{ secrets.ARBITRUM_RPC }} | jq -r '.result')
+          # DECIMAL_BLOCK_NUMBER=$(printf "%d" "$block_number")
+          # BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/dpxArbitrumVaultTest.js;
+          # # BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/radiantDlpVaultTest.js;
+          # # BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/radiantDlpVaultRewardTest.js;
 
-          block_number=$(curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' ${{ secrets.ARBITRUM_RPC }} | jq -r '.result')
-          DECIMAL_BLOCK_NUMBER=$(printf "%d" "$block_number")
-          BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/equilibriaGLP.js;
+          # block_number=$(curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' ${{ secrets.ARBITRUM_RPC }} | jq -r '.result')
+          # DECIMAL_BLOCK_NUMBER=$(printf "%d" "$block_number")
+          # BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/equilibriaGLP.js;
 
-          block_number=$(curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' ${{ secrets.ARBITRUM_RPC }} | jq -r '.result')
-          DECIMAL_BLOCK_NUMBER=$(printf "%d" "$block_number")
-          BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/equilibriaGDAI.js;
-          # TODO(david): test all weather portfolio in Beta verion
-          # BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/allWeatherPortfolioTest.js
-          # BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/allWeatherPortfolioRewardTest.js
+          # block_number=$(curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' ${{ secrets.ARBITRUM_RPC }} | jq -r '.result')
+          # DECIMAL_BLOCK_NUMBER=$(printf "%d" "$block_number")
+          # BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/equilibriaGDAI.js;
+          # # TODO(david): test all weather portfolio in Beta verion
+          # # BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/allWeatherPortfolioTest.js
+          # # BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/allWeatherPortfolioRewardTest.js
 
-          block_number=$(curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' ${{ secrets.ARBITRUM_RPC }} | jq -r '.result')
-          DECIMAL_BLOCK_NUMBER=$(printf "%d" "$block_number")
-          BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/updateRewardsTest.js
+          # block_number=$(curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' ${{ secrets.ARBITRUM_RPC }} | jq -r '.result')
+          # DECIMAL_BLOCK_NUMBER=$(printf "%d" "$block_number")
+          # BLOCK_NUMBER=$DECIMAL_BLOCK_NUMBER yarn test test/updateRewardsTest.js
