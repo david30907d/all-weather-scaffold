@@ -123,8 +123,8 @@ describe("All Weather Protocol", function () {
     await (await weth.connect(wallet).approve(portfolioContract.address, radiantAmount, { gasLimit })).wait();
     console.log(squidCallData.route.transactionRequest.data)
     await portfolioContract.connect(wallet).test(radiantAmount, squidCallData.route.transactionRequest.data).then((tx) => tx.wait());
-    // oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount.div(2), wallet.address, 50);
-    // oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount, wallet.address, 50);
+    // oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount.div(2), dpxVault.address, 50);
+    // oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount, equilibriaGDAIVault.address, 50);
     // pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, dpxAmount, 0.99);
     // pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toAmount).mul(50).div(100), 0.99, daiToken.address);
     // portfolioShares = dpxAmount.div(await portfolioContract.unitOfShares());
