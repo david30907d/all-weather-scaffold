@@ -5,7 +5,8 @@ const {
     gDAIMarketPoolAddress,
     gasLimit,
     simulateAYearLater,
-    getBeforeEachSetUp
+    getBeforeEachSetUp,
+    deposit
 } = require("./utils");
 let { currentTimestamp } = require("./utils");
 
@@ -21,23 +22,6 @@ let equilibriaGDAIVault;
 let equilibriaGlpVault;
 let portfolioContract;
 
-async function deposit() {
-    const depositData = {
-        amount: end2endTestingAmount,
-        receiver: wallet.address,
-        oneInchDataDpx: oneInchSwapDataForDpx.tx.data,
-        glpMinLpOut: pendleGLPZapInData[2],
-        glpGuessPtReceivedFromSy: pendleGLPZapInData[3],
-        glpInput: pendleGLPZapInData[4],
-        gdaiMinLpOut: pendleGDAIZapInData[2],
-        gdaiGuessPtReceivedFromSy: pendleGDAIZapInData[3],
-        gdaiInput: pendleGDAIZapInData[4],
-        gdaiOneInchDataGDAI: oneInchSwapDataForGDAI.tx.data
-    }
-    return await (await portfolioContract.connect(wallet).deposit(depositData, { gasLimit })).wait();
-}
-
-
 describe("All Weather Protocol", function () {
     beforeEach(async () => {
         [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract] = await getBeforeEachSetUp();
@@ -45,7 +29,7 @@ describe("All Weather Protocol", function () {
     describe("Portfolio LP Contract Test", function () {
         it("Should be able to zapin with WETH and redeem", async function () {
             this.timeout(240000); // Set timeout to 120 seconds
-            const receipt = await deposit();
+            const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
             {
                 // Iterate over the events and find the Deposit event
                 for (const event of receipt.events) {

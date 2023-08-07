@@ -5,7 +5,8 @@ const {
     claimableRewardsTestDataForPermanentPortfolio,
     mineBlocks,
     sushiTokenAddress,
-    getBeforeEachSetUp
+    getBeforeEachSetUp,
+    deposit
 } = require("./utils");
 let wallet;
 let weth;
@@ -18,21 +19,6 @@ let dpxVault;
 let equilibriaGDAIVault;
 let equilibriaGlpVault;
 let portfolioContract;
-async function deposit() {
-    const depositData = {
-        amount: end2endTestingAmount,
-        receiver: wallet.address,
-        oneInchDataDpx: oneInchSwapDataForDpx.tx.data,
-        glpMinLpOut: pendleGLPZapInData[2],
-        glpGuessPtReceivedFromSy: pendleGLPZapInData[3],
-        glpInput: pendleGLPZapInData[4],
-        gdaiMinLpOut: pendleGDAIZapInData[2],
-        gdaiGuessPtReceivedFromSy: pendleGDAIZapInData[3],
-        gdaiInput: pendleGDAIZapInData[4],
-        gdaiOneInchDataGDAI: oneInchSwapDataForGDAI.tx.data
-    }
-    return await (await portfolioContract.connect(wallet).deposit(depositData, { gasLimit })).wait();
-}
 
 
 describe("All Weather Protocol", function () {
@@ -43,7 +29,7 @@ describe("All Weather Protocol", function () {
         it("Should be able to claim rewards", async function () {
             const randomWallet = ethers.Wallet.createRandom();
             this.timeout(240000); // Set timeout to 120 seconds
-            await deposit();
+            await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
             await mineBlocks(1000);
             const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
             for (const claimableReward of claimableRewards) {

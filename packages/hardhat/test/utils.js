@@ -140,6 +140,9 @@ async function getBeforeEachSetUp() {
   pendleToken = await ethers.getContractAt("IERC20", pendleTokenAddress);
   daiToken = await ethers.getContractAt("IERC20", daiAddress);
   gDAIToken = await ethers.getContractAt("IERC20", gDAIAddress);
+  sushiToken = await ethers.getContractAt("IERC20", sushiTokenAddress);
+  miniChefV2 = await ethers.getContractAt('IMiniChefV2', sushiMiniChefV2Address);
+
   // we can check our balance in equilibria with this reward pool
   dGDAIRewardPool = await ethers.getContractAt("IERC20", gDAIRewardPoolAddress);
   multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
@@ -193,7 +196,23 @@ async function getBeforeEachSetUp() {
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'pendleGLPZapInData.json'), JSON.stringify(pendleGLPZapInData, null, 2), 'utf8')
   }
   portfolioShares = amountAfterChargingFee.div(await portfolioContract.unitOfShares());
-  return [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract];
+  return [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2];
+}
+
+async function deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI) {
+  const depositData = {
+      amount: end2endTestingAmount,
+      receiver: wallet.address,
+      oneInchDataDpx: oneInchSwapDataForDpx.tx.data,
+      glpMinLpOut: pendleGLPZapInData[2],
+      glpGuessPtReceivedFromSy: pendleGLPZapInData[3],
+      glpInput: pendleGLPZapInData[4],
+      gdaiMinLpOut: pendleGDAIZapInData[2],
+      gdaiGuessPtReceivedFromSy: pendleGDAIZapInData[3],
+      gdaiInput: pendleGDAIZapInData[4],
+      gdaiOneInchDataGDAI: oneInchSwapDataForGDAI.tx.data
+  }
+  return await (await portfolioContract.connect(wallet).deposit(depositData, { gasLimit })).wait();
 }
 
 // common config
@@ -213,9 +232,9 @@ const claimableRewardsTestData = [
   ["Equilibria-GDAI", []]
 ];
 const claimableRewardsTestDataForPermanentPortfolio = [
-  ["Equilibria-GDAI", []],
   ["SushSwap-DpxETH", []],
-  ["Equilibria-GLP", []]
+  ["Equilibria-GLP", []],
+  ["Equilibria-GDAI", []]
 ];
 
 // sushi dpx
@@ -344,5 +363,6 @@ module.exports = {
   claimableRewardsTestData,
   amountAfterChargingFee,
   claimableRewardsTestDataForPermanentPortfolio,
-  getBeforeEachSetUp
+  getBeforeEachSetUp,
+  deposit
 };

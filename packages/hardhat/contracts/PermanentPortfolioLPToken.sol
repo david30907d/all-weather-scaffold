@@ -81,9 +81,9 @@ contract PermanentPortfolioLPToken is ERC20, Ownable {
     asset = ERC20(asset_);
 
     vaults = [
-      AbstractVault(EquilibriaGDAIVault(equilibriaGDAIVaultAddr)),
       AbstractVault(DpxArbitrumVault(dpxVaultAddr)),
-      AbstractVault(EquilibriaGlpVault(equilibriaVaultAddr))
+      AbstractVault(EquilibriaGlpVault(equilibriaVaultAddr)),
+      AbstractVault(EquilibriaGDAIVault(equilibriaGDAIVaultAddr))
     ];
   }
 
