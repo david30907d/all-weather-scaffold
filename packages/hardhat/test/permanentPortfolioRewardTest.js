@@ -120,70 +120,36 @@ describe("All Weather Protocol", function () {
         portfolioShares = amountAfterChargingFee.div(await portfolioContract.unitOfShares());
     });
     describe("Portfolio LP Contract Test", function () {
-        it("Should be able to zapin with WETH and redeem", async function () {
+        it("Should be able to claim rewards", async function () {
+            const randomWallet = ethers.Wallet.createRandom();
             this.timeout(240000); // Set timeout to 120 seconds
-            const receipt = await deposit();
-            {
-                // Iterate over the events and find the Deposit event
-                for (const event of receipt.events) {
-                    if (event.topics.includes(portfolioContract.interface.getEventTopic('Transfer'))) {
-                        const decodedEvent = portfolioContract.interface.decodeEventLog('Transfer', event.data, event.topics);
-                        if (decodedEvent.to === wallet.address && decodedEvent.from === '0x0000000000000000000000000000000000000000') {
-                            expect(await portfolioContract.balanceOf(wallet.address)).to.equal(portfolioShares);
-                            expect(decodedEvent.value).to.equal(portfolioShares);
-                        }
+            await deposit();
+            await mineBlocks(1000);
+            const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
+            for (const claimableReward of claimableRewards) {
+                for (const reward of claimableReward.claimableRewards) {
+                    if (reward.token == sushiTokenAddress) {
+                        continue
                     }
-                }
-                const totalAssets = await portfolioContract.totalAssets();
-                for (const asset of totalAssets) {
-                    if (asset.vaultName === 'SushSwap-DpxETH') {
-                        expect(asset.assets).to.equal(await dpxVault.balanceOf(portfolioContract.address));
-                    } else if (asset.vaultName === 'Equilibria-GLP') {
-                        expect(asset.assets).to.equal(await equilibriaGlpVault.balanceOf(portfolioContract.address));
-                    } else if (asset.vaultName === 'Equilibria-GDAI') {
-                        expect(asset.assets).to.equal(await equilibriaGDAIVault.balanceOf(portfolioContract.address));
-                    } else {
-                        throw new Error(`Unknown vault name ${asset.vaultName}`);
-                    }
+                    expect(reward.amount).to.be.gt(0);
                 }
             }
 
-            // redeem
-            {
-                let equilibriaShares;
-                for (const event of receipt.events) {
-                    if (event.topics.includes(equilibriaGDAIVault.interface.getEventTopic('Deposit')) && event.address === equilibriaGDAIVault.address) {
-                        const decodedEvent = equilibriaGDAIVault.interface.decodeEventLog('Deposit', event.data, event.topics);
-                        if (decodedEvent.owner === portfolioContract.address) {
-                            equilibriaShares = decodedEvent.shares;
-                        }
-                    }
-                }
 
-                currentTimestamp += 12 * 31 * 24 * 60 * 60; // Increment timestamp
-                await simulateAYearLater();
+            await portfolioContract.connect(wallet).claim(randomWallet.address);
+            // dpx
+            expect(await dpxToken.balanceOf(randomWallet.address)).to.be.gt(0);
 
-                const totalAssetsWhichShouldBeWithdrew = await portfolioContract.totalAssets();
-                const pendleZapOutData = await getPendleZapOutData(42161, gDAIMarketPoolAddress, gDAIToken.address, equilibriaShares, 1);
-                // withdraw
-                await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, pendleZapOutData[3], { gasLimit })).wait();
-                for (const asset of totalAssetsWhichShouldBeWithdrew) {
-                    if (asset.vaultName === 'SushSwap-DpxETH') {
-                        expect(asset.assets).to.equal(await dpxSLP.balanceOf(wallet.address));
-                    } else if (asset.vaultName === 'Equilibria-GLP') {
-                        expect(asset.assets).to.equal(await pendleGlpMarketLPT.balanceOf(wallet.address));
-                    } else if (asset.vaultName === 'Equilibria-GDAI') {
-                        expect(asset.assets).to.equal(await pendleGDAIMarketLPT.balanceOf(wallet.address));
-                    } else {
-                        throw new Error(`Unknown vault name ${asset.vaultName}`);
-                    }
-                }
-                const currentUnclaimedAssets = await portfolioContract.totalAssets();
-                for (const asset of currentUnclaimedAssets) {
-                    expect(asset.assets).to.equal(0);
-                }
+            // gdai
+            expect(await pendleToken.balanceOf(randomWallet.address)).to.be.gt(0);
 
-            }
-        });
+            // glp
+            expect(await weth.balanceOf(randomWallet.address)).to.be.gt(0);
+
+        })
+        it("Should be able to check claimable rewards", async function () {
+            const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
+            expect(claimableRewards).to.deep.equal(claimableRewardsTestDataForPermanentPortfolio);
+        })
     });
 });
