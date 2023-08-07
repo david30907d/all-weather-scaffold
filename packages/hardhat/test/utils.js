@@ -2,6 +2,7 @@ const { config } = require('dotenv');
 const { network, ethers } = require("hardhat");
 const got = require('got');
 const fs = require('fs');
+const path = require('path');
 const { Router, toAddress, MarketEntity } = require('@pendle/sdk-v2');
 const { Squid } = require('@0xsquid/sdk');
 
@@ -171,24 +172,24 @@ async function getBeforeEachSetUp() {
 
   try {
     console.log("read 1inch calldata and pendle calldata from json file")
-    oneInchSwapDataForDpx = JSON.parse(fs.readFileSync('oneInchSwapDataForDpx.json', 'utf8'));
-    oneInchSwapDataForGDAI = JSON.parse(fs.readFileSync('oneInchSwapDataForGDAI.json', 'utf8'));
-    pendleGDAIZapInData = JSON.parse(fs.readFileSync('pendleGDAIZapInData.json', 'utf8'));
-    pendleGLPZapInData = JSON.parse(fs.readFileSync('pendleGLPZapInData.json', 'utf8'));
+    oneInchSwapDataForDpx = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForDpx.json'), 'utf8'));
+    oneInchSwapDataForGDAI = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForGDAI.json'), 'utf8'));
+    pendleGDAIZapInData = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'pendleGDAIZapInData.json'), 'utf8'));
+    pendleGLPZapInData = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'pendleGLPZapInData.json'), 'utf8'));
   } catch (err) {
     console.error('json file not found, get new 1inch calldata and pendle calldata');
     oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxTokenAddress, amountAfterChargingFee.div(8), dpxVault.address, 50);
-    fs.writeFileSync('oneInchSwapDataForDpx.json', JSON.stringify(oneInchSwapDataForDpx, null, 2), 'utf8')
+    fs.writeFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForDpx.json'), JSON.stringify(oneInchSwapDataForDpx, null, 2), 'utf8')
 
     oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, amountAfterChargingFee.div(4), equilibriaGDAIVault.address, 50);
-    fs.writeFileSync('oneInchSwapDataForGDAI.json', JSON.stringify(oneInchSwapDataForGDAI, null, 2), 'utf8')
+    fs.writeFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForGDAI.json'), JSON.stringify(oneInchSwapDataForGDAI, null, 2), 'utf8')
 
     // oneInchSwapDataForGDAI.toAmount).div(2): due to the 1inch slippage, need to multiple by 0.95 to pass pendle zap in
     pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toAmount).mul(50).div(100), 0.2, daiToken.address);
-    fs.writeFileSync('pendleGDAIZapInData.json', JSON.stringify(pendleGDAIZapInData, null, 2), 'utf8')
+    fs.writeFileSync(path.join(__dirname, 'fixtures', 'pendleGDAIZapInData.json'), JSON.stringify(pendleGDAIZapInData, null, 2), 'utf8')
 
     pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, amountAfterChargingFee.div(4), 0.99);
-    fs.writeFileSync('pendleGLPZapInData.json', JSON.stringify(pendleGLPZapInData, null, 2), 'utf8')
+    fs.writeFileSync(path.join(__dirname, 'fixtures', 'pendleGLPZapInData.json'), JSON.stringify(pendleGLPZapInData, null, 2), 'utf8')
   }
   portfolioShares = amountAfterChargingFee.div(await portfolioContract.unitOfShares());
   return [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract];

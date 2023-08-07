@@ -1,0 +1,41 @@
+[
+  "0x78000b0605e81ea9df54b33f72ebc61b5f5c8077",
+  "0xa0192f6567f8f5dc38c53323235fd08b318d2dca",
+  {
+    "type": "BigNumber",
+    "hex": "0x891678631b224fc9"
+  },
+  {
+    "guessMin": {
+      "type": "BigNumber",
+      "hex": "0x3c5e6d109da0f6a1"
+    },
+    "guessMax": {
+      "type": "BigNumber",
+      "hex": "0x96ec10a98a126894"
+    },
+    "guessOffchain": {
+      "type": "BigNumber",
+      "hex": "0x4b760854c509344a"
+    },
+    "maxIteration": 14,
+    "eps": "1000000000000000"
+  },
+  {
+    "tokenIn": "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1",
+    "netTokenIn": {
+      "type": "BigNumber",
+      "hex": "0x013cd730000e07ef58"
+    },
+    "tokenMintSy": "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1",
+    "bulk": "0x0000000000000000000000000000000000000000",
+    "pendleSwap": "0x0000000000000000000000000000000000000000",
+    "swapData": {
+      "swapType": 0,
+      "extRouter": "0x0000000000000000000000000000000000000000",
+      "extCalldata": [],
+      "needScale": false
+    }
+  },
+  {}
+]
