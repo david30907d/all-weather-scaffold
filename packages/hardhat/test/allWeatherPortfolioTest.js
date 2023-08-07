@@ -118,7 +118,7 @@ describe("All Weather Protocol", function () {
                 if (event.topics.includes(portfolioContract.interface.getEventTopic('Transfer'))) {
                     const decodedEvent = portfolioContract.interface.decodeEventLog('Transfer', event.data, event.topics);
                     expect(await portfolioContract.balanceOf(wallet.address)).to.equal(portfolioShares);
-                    if (decodedEvent.to === wallet.address && decodedEvent.from === portfolioContract.address) {
+                    if (decodedEvent.to === wallet.address && decodedEvent.from === '0x0000000000000000000000000000000000000000') {
                         expect(decodedEvent.value).to.equal(end2endTestingAmount);
                     }
                 }
