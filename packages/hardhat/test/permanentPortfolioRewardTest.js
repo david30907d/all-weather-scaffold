@@ -23,7 +23,14 @@ let portfolioContract;
 
 describe("All Weather Protocol", function () {
     beforeEach(async () => {
-        [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract] = await getBeforeEachSetUp();
+        [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract] = await getBeforeEachSetUp([{
+            protocol: "SushSwap-DpxETH", percentage: 25,
+          }, {
+            protocol: "Equilibria-GLP", percentage: 25
+          }, {
+            protocol: "Equilibria-GDAI", percentage: 25
+          }
+          ]);
     });
     describe("Portfolio LP Contract Test", function () {
         it("Should be able to claim rewards", async function () {

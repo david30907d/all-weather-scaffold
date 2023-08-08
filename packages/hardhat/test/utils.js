@@ -129,8 +129,9 @@ const getSquidCrossChainContractCallCallData = async (fromChain, toChain, fromTo
   })
 };
 
-async function getBeforeEachSetUp() {
+async function getBeforeEachSetUp(allocations, portfolioContractName="PermanentPortfolioLPToken", ) {
   wallet = await ethers.getImpersonatedSigner(myImpersonatedWalletAddress);
+  wallet2 = await ethers.getImpersonatedSigner(myImpersonatedWalletAddress2);
   dpxSLP = await ethers.getContractAt('IERC20Uniswap', sushiSwapDpxLpTokenAddress);
   weth = await ethers.getContractAt('IWETH', wethAddress);
   dpxToken = await ethers.getContractAt("MockDAI", dpxTokenAddress);
@@ -142,11 +143,14 @@ async function getBeforeEachSetUp() {
   gDAIToken = await ethers.getContractAt("IERC20", gDAIAddress);
   sushiToken = await ethers.getContractAt("IERC20", sushiTokenAddress);
   miniChefV2 = await ethers.getContractAt('IMiniChefV2', sushiMiniChefV2Address);
+  glpRewardPool = await ethers.getContractAt("IERC20", "0x245f1d70AcAaCD219564FCcB75f108917037A960");
+  dlpToken = await ethers.getContractAt("MockDAI", radiantDlpAddress);
 
   // we can check our balance in equilibria with this reward pool
   dGDAIRewardPool = await ethers.getContractAt("IERC20", gDAIRewardPoolAddress);
   multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
   await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit });
+  await weth.connect(wallet2).deposit({ value: ethers.utils.parseEther("0.1"), gasLimit });
 
 
   const DpxArbitrumVault = await ethers.getContractFactory("DpxArbitrumVault");
@@ -161,18 +165,21 @@ async function getBeforeEachSetUp() {
   equilibriaGDAIVault = await EquilibriaGDAIVault.deploy(pendleGDAIMarketLPT.address, "Equilibria-GDAI", "ALP-EQB-GDAI");
   await equilibriaGDAIVault.deployed();
 
-  const PermanentPortfolioLPToken = await ethers.getContractFactory("PermanentPortfolioLPToken");
-  portfolioContract = await PermanentPortfolioLPToken.connect(wallet).deploy(weth.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address);
-  await portfolioContract.connect(wallet).deployed();
-  await portfolioContract.setVaultAllocations([{
-    protocol: "SushSwap-DpxETH", percentage: 25,
-  }, {
-    protocol: "Equilibria-GLP", percentage: 25
-  }, {
-    protocol: "Equilibria-GDAI", percentage: 25
+  const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
+  radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLendingPoolAddress);
+  await radiantVault.deployed();
+
+  const PortfolioContractFactory = await ethers.getContractFactory(portfolioContractName);
+  if (portfolioContractName === "PermanentPortfolioLPToken"){
+    portfolioContract = await PortfolioContractFactory.connect(wallet).deploy(weth.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address);
+  } else if (portfolioContractName === "AllWeatherPortfolioLPToken"){
+    portfolioContract = await PortfolioContractFactory.connect(wallet).deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address);
   }
-  ]).then((tx) => tx.wait());
-  await (await weth.connect(wallet).approve(portfolioContract.address, end2endTestingAmount, { gasLimit })).wait();
+
+  await portfolioContract.connect(wallet).deployed();
+  await portfolioContract.setVaultAllocations(allocations).then((tx) => tx.wait());
+  await (await weth.connect(wallet).approve(portfolioContract.address, ethers.constants.MaxUint256, { gasLimit })).wait();
+  await (await weth.connect(wallet2).approve(portfolioContract.address, ethers.constants.MaxUint256, { gasLimit })).wait();
 
   try {
     console.log("read 1inch calldata and pendle calldata from json file")
@@ -196,7 +203,7 @@ async function getBeforeEachSetUp() {
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'pendleGLPZapInData.json'), JSON.stringify(pendleGLPZapInData, null, 2), 'utf8')
   }
   portfolioShares = amountAfterChargingFee.div(await portfolioContract.unitOfShares());
-  return [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2];
+  return [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2];
 }
 
 async function deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI) {
