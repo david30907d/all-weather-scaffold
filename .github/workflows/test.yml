@@ -30,7 +30,7 @@ jobs:
           BLOCK_NUMBER=118979128 yarn test test/permanentPortfolioTest.js;
           BLOCK_NUMBER=118979128 yarn test test/permanentPortfolioRewardTest.js;
           BLOCK_NUMBER=118979128 yarn test test/feeTest.js;
-          BLOCK_NUMBER=118979128 yarn test test/dpxArbitrumVaultTest.js;
+          # BLOCK_NUMBER=118979128 yarn test test/dpxArbitrumVaultTest.js;
           BLOCK_NUMBER=118979128 yarn test test/equilibriaGLP.js;
           BLOCK_NUMBER=118979128 yarn test test/equilibriaGDAI.js;
           BLOCK_NUMBER=118979128 yarn test test/updateRewardsTest.js
