@@ -35,8 +35,6 @@ contract DpxArbitrumVault is AbstractVault {
     IERC20(0x6C2C06790b3E3E3c38e12Ee22F8183b37a13EE55);
   IERC20 public immutable sushiToken =
     IERC20(0xd4d42F0b6DEF4CE0383636770eF773390d85c61A);
-  address public immutable oneInchAggregatorAddress =
-    0x1111111254EEB25477B68fb85Ed929f73A960582;
   address public immutable sushiSwapRouterAddress =
     0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506;
   address public immutable sushiSwapDpxLpTokenAddress =

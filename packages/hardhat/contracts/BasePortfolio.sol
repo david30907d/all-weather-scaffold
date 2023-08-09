@@ -24,7 +24,7 @@ import "./vaults/equilibria/EquilibriaGlpVault.sol";
 import "./vaults/equilibria/EquilibriaGDAIVault.sol";
 import "./interfaces/AbstractVault.sol";
 
-contract AllWeatherPortfolioLPToken is ERC20, Ownable {
+contract BasePortfolio is ERC20, Ownable {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
@@ -53,15 +53,14 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     IPendleRouter.ApproxParams gdaiGuessPtReceivedFromSy;
     IPendleRouter.TokenInput gdaiInput;
     bytes gdaiOneInchDataGDAI;
+    uint256 rethMinLpOut;
+    IPendleRouter.ApproxParams rethGuessPtReceivedFromSy;
+    IPendleRouter.TokenInput rethInput;
+    bytes rethOneInchDataRETH;
   }
 
   IERC20 public immutable asset;
   uint256 public balanceOfProtocolFee;
-  address public radiantVaultAddr;
-  address payable public dpxVaultAddr;
-  address public equilibriaVaultAddr;
-  address public equilibriaGDAIVaultAddr;
-  address public equilibriaRETHVaultAddr;
 
   mapping(string => uint256) public portfolioAllocation;
   AbstractVault[] public vaults;
@@ -74,23 +73,10 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
 
   constructor(
     address asset_,
-    address radiantVaultAddr_,
-    address payable dpxVaultAddr_,
-    address equilibriaVaultAddr_,
-    address equilibriaGDAIVaultAddr_
-  ) ERC20("AllWeatherVaultLP", "AWVLP") {
-    radiantVaultAddr = radiantVaultAddr_;
-    dpxVaultAddr = dpxVaultAddr_;
-    equilibriaVaultAddr = equilibriaVaultAddr_;
-    equilibriaGDAIVaultAddr = equilibriaGDAIVaultAddr_;
+    string memory name,
+    string memory symbol
+  ) ERC20(name, symbol) {
     asset = ERC20(asset_);
-
-    vaults = [
-      AbstractVault(DpxArbitrumVault(dpxVaultAddr)),
-      AbstractVault(RadiantArbitrumVault(radiantVaultAddr)),
-      AbstractVault(EquilibriaGlpVault(equilibriaVaultAddr)),
-      AbstractVault(EquilibriaGDAIVault(equilibriaGDAIVaultAddr))
-    ];
   }
 
   modifier updateRewards() {
@@ -222,6 +208,17 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
             depositData.gdaiInput
           ) > 0,
           "Zap Into Equilibria GDAI failed"
+        );
+      } else if (bytesOfvaultName == keccak256(bytes("Equilibria-RETH"))) {
+        require(
+          vaults[idx].deposit(
+            zapInAmountForThisVault,
+            depositData.rethOneInchDataRETH,
+            depositData.rethMinLpOut,
+            depositData.rethGuessPtReceivedFromSy,
+            depositData.rethInput
+          ) > 0,
+          "Zap Into Equilibria RETH failed"
         );
       }
     }

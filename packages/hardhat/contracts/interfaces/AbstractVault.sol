@@ -14,8 +14,15 @@ abstract contract AbstractVault is ERC4626, Ownable {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
+  address public oneInchAggregatorAddress;
   IWETH public immutable WETH =
     IWETH(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1);
+
+  function setOneInchAggregatorAddress(
+    address oneInchAggregatorAddress_
+  ) external onlyOwner {
+    oneInchAggregatorAddress = oneInchAggregatorAddress_;
+  }
 
   function totalLockedAssets() public view virtual returns (uint256);
 
