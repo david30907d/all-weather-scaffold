@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { 
+const {
   end2endTestingAmount,
   getPendleZapOutData,
   mineBlocks,
@@ -12,17 +12,28 @@ const {
 
 let wallet;
 let weth;
-let radiantVault;
-let portfolioContract;
 let oneInchSwapDataForDpx;
 let oneInchSwapDataForGDAI;
-let pendleGLPZapInData;
 let pendleGDAIZapInData;
+let pendleGLPZapInData;
 let portfolioShares;
+let dpxVault;
+let equilibriaGDAIVault;
+let equilibriaGlpVault;
+let portfolioContract;
+let sushiToken;
+let miniChefV2;
 let glpRewardPool;
-describe("All Weather Protocol", function () {
+let radiantVault;
+let wallet2;
+let rethToken;
+let oneInchSwapDataForRETH;
+let pendleRETHZapInData;
+let equilibriaRETHVault;
+let pendleRETHMarketLPT;
+let pendleBooster; describe("All Weather Protocol", function () {
   beforeEach(async () => {
-    [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool] = await getBeforeEachSetUp([{
+    [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster] = await getBeforeEachSetUp([{
       protocol: "Equilibria-GLP", percentage: 100
     }
     ]);
@@ -31,7 +42,8 @@ describe("All Weather Protocol", function () {
   describe("Portfolio LP Contract Test", function () {
     it("Should be able to zapin with WETH into equilibria GLP", async function () {
       this.timeout(240000); // Set timeout to 120 seconds
-      const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
+      const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData,);
+
 
       // Iterate over the events and find the Deposit event
       for (const event of receipt.events) {
@@ -49,7 +61,8 @@ describe("All Weather Protocol", function () {
     });
     it("Should be able to withdraw GLP from equilibria", async function () {
       this.timeout(240000); // Set timeout to 120 seconds
-      const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
+      const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData,);
+
 
       let shares;
       for (const event of receipt.events) {
@@ -64,14 +77,15 @@ describe("All Weather Protocol", function () {
       // const pendleZapOutData = await getPendleZapOutData(42161, glpMarketPoolAddress, fsGLP.address, shares, 0.4);
       const pendleZapOutData = await getPendleZapOutData(42161, glpMarketPoolAddress, weth.address, shares, 1);
       // // withdraw
-      await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, pendleZapOutData[3], { gasLimit })).wait();
+      await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, { gasLimit })).wait();
       // expect(await pendleGlpMarketLPT.balanceOf(wallet.address)).to.equal(shares);
       expect(await equilibriaGlpVault.totalAssets()).to.equal(0);
     });
 
     it("Should be able to claim rewards", async function () {
       this.timeout(240000); // Set timeout to 120 seconds
-      const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
+      const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData,);
+
 
 
       await mineBlocks(100); // Mine 100 blocks

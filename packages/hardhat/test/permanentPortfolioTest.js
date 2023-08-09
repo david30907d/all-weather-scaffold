@@ -21,22 +21,35 @@ let dpxVault;
 let equilibriaGDAIVault;
 let equilibriaGlpVault;
 let portfolioContract;
+let sushiToken;
+let miniChefV2;
+let glpRewardPool;
+let radiantVault;
+let wallet2;
+let rethToken;
+let oneInchSwapDataForRETH;
+let pendleRETHZapInData;
+let equilibriaRETHVault;
+let pendleRETHMarketLPT;
+let pendleBooster;
 
 describe("All Weather Protocol", function () {
     beforeEach(async () => {
-        [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract] = await getBeforeEachSetUp([{
+        [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster] = await getBeforeEachSetUp([{
             protocol: "SushSwap-DpxETH", percentage: 25,
           }, {
             protocol: "Equilibria-GLP", percentage: 25
           }, {
             protocol: "Equilibria-GDAI", percentage: 25
+          }, {
+            protocol: "Equilibria-RETH", percentage: 25
           }
           ]);
     });
     describe("Portfolio LP Contract Test", function () {
         it("Should be able to zapin with WETH and redeem", async function () {
             this.timeout(240000); // Set timeout to 120 seconds
-            const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
+            const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData,);
             {
                 // Iterate over the events and find the Deposit event
                 for (const event of receipt.events) {
@@ -56,6 +69,8 @@ describe("All Weather Protocol", function () {
                         expect(asset.assets).to.equal(await equilibriaGlpVault.balanceOf(portfolioContract.address));
                     } else if (asset.vaultName === 'Equilibria-GDAI') {
                         expect(asset.assets).to.equal(await equilibriaGDAIVault.balanceOf(portfolioContract.address));
+                    } else if (asset.vaultName === 'Equilibria-RETH') {
+                        expect(asset.assets).to.equal(await equilibriaRETHVault.balanceOf(portfolioContract.address));
                     } else {
                         throw new Error(`Unknown vault name ${asset.vaultName}`);
                     }
@@ -78,9 +93,8 @@ describe("All Weather Protocol", function () {
                 await simulateAYearLater();
 
                 const totalAssetsWhichShouldBeWithdrew = await portfolioContract.totalAssets();
-                const pendleZapOutData = await getPendleZapOutData(42161, gDAIMarketPoolAddress, gDAIToken.address, equilibriaShares, 1);
                 // withdraw
-                await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, pendleZapOutData[3], { gasLimit })).wait();
+                await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, { gasLimit })).wait();
                 for (const asset of totalAssetsWhichShouldBeWithdrew) {
                     if (asset.vaultName === 'SushSwap-DpxETH') {
                         expect(asset.assets).to.equal(await dpxSLP.balanceOf(wallet.address));
@@ -88,6 +102,8 @@ describe("All Weather Protocol", function () {
                         expect(asset.assets).to.equal(await pendleGlpMarketLPT.balanceOf(wallet.address));
                     } else if (asset.vaultName === 'Equilibria-GDAI') {
                         expect(asset.assets).to.equal(await pendleGDAIMarketLPT.balanceOf(wallet.address));
+                    } else if (asset.vaultName === 'Equilibria-RETH') {
+                        expect(asset.assets).to.equal(await pendleRETHMarketLPT.balanceOf(wallet.address));
                     } else {
                         throw new Error(`Unknown vault name ${asset.vaultName}`);
                     }

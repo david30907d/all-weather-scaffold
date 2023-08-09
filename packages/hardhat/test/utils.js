@@ -183,7 +183,7 @@ async function getBeforeEachSetUp(allocations, portfolioContractName = "Permanen
   if (portfolioContractName === "PermanentPortfolioLPToken") {
     portfolioContract = await PortfolioContractFactory.connect(wallet).deploy(weth.address, "PermanentLP", "PNLP", dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address, equilibriaRETHVault.address);
   } else if (portfolioContractName === "AllWeatherPortfolioLPToken") {
-    portfolioContract = await PortfolioContractFactory.connect(wallet).deploy(weth.address, "AllWeatherLP", "AWLP", radiantVault.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address);
+    portfolioContract = await PortfolioContractFactory.connect(wallet).deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address);
   }
 
   await portfolioContract.connect(wallet).deployed();
