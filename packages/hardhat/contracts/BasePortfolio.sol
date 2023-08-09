@@ -236,16 +236,14 @@ contract BasePortfolio is ERC20, Ownable {
 
   function redeemAndClaim(
     uint256 shares,
-    address payable receiver,
-    IPendleRouter.TokenOutput calldata output
+    address payable receiver
   ) public updateRewards {
-    redeem(shares, receiver, output);
+    redeem(shares, receiver);
   }
 
   function redeem(
     uint256 shares,
-    address payable receiver,
-    IPendleRouter.TokenOutput calldata output
+    address payable receiver
   ) public updateRewards {
     require(shares <= totalSupply(), "Shares exceed total supply");
     claim(receiver);
@@ -257,15 +255,7 @@ contract BasePortfolio is ERC20, Ownable {
       );
       bytes32 bytesOfvaultName = keccak256(bytes(vaults[i].name()));
       if (vaultShares > 0) {
-        if (
-          bytesOfvaultName == keccak256(bytes("Equilibria-GDAI")) ||
-          bytesOfvaultName == keccak256(bytes("Equilibria-GLP"))
-        ) {
-          // equilibria needs `output` to be passed in
-          vaults[i].redeem(vaultShares, output);
-        } else if (
-          bytesOfvaultName == keccak256(bytes("RadiantArbitrum-DLP"))
-        ) {
+        if (bytesOfvaultName == keccak256(bytes("RadiantArbitrum-DLP"))) {
           vaults[i].redeem();
         } else {
           vaults[i].redeem(vaultShares);

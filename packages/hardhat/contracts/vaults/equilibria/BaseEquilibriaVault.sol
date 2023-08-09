@@ -62,34 +62,14 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     return totalStakedButWithoutLockedAssets().sub(originalShares);
   }
 
-  function redeem(
-    uint256 shares,
-    IPendleRouter.TokenOutput calldata output
-  ) public override returns (uint256) {
+  function redeem(uint256 shares) public override returns (uint256) {
     (, , address rewardPool, ) = pendleBooster.poolInfo(pid);
     SafeERC20.safeApprove(
       IBaseRewardPool(rewardPool).stakingToken(),
       address(eqbZap),
       shares
     );
-    // this would only withdraw GLP-LPT, not fsGLP
     eqbZap.withdraw(pid, shares);
-
-    // ideal solution: use eqbZap.zapOut
-    // eqbZap.zapOut(pid, 1, output, false);
-
-    // alternative: use pendleRouter.removeLiquiditySingleToken
-    // SafeERC20.safeApprove(
-    //   IERC20(asset()),
-    //   address(pendleRouter),
-    //   shares
-    // );
-    // pendleRouter.removeLiquiditySingleToken(
-    //     address(this),
-    //     asset(),
-    //     1,
-    //     output
-    // );
     claim();
     uint256 redeemShares = super.redeem(shares, msg.sender, msg.sender);
     return redeemShares;
