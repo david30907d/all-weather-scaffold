@@ -26,11 +26,11 @@ abstract contract BaseEquilibriaVault is AbstractVault {
   uint256 public immutable pid;
   address public eqbMinterAddr;
   address public pendleBoosterAddr;
-  address public immutable PENDLETOKENADDR =
+  address public constant PENDLE_TOKEN_ADDR =
     0x0c880f6761F1af8d9Aa9C466984b80DAb9a8c9e8;
-  address public immutable EQBTOKENADDR =
+  address public constant EQB_TOKEN_ADDR =
     0xBfbCFe8873fE28Dfa25f1099282b088D52bbAD9C;
-  address public immutable XEQBTOKENADDR =
+  address public constant XEQB_TOKEN_ADDR =
     0x96C4A48Abdf781e9c931cfA92EC0167Ba219ad8E;
 
   constructor(
@@ -150,7 +150,7 @@ abstract contract BaseEquilibriaVault is AbstractVault {
           totalVaultShares
         )
       });
-      if (rewardTokens[i] == PENDLETOKENADDR) {
+      if (rewardTokens[i] == PENDLE_TOKEN_ADDR) {
         pendleAmount = rewards[i].amount;
       }
     }
@@ -158,11 +158,11 @@ abstract contract BaseEquilibriaVault is AbstractVault {
       pendleAmount
     );
     rewards[rewardTokens.length] = IFeeDistribution.RewardData({
-      token: EQBTOKENADDR,
+      token: EQB_TOKEN_ADDR,
       amount: eqbAmount
     });
     rewards[rewardTokens.length + 1] = IFeeDistribution.RewardData({
-      token: XEQBTOKENADDR,
+      token: XEQB_TOKEN_ADDR,
       amount: xEqbAmount
     });
     return rewards;

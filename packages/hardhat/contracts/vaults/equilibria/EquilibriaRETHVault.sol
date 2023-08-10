@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./BaseEquilibriaVault.sol";
 
 contract EquilibriaRETHVault is BaseEquilibriaVault {
-  IERC20 public immutable RETH =
+  IERC20 public constant RETH =
     IERC20(0xEC70Dcb4A1EFa46b8F2D97C310C9c4790ba5ffA8);
 
   constructor(

@@ -12,7 +12,6 @@ import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "../../radiant/ILendingPool.sol";
 import "../../radiant/ILockZap.sol";
 import "../../radiant/IMultiFeeDistribution.sol";
-import "../../radiant/IWETHGateway.sol";
 import "../../radiant/IAToken.sol";
 import "../../radiant/IFeeDistribution.sol";
 import "../../interfaces/AbstractVault.sol";
@@ -25,10 +24,8 @@ contract RadiantArbitrumVault is AbstractVault {
 
   ILendingPool public immutable radiantLending;
   ILockZap public immutable lockZap;
-  IMultiFeeDistribution public immutable multiFeeDistribution =
+  IMultiFeeDistribution public constant MULTIFEE_DISTRIBUTION =
     IMultiFeeDistribution(0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE);
-  IWETHGateway public immutable wethGateway =
-    IWETHGateway(0xBb5cA40b2F7aF3B1ff5dbce0E9cC78F8BFa817CE);
   address[6] public radiantRewardNativeTokenAddresses = [
     0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f, // wbtc
     0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9, // usdt
@@ -82,7 +79,7 @@ contract RadiantArbitrumVault is AbstractVault {
 
   function redeem() public override returns (uint256) {
     // TODO(david): should only redeem _shares amount of dLP
-    uint256 radiantDlpShares = multiFeeDistribution.withdrawExpiredLocksFor(
+    uint256 radiantDlpShares = MULTIFEE_DISTRIBUTION.withdrawExpiredLocksFor(
       address(this)
     );
     // uint256 radiantDlpShares=1;
@@ -101,7 +98,7 @@ contract RadiantArbitrumVault is AbstractVault {
     IFeeDistribution.RewardData[]
       memory claimableRewards = getClaimableRewards();
     if (claimableRewards.length != 0) {
-      multiFeeDistribution.getAllRewards();
+      MULTIFEE_DISTRIBUTION.getAllRewards();
       super.claimRewardsFromVaultToPortfolioVault(claimableRewards);
     }
     return claimableRewards;
@@ -120,7 +117,7 @@ contract RadiantArbitrumVault is AbstractVault {
       return new IFeeDistribution.RewardData[](0);
     }
     IFeeDistribution.RewardData[]
-      memory radiantRewardData = multiFeeDistribution.claimableRewards(
+      memory radiantRewardData = MULTIFEE_DISTRIBUTION.claimableRewards(
         address(this)
       );
     return

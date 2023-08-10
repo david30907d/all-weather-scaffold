@@ -69,7 +69,7 @@ contract BasePortfolio is ERC20, Ownable {
   mapping(address => mapping(string => mapping(address => uint256)))
     public userRewardPerTokenPaid;
   mapping(string => mapping(address => uint256)) public rewardPerShareZappedIn;
-  uint256 public immutable unitOfShares = 10e15;
+  uint256 public constant UNIT_OF_SHARES = 10e15;
 
   constructor(
     address asset_,
@@ -229,12 +229,12 @@ contract BasePortfolio is ERC20, Ownable {
 
     _mint(
       depositData.receiver,
-      SafeMath.div(amountAfterDeductingFee, unitOfShares)
+      SafeMath.div(amountAfterDeductingFee, UNIT_OF_SHARES)
     );
     emit Transfer(
       address(0),
       depositData.receiver,
-      SafeMath.div(amountAfterDeductingFee, unitOfShares)
+      SafeMath.div(amountAfterDeductingFee, UNIT_OF_SHARES)
     );
   }
 

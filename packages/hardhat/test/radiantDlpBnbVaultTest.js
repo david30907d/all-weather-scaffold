@@ -127,7 +127,7 @@ describe("All Weather Protocol", function () {
     // oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, dpxAmount, equilibriaGDAIVault.address, 50);
     // pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, dpxAmount, 0.99);
     // pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toAmount).mul(50).div(100), 0.99, daiToken.address);
-    // portfolioShares = dpxAmount.div(await portfolioContract.unitOfShares());
+    // portfolioShares = dpxAmount.div(await portfolioContract.UNIT_OF_SHARES());
   });
 
   describe("Portfolio LP Contract Test", function () {

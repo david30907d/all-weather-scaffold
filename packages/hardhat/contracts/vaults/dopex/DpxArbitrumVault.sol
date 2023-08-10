@@ -31,16 +31,16 @@ contract DpxArbitrumVault is AbstractVault {
     uint256 max
   );
 
-  IERC20 public immutable dpxToken =
+  IERC20 public constant DPX_TOKEN =
     IERC20(0x6C2C06790b3E3E3c38e12Ee22F8183b37a13EE55);
-  IERC20 public immutable sushiToken =
+  IERC20 public constant SUSHI_TOKEN =
     IERC20(0xd4d42F0b6DEF4CE0383636770eF773390d85c61A);
-  address public immutable sushiSwapRouterAddress =
+  address public constant SUSHISWAP_ROUTER_ADDRESS =
     0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506;
-  address public immutable sushiSwapDpxLpTokenAddress =
+  address public constant SUSHISWAP_DPX_LPTOKEN_ADDRESS =
     0x0C1Cf6883efA1B496B01f654E247B9b419873054;
 
-  ICloneRewarderTime public immutable dpxRewarder =
+  ICloneRewarderTime public constant dpxRewarder =
     ICloneRewarderTime(0xb873813F710093CBC17836297A6feFCfc6989faF);
   IMiniChefV2 public sushiSwapMiniChef;
 
@@ -74,7 +74,11 @@ contract DpxArbitrumVault is AbstractVault {
     );
     // (uint256 dpxReturnedAmount, uint256 gasLeft) = abi.decode(data, (uint256, uint256));
     uint256 dpxReturnedAmount = abi.decode(data, (uint256));
-    SafeERC20.safeApprove(dpxToken, sushiSwapRouterAddress, dpxReturnedAmount);
+    SafeERC20.safeApprove(
+      DPX_TOKEN,
+      SUSHISWAP_ROUTER_ADDRESS,
+      dpxReturnedAmount
+    );
     WETH.withdraw(Math.mulDiv(amount, 1, 2));
 
     // deadline means current time + 5 minutes;
@@ -82,16 +86,16 @@ contract DpxArbitrumVault is AbstractVault {
     uint256 deadline = block.timestamp + 300;
 
     // slither-disable-next-line unused-return
-    (, , uint liquidity) = IUniswapV2Router01(sushiSwapRouterAddress)
+    (, , uint liquidity) = IUniswapV2Router01(SUSHISWAP_ROUTER_ADDRESS)
       .addLiquidityETH{value: address(this).balance}(
-      address(dpxToken),
+      address(DPX_TOKEN),
       dpxReturnedAmount,
       Math.mulDiv(dpxReturnedAmount, 95, 100),
       Math.mulDiv(address(this).balance, 95, 100),
       address(this),
       deadline
     );
-    IERC20(sushiSwapDpxLpTokenAddress).approve(
+    IERC20(SUSHISWAP_DPX_LPTOKEN_ADDRESS).approve(
       address(sushiSwapMiniChef),
       liquidity
     );
@@ -155,7 +159,7 @@ contract DpxArbitrumVault is AbstractVault {
     }
     rewards = new IFeeDistribution.RewardData[](2);
     rewards[0] = IFeeDistribution.RewardData({
-      token: address(sushiToken),
+      token: address(SUSHI_TOKEN),
       amount: Math.mulDiv(
         sushiSwapMiniChef.pendingSushi(pid, address(this)),
         portfolioSharesInThisVault,
@@ -163,7 +167,7 @@ contract DpxArbitrumVault is AbstractVault {
       )
     });
     rewards[1] = IFeeDistribution.RewardData({
-      token: address(dpxToken),
+      token: address(DPX_TOKEN),
       amount: Math.mulDiv(
         dpxRewarder.pendingToken(pid, address(this)),
         portfolioSharesInThisVault,
