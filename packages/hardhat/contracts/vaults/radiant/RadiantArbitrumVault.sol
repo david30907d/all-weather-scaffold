@@ -23,13 +23,13 @@ contract RadiantArbitrumVault is AbstractVault {
 
   event WithdrawFailed(address token);
 
-  ILendingPool public radiantLending;
-  ILockZap public lockZap;
+  ILendingPool public immutable radiantLending;
+  ILockZap public immutable lockZap;
   IMultiFeeDistribution public immutable multiFeeDistribution =
     IMultiFeeDistribution(0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE);
   IWETHGateway public immutable wethGateway =
     IWETHGateway(0xBb5cA40b2F7aF3B1ff5dbce0E9cC78F8BFa817CE);
-  address[] public radiantRewardNativeTokenAddresses = [
+  address[] public immutable radiantRewardNativeTokenAddresses = [
     0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f, // wbtc
     0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9, // usdt
     0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8, // usdc.e

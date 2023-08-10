@@ -44,7 +44,7 @@ contract DpxArbitrumVault is AbstractVault {
     ICloneRewarderTime(0xb873813F710093CBC17836297A6feFCfc6989faF);
   IMiniChefV2 public sushiSwapMiniChef;
 
-  uint256 public pid; // sushiSwap pid
+  uint256 public immutable pid; // sushiSwap pid
 
   constructor(
     IERC20Metadata asset_,

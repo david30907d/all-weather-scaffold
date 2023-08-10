@@ -21,9 +21,9 @@ abstract contract BaseEquilibriaVault is AbstractVault {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
-  IEqbZap public eqbZap;
-  IPendleBooster public pendleBooster;
-  uint256 public pid;
+  IEqbZap public immutable eqbZap;
+  IPendleBooster public immutable pendleBooster;
+  uint256 public immutable pid;
   address public eqbMinterAddr;
   address public pendleBoosterAddr;
   address public immutable PENDLETOKENADDR =

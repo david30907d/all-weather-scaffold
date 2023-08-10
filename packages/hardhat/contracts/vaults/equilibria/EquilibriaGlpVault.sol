@@ -18,7 +18,7 @@ contract EquilibriaGlpVault is BaseEquilibriaVault {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
-  IERC20 public fsGLP;
+  IERC20 public immutable fsGLP;
 
   constructor(
     IERC20Metadata asset_,
