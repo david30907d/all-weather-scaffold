@@ -7,7 +7,7 @@
 // claim: Takes in an account and reward tokens, and claims all the available rewards across both protocols, sending them to the account.
 // The code imports several open source libraries and uses various data structures like struct, bytes, and mapping. The SPDX-License-Identifier specifies the license for the code (MIT in this case).
 
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.21;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/interfaces/IERC4626.sol";
@@ -63,7 +63,7 @@ contract BasePortfolio is ERC20, Ownable {
   uint256 public balanceOfProtocolFee;
 
   mapping(string => uint256) public portfolioAllocation;
-  AbstractVault[] public vaults;
+  AbstractVault[] internal vaults;
   mapping(address => mapping(string => mapping(address => uint256)))
     public userRewardsOfInvestedProtocols;
   mapping(address => mapping(string => mapping(address => uint256)))
@@ -73,10 +73,14 @@ contract BasePortfolio is ERC20, Ownable {
 
   constructor(
     address asset_,
-    string memory name,
+    string memory name_,
     string memory symbol
-  ) ERC20(name, symbol) {
+  ) ERC20(name_, symbol) {
     asset = ERC20(asset_);
+  }
+
+  function getVaults() external view returns (AbstractVault[] memory) {
+    return vaults;
   }
 
   modifier updateRewards() {

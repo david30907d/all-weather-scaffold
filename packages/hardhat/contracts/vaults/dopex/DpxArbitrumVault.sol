@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // This is a Smart Contract written in Solidity. It represents a vault that allows users to deposit WETH and receive DPXV in return. The contract uses the functionalities of other smart contracts such as oneInch aggregator, SushiSwap, and MiniChefV2 to perform swaps and farming of SUSHI and DPX tokens. The contract has several functions including deposit(), redeem(), claim(), totalAssets(), totalLockedAssets(), totalStakedButWithoutLockedAssets(), and getClaimableRewards().
 
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.21;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -81,6 +81,7 @@ contract DpxArbitrumVault is AbstractVault {
     // solhint-disable-next-line not-rely-on-time
     uint256 deadline = block.timestamp + 300;
 
+    // slither-disable-next-line unused-return
     (, , uint liquidity) = IUniswapV2Router01(sushiSwapRouterAddress)
       .addLiquidityETH{value: address(this).balance}(
       address(dpxToken),

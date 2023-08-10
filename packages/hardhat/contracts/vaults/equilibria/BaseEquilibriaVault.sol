@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.21;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -62,8 +62,9 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     override
     returns (uint256)
   {
-    (, , address rewardpool, ) = pendleBooster.poolInfo(pid);
-    return IERC20(rewardpool).balanceOf(address(this));
+    // slither-disable-next-line unused-return
+    (, , address rewardPool, ) = pendleBooster.poolInfo(pid);
+    return IERC20(rewardPool).balanceOf(address(this));
   }
 
   // function getEqbReward() public view returns (uint256) {
@@ -90,6 +91,7 @@ abstract contract BaseEquilibriaVault is AbstractVault {
   }
 
   function redeem(uint256 shares) public override returns (uint256) {
+    // slither-disable-next-line unused-return
     (, , address rewardPool, ) = pendleBooster.poolInfo(pid);
     SafeERC20.safeApprove(
       IBaseRewardPool(rewardPool).stakingToken(),
@@ -130,14 +132,15 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     if (portfolioSharesInThisVault == 0 || totalVaultShares == 0) {
       return new IFeeDistribution.RewardData[](0);
     }
-    (, , address rewardpool, ) = pendleBooster.poolInfo(pid);
-    address[] memory rewardTokens = IBaseRewardPool(rewardpool)
+    // slither-disable-next-line unused-return
+    (, , address rewardPool, ) = pendleBooster.poolInfo(pid);
+    address[] memory rewardTokens = IBaseRewardPool(rewardPool)
       .getRewardTokens();
     // leave 2 spaces for EQB and xEQB
     rewards = new IFeeDistribution.RewardData[](rewardTokens.length + 2);
     for (uint256 i = 0; i < rewardTokens.length; i++) {
       uint256 amountProrata = Math.mulDiv(
-        IBaseRewardPool(rewardpool).earned(address(this), rewardTokens[i]),
+        IBaseRewardPool(rewardPool).earned(address(this), rewardTokens[i]),
         portfolioSharesInThisVault,
         totalVaultShares
       );

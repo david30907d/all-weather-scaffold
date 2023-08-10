@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.21;
 
 interface IEqbMinterSidechain {
   function DENOMINATOR() external view returns (uint256);
