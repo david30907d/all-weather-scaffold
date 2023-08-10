@@ -18,9 +18,10 @@ abstract contract AbstractVault is ERC4626, Ownable {
   IWETH public immutable WETH =
     IWETH(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1);
 
-  function setOneInchAggregatorAddress(
+  function updateOneInchAggregatorAddress(
     address oneInchAggregatorAddress_
   ) external onlyOwner {
+    require(oneInchAggregatorAddress_ != address(0), "Address cannot be zero");
     oneInchAggregatorAddress = oneInchAggregatorAddress_;
   }
 

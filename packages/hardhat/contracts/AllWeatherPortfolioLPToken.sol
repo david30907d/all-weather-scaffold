@@ -79,9 +79,25 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     address equilibriaVaultAddr_,
     address equilibriaGDAIVaultAddr_
   ) ERC20("AllWeatherVaultLP", "AWVLP") {
+    require(
+      radiantVaultAddr_ != address(0),
+      "radiantVaultAddr_ cannot be zero"
+    );
     radiantVaultAddr = radiantVaultAddr_;
+
+    require(dpxVaultAddr_ != address(0), "dpxVaultAddr_ cannot be zero");
     dpxVaultAddr = dpxVaultAddr_;
+
+    require(
+      equilibriaVaultAddr_ != address(0),
+      "equilibriaVaultAddr_ cannot be zero"
+    );
     equilibriaVaultAddr = equilibriaVaultAddr_;
+
+    require(
+      equilibriaGDAIVaultAddr_ != address(0),
+      "equilibriaGDAIVaultAddr_ cannot be zero"
+    );
     equilibriaGDAIVaultAddr = equilibriaGDAIVaultAddr_;
     asset = ERC20(asset_);
 

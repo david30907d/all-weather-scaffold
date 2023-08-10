@@ -159,7 +159,7 @@ async function getBeforeEachSetUp(allocations, portfolioContractName = "Permanen
   const DpxArbitrumVault = await ethers.getContractFactory("DpxArbitrumVault");
   dpxVault = await DpxArbitrumVault.deploy(dpxSLP.address, sushiMiniChefV2Address, sushiPid);
   await dpxVault.deployed();
-  await dpxVault.setOneInchAggregatorAddress(oneInchAddress).then((tx) => tx.wait());
+  await dpxVault.updateOneInchAggregatorAddress(oneInchAddress).then((tx) => tx.wait());
   
   const EquilibriaGlpVault = await ethers.getContractFactory("EquilibriaGlpVault");
   equilibriaGlpVault = await EquilibriaGlpVault.deploy(pendleGlpMarketLPT.address, "Equilibria-GLP", "ALP-EQB-GLP");
@@ -170,14 +170,14 @@ async function getBeforeEachSetUp(allocations, portfolioContractName = "Permanen
   const EquilibriaGDAIVault = await ethers.getContractFactory("EquilibriaGDAIVault");
   equilibriaGDAIVault = await EquilibriaGDAIVault.deploy(pendleGDAIMarketLPT.address, "Equilibria-GDAI", "ALP-EQB-GDAI");
   await equilibriaGDAIVault.deployed();
-  await equilibriaGDAIVault.setOneInchAggregatorAddress(oneInchAddress).then((tx) => tx.wait());
+  await equilibriaGDAIVault.updateOneInchAggregatorAddress(oneInchAddress).then((tx) => tx.wait());
   await equilibriaGDAIVault.updateEqbMinterAddr(eqbMinterAddress).then((tx) => tx.wait());
   await equilibriaGDAIVault.updatePendleBoosterAddr(pendleBoosterAddress).then((tx) => tx.wait());
   
   const EquilibriaRETHVault = await ethers.getContractFactory("EquilibriaRETHVault");
   equilibriaRETHVault = await EquilibriaRETHVault.deploy(pendleRETHMarketLPT.address, "Equilibria-RETH", "ALP-EQB-RETH");
   await equilibriaRETHVault.deployed();
-  await equilibriaRETHVault.setOneInchAggregatorAddress(oneInchAddress).then((tx) => tx.wait());
+  await equilibriaRETHVault.updateOneInchAggregatorAddress(oneInchAddress).then((tx) => tx.wait());
   await equilibriaRETHVault.updateEqbMinterAddr(eqbMinterAddress).then((tx) => tx.wait());
   await equilibriaRETHVault.updatePendleBoosterAddr(pendleBoosterAddress).then((tx) => tx.wait());
 

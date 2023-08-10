@@ -28,6 +28,20 @@ contract PermanentPortfolioLPToken is BasePortfolio {
     address equilibriaGDAIVaultAddr,
     address equilibriaRETHVaultAddr
   ) BasePortfolio(asset_, name_, symbol) {
+    require(dpxVaultAddr != address(0), "dpxVaultAddr cannot be zero");
+    require(
+      equilibriaVaultAddr != address(0),
+      "equilibriaVaultAddr cannot be zero"
+    );
+    require(
+      equilibriaGDAIVaultAddr != address(0),
+      "equilibriaGDAIVaultAddr cannot be zero"
+    );
+    require(
+      equilibriaRETHVaultAddr != address(0),
+      "equilibriaRETHVaultAddr cannot be zero"
+    );
+
     vaults = [
       AbstractVault(DpxArbitrumVault(dpxVaultAddr)),
       AbstractVault(EquilibriaGlpVault(equilibriaVaultAddr)),

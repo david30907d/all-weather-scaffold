@@ -35,20 +35,22 @@ abstract contract BaseEquilibriaVault is AbstractVault {
 
   constructor(
     IERC20Metadata asset_,
-    string memory name,
+    string memory name_,
     string memory symbol
-  ) ERC4626(asset_) ERC20(name, symbol) {
+  ) ERC4626(asset_) ERC20(name_, symbol) {
     eqbZap = IEqbZap(0xc7517f481Cc0a645e63f870830A4B2e580421e32);
     pendleBooster = IPendleBooster(0x4D32C8Ff2fACC771eC7Efc70d6A8468bC30C26bF);
   }
 
   function updateEqbMinterAddr(address eqbMinterAddr_) public onlyOwner {
+    require(eqbMinterAddr_ != address(0), "Address cannot be zero");
     eqbMinterAddr = eqbMinterAddr_;
   }
 
   function updatePendleBoosterAddr(
     address pendleBoosterAddr_
   ) public onlyOwner {
+    require(pendleBoosterAddr_ != address(0), "Address cannot be zero");
     pendleBoosterAddr = pendleBoosterAddr_;
   }
 
@@ -138,30 +140,31 @@ abstract contract BaseEquilibriaVault is AbstractVault {
       .getRewardTokens();
     // leave 2 spaces for EQB and xEQB
     rewards = new IFeeDistribution.RewardData[](rewardTokens.length + 2);
+    uint256 pendleAmount;
     for (uint256 i = 0; i < rewardTokens.length; i++) {
-      uint256 amountProrata = Math.mulDiv(
-        IBaseRewardPool(rewardPool).earned(address(this), rewardTokens[i]),
-        portfolioSharesInThisVault,
-        totalVaultShares
-      );
       rewards[i] = IFeeDistribution.RewardData({
         token: rewardTokens[i],
-        amount: amountProrata
+        amount: Math.mulDiv(
+          IBaseRewardPool(rewardPool).earned(address(this), rewardTokens[i]),
+          portfolioSharesInThisVault,
+          totalVaultShares
+        )
       });
       if (rewardTokens[i] == PENDLETOKENADDR) {
-        (uint256 eqbAmount, uint256 xEqbAmount) = _getEqbClaimableRewards(
-          amountProrata
-        );
-        rewards[rewardTokens.length] = IFeeDistribution.RewardData({
-          token: EQBTOKENADDR,
-          amount: eqbAmount
-        });
-        rewards[rewardTokens.length + 1] = IFeeDistribution.RewardData({
-          token: XEQBTOKENADDR,
-          amount: xEqbAmount
-        });
+        pendleAmount = rewards[i].amount;
       }
     }
+    (uint256 eqbAmount, uint256 xEqbAmount) = _getEqbClaimableRewards(
+      pendleAmount
+    );
+    rewards[rewardTokens.length] = IFeeDistribution.RewardData({
+      token: EQBTOKENADDR,
+      amount: eqbAmount
+    });
+    rewards[rewardTokens.length + 1] = IFeeDistribution.RewardData({
+      token: XEQBTOKENADDR,
+      amount: xEqbAmount
+    });
     return rewards;
   }
 
