@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity ^0.8.21;
+pragma solidity ^0.8.18;
 pragma experimental ABIEncoderV2;
 
 interface IAaveIncentivesController {

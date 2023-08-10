@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.21;
+pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -23,7 +23,7 @@ abstract contract BaseEquilibriaVault is AbstractVault {
 
   IEqbZap public immutable eqbZap;
   IPendleBooster public immutable pendleBooster;
-  uint256 public immutable pid;
+  uint256 public pid;
   address public eqbMinterAddr;
   address public pendleBoosterAddr;
   address public constant PENDLE_TOKEN_ADDR =

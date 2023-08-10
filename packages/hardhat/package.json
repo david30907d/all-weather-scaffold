@@ -37,7 +37,7 @@
     "node-watch": "^0.7.0",
     "qrcode-terminal": "^0.12.0",
     "ramda": "^0.27.1",
-    "solc": "0.8.21",
+    "solc": "0.8.18",
     "solidity-coverage": "^0.7.21"
   },
   "scripts": {
