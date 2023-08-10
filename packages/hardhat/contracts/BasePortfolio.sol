@@ -165,7 +165,7 @@ abstract contract BasePortfolio is ERC20, Ownable {
         portfolioAllocation[vaults[idx].name()],
         100
       );
-      // slither-disable-next-line 1-0-incorrect-equality
+      // slither-disable-next-line incorrect-equality
       if (zapInAmountForThisVault == 0) {
         continue;
       }
@@ -279,7 +279,7 @@ abstract contract BasePortfolio is ERC20, Ownable {
     ClaimableRewardOfAProtocol[]
       memory totalClaimableRewards = getClaimableRewards(payable(msg.sender));
     uint256 userShares = balanceOf(msg.sender);
-    // slither-disable-next-line 1-0-incorrect-equality
+    // slither-disable-next-line incorrect-equality
     if (userShares == 0) {
       return;
     }
@@ -435,7 +435,7 @@ abstract contract BasePortfolio is ERC20, Ownable {
   function _calculateRewardPerShareDuringThisPeriod(
     uint256 oneOfTheUnclaimedRewardsBelongsToThisPortfolio
   ) internal view returns (uint256) {
-    // slither-disable-next-line 1-0-incorrect-equality
+    // slither-disable-next-line incorrect-equality
     if (totalSupply() == 0) {
       return 0;
     }
