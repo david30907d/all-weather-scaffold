@@ -96,12 +96,17 @@ let pendleBooster; describe("All Weather Protocol", function () {
         if (claimableReward.protocol !== "Equilibria-GLP") {
           expect(claimableReward.claimableRewards).to.deep.equal([]);
         } else {
-          expect(claimableReward.claimableRewards.length).to.equal(2);
+          const rewardLengthOfThisVault = claimableReward.claimableRewards.length;
+          expect(rewardLengthOfThisVault).to.equal(4);
           console.log(claimableReward)
           const pendleClaimableReward = claimableReward.claimableRewards[0].amount;
           const wethClaimableReward = claimableReward.claimableRewards[1].amount;
           expect(pendleClaimableReward).to.be.gt(0);
           expect(wethClaimableReward).to.be.gt(0);
+
+          // EQB and xEQB
+          expect(Math.floor(claimableReward.claimableRewards[rewardLengthOfThisVault-2].amount/100)).to.equal(Math.floor(claimableReward.claimableRewards[rewardLengthOfThisVault-1].amount/300));
+
           await portfolioContract.connect(wallet).claim(wallet.address);
           // NOTE: using `to.be.gt` instead of `to.equal` because the reward would somehow be increased after claim(). My hunch is that `claim()` would also claim the reward for the current block.
           expect((await pendleToken.balanceOf(wallet.address)).sub(originalPendleToken)).to.be.gt(pendleClaimableReward);

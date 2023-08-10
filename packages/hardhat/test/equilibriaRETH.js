@@ -89,11 +89,17 @@ describe("All Weather Protocol", function () {
                 if (claimableReward.protocol !== "Equilibria-RETH") {
                     expect(claimableReward.claimableRewards).to.deep.equal([]);
                 } else {
-                    expect(claimableReward.claimableRewards.length).to.equal(1);
+                    const rewardLengthOfThisVault = claimableReward.claimableRewards.length;
+                    expect(rewardLengthOfThisVault).to.equal(3);
                     const pendleClaimableReward = claimableReward.claimableRewards[0].amount;
                     expect(pendleClaimableReward).to.be.gt(0);
+
+                    // EQB and xEQB
+                    expect(Math.floor(claimableReward.claimableRewards[rewardLengthOfThisVault-2].amount/100)).to.equal(Math.floor(claimableReward.claimableRewards[rewardLengthOfThisVault-1].amount/300));
+
                     await portfolioContract.connect(wallet).claim(wallet.address);
                     expect((await pendleToken.balanceOf(wallet.address)).sub(originalPendleToken)).to.be.gt(pendleClaimableReward);
+
                 }
             }
 

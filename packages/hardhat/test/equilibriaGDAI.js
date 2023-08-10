@@ -90,9 +90,12 @@ describe("All Weather Protocol", function () {
         if (claimableReward.protocol !== "Equilibria-GDAI") {
           expect(claimableReward.claimableRewards).to.deep.equal([]);
         } else {
-          expect(claimableReward.claimableRewards.length).to.equal(1);
+          const rewardLengthOfThisVault = claimableReward.claimableRewards.length;
+          expect(rewardLengthOfThisVault).to.equal(3);
           pendleClaimableReward = claimableReward.claimableRewards[0].amount;
           expect(pendleClaimableReward).to.be.gt(0);
+          // EQB and xEQB
+          expect(Math.floor(claimableReward.claimableRewards[rewardLengthOfThisVault-2].amount/100)).to.equal(Math.floor(claimableReward.claimableRewards[rewardLengthOfThisVault-1].amount/300));
         }
       }
 

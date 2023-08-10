@@ -164,16 +164,23 @@ async function getBeforeEachSetUp(allocations, portfolioContractName = "Permanen
   const EquilibriaGlpVault = await ethers.getContractFactory("EquilibriaGlpVault");
   equilibriaGlpVault = await EquilibriaGlpVault.deploy(pendleGlpMarketLPT.address, "Equilibria-GLP", "ALP-EQB-GLP");
   await equilibriaGlpVault.deployed();
+  await equilibriaGlpVault.updateEqbMinterAddr(eqbMinterAddress).then((tx) => tx.wait());
+  await equilibriaGlpVault.updatePendleBoosterAddr(pendleBoosterAddress).then((tx) => tx.wait());
   
   const EquilibriaGDAIVault = await ethers.getContractFactory("EquilibriaGDAIVault");
   equilibriaGDAIVault = await EquilibriaGDAIVault.deploy(pendleGDAIMarketLPT.address, "Equilibria-GDAI", "ALP-EQB-GDAI");
   await equilibriaGDAIVault.deployed();
   await equilibriaGDAIVault.setOneInchAggregatorAddress(oneInchAddress).then((tx) => tx.wait());
+  await equilibriaGDAIVault.updateEqbMinterAddr(eqbMinterAddress).then((tx) => tx.wait());
+  await equilibriaGDAIVault.updatePendleBoosterAddr(pendleBoosterAddress).then((tx) => tx.wait());
   
   const EquilibriaRETHVault = await ethers.getContractFactory("EquilibriaRETHVault");
   equilibriaRETHVault = await EquilibriaRETHVault.deploy(pendleRETHMarketLPT.address, "Equilibria-RETH", "ALP-EQB-RETH");
   await equilibriaRETHVault.deployed();
   await equilibriaRETHVault.setOneInchAggregatorAddress(oneInchAddress).then((tx) => tx.wait());
+  await equilibriaRETHVault.updateEqbMinterAddr(eqbMinterAddress).then((tx) => tx.wait());
+  await equilibriaRETHVault.updatePendleBoosterAddr(pendleBoosterAddress).then((tx) => tx.wait());
+
 
   const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
   radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLendingPoolAddress);
@@ -351,7 +358,8 @@ const gDAIAddress = '0xd85E038593d7A098614721EaE955EC2022B9B91B';
 
 // equilibria rETH
 const rethTokenAddress = '0xEC70Dcb4A1EFa46b8F2D97C310C9c4790ba5ffA8';
-
+const eqbMinterAddress = '0x09bae4C38B1a9142726C6F08DC4d1260B0C8e94d';
+const pendleBoosterAddress = '0x4D32C8Ff2fACC771eC7Efc70d6A8468bC30C26bF';
 // squid
 const squidRouterProxyAddress = '0xce16F69375520ab01377ce7B88f5BA8C48F8D666';
 

@@ -12,6 +12,8 @@ import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "../../interfaces/AbstractVault.sol";
 import "../../equilibria/IEqbZap.sol";
 import "../../equilibria/IBaseRewardPool.sol";
+import "../../equilibria/IEqbMinterSidechain.sol";
+import "../../equilibria/IPendleBoosterSidechain.sol";
 import "../../pendle/IPendleRouter.sol";
 import "../../pendle/IPendleBooster.sol";
 
@@ -22,6 +24,14 @@ abstract contract BaseEquilibriaVault is AbstractVault {
   IEqbZap public eqbZap;
   IPendleBooster public pendleBooster;
   uint256 public pid;
+  address public eqbMinterAddr;
+  address public pendleBoosterAddr;
+  address public immutable PENDLETOKENADDR =
+    0x0c880f6761F1af8d9Aa9C466984b80DAb9a8c9e8;
+  address public immutable EQBTOKENADDR =
+    0xBfbCFe8873fE28Dfa25f1099282b088D52bbAD9C;
+  address public immutable XEQBTOKENADDR =
+    0x96C4A48Abdf781e9c931cfA92EC0167Ba219ad8E;
 
   constructor(
     IERC20Metadata asset_,
@@ -30,6 +40,16 @@ abstract contract BaseEquilibriaVault is AbstractVault {
   ) ERC4626(asset_) ERC20(name, symbol) {
     eqbZap = IEqbZap(0xc7517f481Cc0a645e63f870830A4B2e580421e32);
     pendleBooster = IPendleBooster(0x4D32C8Ff2fACC771eC7Efc70d6A8468bC30C26bF);
+  }
+
+  function updateEqbMinterAddr(address eqbMinterAddr_) public onlyOwner {
+    eqbMinterAddr = eqbMinterAddr_;
+  }
+
+  function updatePendleBoosterAddr(
+    address pendleBoosterAddr_
+  ) public onlyOwner {
+    pendleBoosterAddr = pendleBoosterAddr_;
   }
 
   function totalLockedAssets() public pure override returns (uint256) {
@@ -45,6 +65,13 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     (, , address rewardpool, ) = pendleBooster.poolInfo(pid);
     return IERC20(rewardpool).balanceOf(address(this));
   }
+
+  // function getEqbReward() public view returns (uint256) {
+
+  //   uint256 sum = EqbMinter.getFactor/EqbMinter.DENOMINATOR * PENDLE;
+  //   uint256 EQB = Sum * PendleBooster.farmEqbShare/PendleBooster.DENOMINATOR;
+  //   uint256 xEQB = Sum - EQB;
+  // }
 
   function _zapIn(
     IERC20 zapInToken,
@@ -106,17 +133,49 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     (, , address rewardpool, ) = pendleBooster.poolInfo(pid);
     address[] memory rewardTokens = IBaseRewardPool(rewardpool)
       .getRewardTokens();
-    rewards = new IFeeDistribution.RewardData[](rewardTokens.length);
+    // leave 2 spaces for EQB and xEQB
+    rewards = new IFeeDistribution.RewardData[](rewardTokens.length + 2);
     for (uint256 i = 0; i < rewardTokens.length; i++) {
+      uint256 amountProrata = Math.mulDiv(
+        IBaseRewardPool(rewardpool).earned(address(this), rewardTokens[i]),
+        portfolioSharesInThisVault,
+        totalVaultShares
+      );
       rewards[i] = IFeeDistribution.RewardData({
         token: rewardTokens[i],
-        amount: Math.mulDiv(
-          IBaseRewardPool(rewardpool).earned(address(this), rewardTokens[i]),
-          portfolioSharesInThisVault,
-          totalVaultShares
-        )
+        amount: amountProrata
       });
+      if (rewardTokens[i] == PENDLETOKENADDR) {
+        (uint256 eqbAmount, uint256 xEqbAmount) = _getEqbClaimableRewards(
+          amountProrata
+        );
+        rewards[rewardTokens.length] = IFeeDistribution.RewardData({
+          token: EQBTOKENADDR,
+          amount: eqbAmount
+        });
+        rewards[rewardTokens.length + 1] = IFeeDistribution.RewardData({
+          token: XEQBTOKENADDR,
+          amount: xEqbAmount
+        });
+      }
     }
     return rewards;
+  }
+
+  function _getEqbClaimableRewards(
+    uint256 pendleAmount
+  ) internal view returns (uint256, uint256) {
+    uint256 sumOfEqbAndXeqb = Math.mulDiv(
+      pendleAmount,
+      IEqbMinterSidechain(eqbMinterAddr).getFactor(),
+      IEqbMinterSidechain(eqbMinterAddr).DENOMINATOR()
+    );
+    uint256 eqbAmount = Math.mulDiv(
+      sumOfEqbAndXeqb,
+      IPendleBoosterSidechain(pendleBoosterAddr).farmEqbShare(),
+      IPendleBoosterSidechain(pendleBoosterAddr).DENOMINATOR()
+    );
+    uint256 xeqbAmount = sumOfEqbAndXeqb - eqbAmount;
+    return (eqbAmount, xeqbAmount);
   }
 }
