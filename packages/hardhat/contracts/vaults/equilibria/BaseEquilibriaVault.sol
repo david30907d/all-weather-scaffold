@@ -131,6 +131,7 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     // pro rata: user's share divided by total shares, is the ratio of the reward
     uint256 portfolioSharesInThisVault = balanceOf(msg.sender);
     uint256 totalVaultShares = totalSupply();
+    // slither-disable-next-line 1-0-incorrect-equality
     if (portfolioSharesInThisVault == 0 || totalVaultShares == 0) {
       return new IFeeDistribution.RewardData[](0);
     }

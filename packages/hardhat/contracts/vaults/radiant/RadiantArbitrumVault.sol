@@ -85,7 +85,6 @@ contract RadiantArbitrumVault is AbstractVault {
     // uint256 radiantDlpShares=1;
     require(radiantDlpShares != 0, "dLP lock has not expired yet");
     uint256 vaultShare = super.redeem(radiantDlpShares, msg.sender, msg.sender);
-    require(radiantDlpShares == vaultShare, "radiantDlpShares != vaultShare");
     claim();
     return vaultShare;
   }
@@ -113,6 +112,7 @@ contract RadiantArbitrumVault is AbstractVault {
     // pro rata: portfolio's share / total shares in this vault
     uint256 portfolioSharesInThisVault = balanceOf(msg.sender);
     uint256 totalVaultShares = totalSupply();
+    // slither-disable-next-line 1-0-incorrect-equality
     if (portfolioSharesInThisVault == 0 || totalVaultShares == 0) {
       return new IFeeDistribution.RewardData[](0);
     }
@@ -134,6 +134,7 @@ contract RadiantArbitrumVault is AbstractVault {
     uint256 totalVaultShares
   ) internal pure returns (IFeeDistribution.RewardData[] memory rewards) {
     for (uint256 i = 0; i < radiantRewardData.length; i++) {
+      // slither-disable-next-line 1-0-incorrect-equality
       if (radiantRewardData[i].amount == 0) {
         continue;
       }
