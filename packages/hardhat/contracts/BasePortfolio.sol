@@ -24,7 +24,7 @@ import "./vaults/equilibria/EquilibriaGlpVault.sol";
 import "./vaults/equilibria/EquilibriaGDAIVault.sol";
 import "./interfaces/AbstractVault.sol";
 
-contract BasePortfolio is ERC20, Ownable {
+abstract contract BasePortfolio is ERC20, Ownable {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
