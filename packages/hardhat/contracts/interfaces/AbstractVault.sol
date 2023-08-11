@@ -193,11 +193,7 @@ abstract contract AbstractVault is ERC4626, Ownable {
   /* solhint-enable no-unused-vars */
 
   /* solhint-disable no-unused-vars */
-  function claim()
-    public
-    virtual
-    returns (IFeeDistribution.RewardData[] memory)
-  {
+  function claim() public virtual {
     revert("Not implemented");
   }
 

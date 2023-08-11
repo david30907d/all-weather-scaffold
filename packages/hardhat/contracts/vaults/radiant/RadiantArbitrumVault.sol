@@ -89,18 +89,13 @@ contract RadiantArbitrumVault is AbstractVault {
     return vaultShare;
   }
 
-  function claim()
-    public
-    override
-    returns (IFeeDistribution.RewardData[] memory)
-  {
+  function claim() public override {
     IFeeDistribution.RewardData[]
       memory claimableRewards = getClaimableRewards();
     if (claimableRewards.length != 0) {
       MULTIFEE_DISTRIBUTION.getAllRewards();
       super.claimRewardsFromVaultToPortfolioVault(claimableRewards);
     }
-    return claimableRewards;
   }
 
   function getClaimableRewards()

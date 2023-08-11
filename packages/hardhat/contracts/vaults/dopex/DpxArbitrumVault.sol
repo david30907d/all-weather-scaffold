@@ -72,7 +72,6 @@ contract DpxArbitrumVault is AbstractVault {
       succ,
       "1inch failed to swap, please update your block_number when running hardhat test"
     );
-    // (uint256 dpxReturnedAmount, uint256 gasLeft) = abi.decode(data, (uint256, uint256));
     uint256 dpxReturnedAmount = abi.decode(data, (uint256));
     SafeERC20.safeApprove(
       DPX_TOKEN,
@@ -109,11 +108,7 @@ contract DpxArbitrumVault is AbstractVault {
     return shares;
   }
 
-  function claim()
-    public
-    override
-    returns (IFeeDistribution.RewardData[] memory)
-  {
+  function claim() public override {
     // TODO(david): current implementation doesn't support multiple portfolio vaults
     // since harvet() would harvest all of the rewards, which is owned by multiple portfolio vaults
     IFeeDistribution.RewardData[]
@@ -122,7 +117,6 @@ contract DpxArbitrumVault is AbstractVault {
       sushiSwapMiniChef.harvest(pid, address(this));
       super.claimRewardsFromVaultToPortfolioVault(claimableRewards);
     }
-    return claimableRewards;
   }
 
   function totalLockedAssets() public pure override returns (uint256) {
@@ -137,6 +131,7 @@ contract DpxArbitrumVault is AbstractVault {
   {
     /// `amount` LP token amount the user has provided.
     /// `rewardDebt` The amount of SUSHI entitled to the user.
+    // slither-disable-next-line unused-return
     (uint256 amount, ) = sushiSwapMiniChef.userInfo(pid, address(this));
     return amount;
   }

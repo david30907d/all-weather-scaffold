@@ -117,11 +117,7 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     return redeemShares;
   }
 
-  function claim()
-    public
-    override
-    returns (IFeeDistribution.RewardData[] memory)
-  {
+  function claim() public override {
     IFeeDistribution.RewardData[]
       memory claimableRewards = getClaimableRewards();
     if (claimableRewards.length != 0) {
@@ -130,7 +126,6 @@ abstract contract BaseEquilibriaVault is AbstractVault {
       eqbZap.claimRewards(pids);
       super.claimRewardsFromVaultToPortfolioVault(claimableRewards);
     }
-    return claimableRewards;
   }
 
   function getClaimableRewards()
