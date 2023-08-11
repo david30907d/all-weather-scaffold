@@ -13,7 +13,7 @@ contract EquilibriaRETHVault is BaseEquilibriaVault {
     string memory name_,
     string memory symbol
   ) BaseEquilibriaVault(asset_, name_, symbol) {
-    pid = 8;
+    _initializePid(8);
   }
 
   function totalUnstakedAssets() public view override returns (uint256) {

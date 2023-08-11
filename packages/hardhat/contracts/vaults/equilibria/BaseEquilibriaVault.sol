@@ -32,6 +32,7 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     0xBfbCFe8873fE28Dfa25f1099282b088D52bbAD9C;
   address public constant XEQB_TOKEN_ADDR =
     0x96C4A48Abdf781e9c931cfA92EC0167Ba219ad8E;
+  bool private _initialized = false;
 
   constructor(
     IERC20Metadata asset_,
@@ -40,6 +41,16 @@ abstract contract BaseEquilibriaVault is AbstractVault {
   ) ERC4626(asset_) ERC20(name_, symbol) {
     eqbZap = IEqbZap(0xc7517f481Cc0a645e63f870830A4B2e580421e32);
     pendleBooster = IPendleBooster(0x4D32C8Ff2fACC771eC7Efc70d6A8468bC30C26bF);
+  }
+
+  modifier onlyOnce() {
+    require(!_initialized, "Already initialized");
+    _;
+    _initialized = true;
+  }
+
+  function _initializePid(uint256 pid_) internal onlyOnce onlyOwner {
+    pid = pid_;
   }
 
   function updateEqbMinterAddr(address eqbMinterAddr_) public onlyOwner {
@@ -131,7 +142,7 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     // pro rata: user's share divided by total shares, is the ratio of the reward
     uint256 portfolioSharesInThisVault = balanceOf(msg.sender);
     uint256 totalVaultShares = totalSupply();
-    // slither-disable-next-line 1-0-incorrect-equality
+    // slither-disable-next-line incorrect-equality
     if (portfolioSharesInThisVault == 0 || totalVaultShares == 0) {
       return new IFeeDistribution.RewardData[](0);
     }
@@ -141,7 +152,7 @@ abstract contract BaseEquilibriaVault is AbstractVault {
       .getRewardTokens();
     // leave 2 spaces for EQB and xEQB
     rewards = new IFeeDistribution.RewardData[](rewardTokens.length + 2);
-    uint256 pendleAmount;
+    uint256 pendleAmount = 0;
     for (uint256 i = 0; i < rewardTokens.length; i++) {
       rewards[i] = IFeeDistribution.RewardData({
         token: rewardTokens[i],

@@ -12,7 +12,7 @@ contract EquilibriaGDAIVault is BaseEquilibriaVault {
     string memory name_,
     string memory symbol
   ) BaseEquilibriaVault(asset_, name_, symbol) {
-    pid = 2;
+    _initializePid(2);
     // // asset
     DAI = IERC20(0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1);
   }

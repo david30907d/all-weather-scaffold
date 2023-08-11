@@ -25,7 +25,7 @@ contract EquilibriaGlpVault is BaseEquilibriaVault {
     string memory name_,
     string memory symbol
   ) BaseEquilibriaVault(asset_, name_, symbol) {
-    pid = 1;
+    _initializePid(1);
     fsGLP = IERC20(0x1aDDD80E6039594eE970E5872D247bf0414C8903);
   }
 
