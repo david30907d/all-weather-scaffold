@@ -35,7 +35,7 @@ jobs:
         sarif: results.sarif
         fail-on: none
         target: 'packages/hardhat/contracts/'
-        slither-args: --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/ --filter-paths node_modules
+        slither-args: --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/ --filter-paths "node_modules|contracts/1inch|contracts/dpx|contracts/equilibria|contracts/pendle|contracts/radiant|contracts/sushiSwap"
 
     - name: Upload SARIF file
       uses: github/codeql-action/upload-sarif@v2

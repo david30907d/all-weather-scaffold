@@ -42,7 +42,7 @@ contract DpxArbitrumVault is AbstractVault {
 
   ICloneRewarderTime public constant dpxRewarder =
     ICloneRewarderTime(0xb873813F710093CBC17836297A6feFCfc6989faF);
-  IMiniChefV2 public sushiSwapMiniChef;
+  IMiniChefV2 public immutable sushiSwapMiniChef;
 
   uint256 public immutable pid; // sushiSwap pid
 

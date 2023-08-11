@@ -57,11 +57,11 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
 
   IERC20 public immutable asset;
   uint256 public balanceOfProtocolFee;
-  address public radiantVaultAddr;
-  address payable public dpxVaultAddr;
-  address public equilibriaVaultAddr;
-  address public equilibriaGDAIVaultAddr;
-  address public equilibriaRETHVaultAddr;
+  address public immutable radiantVaultAddr;
+  address payable public immutable dpxVaultAddr;
+  address public immutable equilibriaVaultAddr;
+  address public immutable equilibriaGDAIVaultAddr;
+  address public immutable equilibriaRETHVaultAddr;
 
   mapping(string => uint256) public portfolioAllocation;
   AbstractVault[] public vaults;
