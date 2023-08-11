@@ -64,7 +64,7 @@ contract DpxArbitrumVault is AbstractVault {
       oneInchAggregatorAddress,
       Math.mulDiv(amount, 1, 2)
     );
-    // solhint-disable-next-line low-level-calls
+    // slither-disable-next-line low-level-calls
     (bool succ, bytes memory data) = address(oneInchAggregatorAddress).call(
       oneInchData
     );
@@ -94,7 +94,8 @@ contract DpxArbitrumVault is AbstractVault {
       address(this),
       deadline
     );
-    IERC20(SUSHISWAP_DPX_LPTOKEN_ADDRESS).approve(
+    SafeERC20.safeApprove(
+      IERC20(SUSHISWAP_DPX_LPTOKEN_ADDRESS),
       address(sushiSwapMiniChef),
       liquidity
     );

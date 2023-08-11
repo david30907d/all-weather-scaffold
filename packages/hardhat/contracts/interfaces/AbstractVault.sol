@@ -101,7 +101,7 @@ abstract contract AbstractVault is ERC4626, Ownable {
     return _mintShares(shares, shares);
   }
 
-  function _prepareForDeposit(uint256 amount) public virtual {
+  function _prepareForDeposit(uint256 amount) internal virtual {
     require(amount <= maxDeposit(msg.sender), "ERC4626: deposit more than max");
     SafeERC20.safeTransferFrom(WETH, msg.sender, address(this), amount);
   }
@@ -152,7 +152,7 @@ abstract contract AbstractVault is ERC4626, Ownable {
   function _mintShares(
     uint256 shares,
     uint256 amount
-  ) public virtual returns (uint256) {
+  ) internal virtual returns (uint256) {
     _mint(msg.sender, shares);
     emit Deposit(_msgSender(), msg.sender, amount, shares);
     return shares;
