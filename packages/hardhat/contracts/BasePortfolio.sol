@@ -435,7 +435,7 @@ abstract contract BasePortfolio is ERC20, Ownable {
   function _calcualteUserEarnedBeforeThisUpdateAction(
     string memory protocolNameOfThisVault,
     address addressOfReward
-  ) public view returns (uint256) {
+  ) internal view returns (uint256) {
     return
       (rewardPerShareZappedIn[protocolNameOfThisVault][addressOfReward] -
         userRewardPerTokenPaid[msg.sender][protocolNameOfThisVault][

@@ -5,7 +5,8 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./BaseEquilibriaVault.sol";
 
 contract EquilibriaGDAIVault is BaseEquilibriaVault {
-  IERC20 public immutable DAI;
+  IERC20 public constant DAI =
+    IERC20(0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1);
 
   constructor(
     IERC20Metadata asset_,
@@ -13,8 +14,6 @@ contract EquilibriaGDAIVault is BaseEquilibriaVault {
     string memory symbol
   ) BaseEquilibriaVault(asset_, name_, symbol) {
     _initializePid(2);
-    // // asset
-    DAI = IERC20(0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1);
   }
 
   function totalUnstakedAssets() public view override returns (uint256) {
