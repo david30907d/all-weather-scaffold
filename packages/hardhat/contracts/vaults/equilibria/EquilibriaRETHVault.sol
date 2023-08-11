@@ -29,6 +29,7 @@ contract EquilibriaRETHVault is BaseEquilibriaVault {
   ) internal override returns (uint256) {
     // swap weth to RETH with 1inch
     SafeERC20.safeApprove(WETH, oneInchAggregatorAddress, amount);
+    // solhint-disable-next-line low-level-calls
     (bool succ, bytes memory data) = address(oneInchAggregatorAddress).call(
       oneInchData
     );

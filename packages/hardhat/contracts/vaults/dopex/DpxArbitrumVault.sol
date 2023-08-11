@@ -64,7 +64,7 @@ contract DpxArbitrumVault is AbstractVault {
       oneInchAggregatorAddress,
       Math.mulDiv(amount, 1, 2)
     );
-    // solhint-disable-next-line avoid-low-level-calls
+    // solhint-disable-next-line low-level-calls
     (bool succ, bytes memory data) = address(oneInchAggregatorAddress).call(
       oneInchData
     );
