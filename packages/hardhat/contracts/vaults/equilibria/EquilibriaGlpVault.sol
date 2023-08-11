@@ -9,9 +9,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-import "../../equilibria/IEqbZap.sol";
-import "../../pendle/IPendleRouter.sol";
-import "../../pendle/IPendleBooster.sol";
+import "../../3rd/equilibria/IEqbZap.sol";
+import "../../3rd/pendle/IPendleRouter.sol";
+import "../../3rd/pendle/IPendleBooster.sol";
 import "./BaseEquilibriaVault.sol";
 
 contract EquilibriaGlpVault is BaseEquilibriaVault {

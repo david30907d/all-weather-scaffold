@@ -16,10 +16,10 @@ import "./vaults/radiant/RadiantArbitrumVault.sol";
 import "./vaults/dopex/DpxArbitrumVault.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "./radiant/IFeeDistribution.sol";
+import "./3rd/radiant/IFeeDistribution.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
-import "./pendle/IPendleRouter.sol";
+import "./3rd/pendle/IPendleRouter.sol";
 import "./vaults/equilibria/EquilibriaGlpVault.sol";
 import "./vaults/equilibria/EquilibriaGDAIVault.sol";
 import "./interfaces/AbstractVault.sol";
@@ -61,7 +61,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   address payable public immutable dpxVaultAddr;
   address public immutable equilibriaVaultAddr;
   address public immutable equilibriaGDAIVaultAddr;
-  address public immutable equilibriaRETHVaultAddr;
 
   mapping(string => uint256) public portfolioAllocation;
   AbstractVault[] public vaults;

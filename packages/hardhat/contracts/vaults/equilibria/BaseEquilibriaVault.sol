@@ -10,12 +10,12 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 import "../../interfaces/AbstractVault.sol";
-import "../../equilibria/IEqbZap.sol";
-import "../../equilibria/IBaseRewardPool.sol";
-import "../../equilibria/IEqbMinterSidechain.sol";
-import "../../equilibria/IPendleBoosterSidechain.sol";
-import "../../pendle/IPendleRouter.sol";
-import "../../pendle/IPendleBooster.sol";
+import "../../3rd/equilibria/IEqbZap.sol";
+import "../../3rd/equilibria/IBaseRewardPool.sol";
+import "../../3rd/equilibria/IEqbMinterSidechain.sol";
+import "../../3rd/equilibria/IPendleBoosterSidechain.sol";
+import "../../3rd/pendle/IPendleRouter.sol";
+import "../../3rd/pendle/IPendleBooster.sol";
 
 abstract contract BaseEquilibriaVault is AbstractVault {
   using SafeERC20 for IERC20;

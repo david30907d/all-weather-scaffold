@@ -9,11 +9,11 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-import "../../radiant/ILendingPool.sol";
-import "../../radiant/ILockZap.sol";
-import "../../radiant/IMultiFeeDistribution.sol";
-import "../../radiant/IAToken.sol";
-import "../../radiant/IFeeDistribution.sol";
+import "../../3rd/radiant/ILendingPool.sol";
+import "../../3rd/radiant/ILockZap.sol";
+import "../../3rd/radiant/IMultiFeeDistribution.sol";
+import "../../3rd/radiant/IAToken.sol";
+import "../../3rd/radiant/IFeeDistribution.sol";
 import "../../interfaces/AbstractVault.sol";
 
 contract RadiantArbitrumVault is AbstractVault {

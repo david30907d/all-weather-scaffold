@@ -6,9 +6,9 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-import "../radiant/IFeeDistribution.sol";
+import "../3rd/radiant/IFeeDistribution.sol";
 import "../utils/IWETH.sol";
-import "../pendle/IPendleRouter.sol";
+import "../3rd/pendle/IPendleRouter.sol";
 
 abstract contract AbstractVault is ERC4626, Ownable {
   using SafeERC20 for IERC20;
