@@ -154,8 +154,10 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     string[] memory nameOfVaults = new string[](vaults.length);
     uint256[] memory percentages = new uint256[](vaults.length);
     for (uint256 i = 0; i < vaults.length; i++) {
-      nameOfVaults[i] = vaults[i].name();
-      percentages[i] = portfolioAllocation[vaults[i].name()];
+      // slither-disable-next-line calls-loop
+      string memory nameOfThisVault = vaults[i].name();
+      nameOfVaults[i] = nameOfThisVault;
+      percentages[i] = portfolioAllocation[nameOfThisVault];
     }
     return (nameOfVaults, percentages);
   }
@@ -184,10 +186,12 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     );
 
     for (uint256 idx = 0; idx < vaults.length; idx++) {
-      bytes32 bytesOfvaultName = keccak256(bytes(vaults[idx].name()));
+      // slither-disable-next-line calls-loop
+      string memory nameOfThisVault = vaults[idx].name();
+      bytes32 bytesOfvaultName = keccak256(bytes(nameOfThisVault));
       uint256 zapInAmountForThisVault = Math.mulDiv(
         amountAfterDeductingFee,
-        portfolioAllocation[vaults[idx].name()],
+        portfolioAllocation[nameOfThisVault],
         100
       );
       // slither-disable-next-line incorrect-equality
@@ -201,6 +205,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       );
 
       if (bytesOfvaultName == keccak256(bytes("SushSwap-DpxETH"))) {
+        // slither-disable-next-line calls-loop
         require(
           vaults[idx].deposit(
             zapInAmountForThisVault,
@@ -209,11 +214,13 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
           "Buying Dpx LP token failed"
         );
       } else if (bytesOfvaultName == keccak256(bytes("RadiantArbitrum-DLP"))) {
+        // slither-disable-next-line calls-loop
         require(
           vaults[idx].deposit(zapInAmountForThisVault) > 0,
           "Buying Radiant LP token failed"
         );
       } else if (bytesOfvaultName == keccak256(bytes("Equilibria-GLP"))) {
+        // slither-disable-next-line calls-loop
         require(
           vaults[idx].deposit(
             zapInAmountForThisVault,
@@ -229,6 +236,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         // In short, you need to lower the amount of Dai that you zapin to getPendleZapInData()
         // since there's 2 steps: weth -> dai -> gdai
         // so slippage is the culprit to get this error
+        // slither-disable-next-line calls-loop
         require(
           vaults[idx].deposit(
             zapInAmountForThisVault,
@@ -280,15 +288,18 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
           bytesOfvaultName == keccak256(bytes("Equilibria-GDAI")) ||
           bytesOfvaultName == keccak256(bytes("Equilibria-GLP"))
         ) {
-          // equilibria needs `output` to be passed in
+          // slither-disable-next-line calls-loop
           vaults[i].redeem(vaultShares, output);
         } else if (
           bytesOfvaultName == keccak256(bytes("RadiantArbitrum-DLP"))
         ) {
+          // slither-disable-next-line calls-loop
           vaults[i].redeem();
         } else {
+          // slither-disable-next-line calls-loop
           vaults[i].redeem(vaultShares);
         }
+        // slither-disable-next-line calls-loop
         SafeERC20.safeTransfer(
           IERC20(vaults[i].asset()),
           receiver,
@@ -345,7 +356,9 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         vaults.length
       );
     for (uint256 vaultIdx = 0; vaultIdx < vaults.length; vaultIdx++) {
+      // slither-disable-next-line calls-loop
       string memory protocolNameOfThisVault = vaults[vaultIdx].name();
+      // slither-disable-next-line calls-loop
       IFeeDistribution.RewardData[] memory claimableRewardsOfThisVault = vaults[
         vaultIdx
       ].getClaimableRewards();

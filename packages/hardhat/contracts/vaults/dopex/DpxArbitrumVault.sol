@@ -102,10 +102,9 @@ contract DpxArbitrumVault is AbstractVault {
     return liquidity;
   }
 
-  function redeem(uint256 shares) public override returns (uint256) {
+  function redeem(uint256 shares) public override {
     sushiSwapMiniChef.withdrawAndHarvest(pid, shares, address(this));
     super.redeem(shares, msg.sender, msg.sender);
-    return shares;
   }
 
   function claim() public override {

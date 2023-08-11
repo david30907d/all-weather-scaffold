@@ -44,6 +44,7 @@ contract RadiantArbitrumVault is AbstractVault {
   }
 
   function totalLockedAssets() public view override returns (uint256) {
+    // slither-disable-next-line unused-return
     (uint256 lockedBalances, , , , ) = IFeeDistribution(
       0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE
     ).lockedBalances(address(this));
@@ -77,16 +78,15 @@ contract RadiantArbitrumVault is AbstractVault {
     return shares;
   }
 
-  function redeem() public override returns (uint256) {
+  function redeem() public override {
     // TODO(david): should only redeem _shares amount of dLP
     uint256 radiantDlpShares = MULTIFEE_DISTRIBUTION.withdrawExpiredLocksFor(
       address(this)
     );
     // uint256 radiantDlpShares=1;
     require(radiantDlpShares != 0, "dLP lock has not expired yet");
-    uint256 vaultShare = super.redeem(radiantDlpShares, msg.sender, msg.sender);
+    super.redeem(radiantDlpShares, msg.sender, msg.sender);
     claim();
-    return vaultShare;
   }
 
   function claim() public override {

@@ -129,8 +129,10 @@ abstract contract BasePortfolio is ERC20, Ownable {
     string[] memory nameOfVaults = new string[](vaults.length);
     uint256[] memory percentages = new uint256[](vaults.length);
     for (uint256 i = 0; i < vaults.length; i++) {
-      nameOfVaults[i] = vaults[i].name();
-      percentages[i] = portfolioAllocation[vaults[i].name()];
+      // slither-disable-next-line calls-loop
+      string memory nameOfThisVault = vaults[i].name();
+      nameOfVaults[i] = nameOfThisVault;
+      percentages[i] = portfolioAllocation[nameOfThisVault];
     }
     return (nameOfVaults, percentages);
   }
@@ -159,10 +161,12 @@ abstract contract BasePortfolio is ERC20, Ownable {
     );
 
     for (uint256 idx = 0; idx < vaults.length; idx++) {
-      bytes32 bytesOfvaultName = keccak256(bytes(vaults[idx].name()));
+      // slither-disable-next-line calls-loop
+      string memory nameOfThisVault = vaults[idx].name();
+      bytes32 bytesOfvaultName = keccak256(bytes(nameOfThisVault));
       uint256 zapInAmountForThisVault = Math.mulDiv(
         amountAfterDeductingFee,
-        portfolioAllocation[vaults[idx].name()],
+        portfolioAllocation[nameOfThisVault],
         100
       );
       // slither-disable-next-line incorrect-equality
@@ -176,6 +180,7 @@ abstract contract BasePortfolio is ERC20, Ownable {
       );
 
       if (bytesOfvaultName == keccak256(bytes("SushSwap-DpxETH"))) {
+        // slither-disable-next-line calls-loop
         require(
           vaults[idx].deposit(
             zapInAmountForThisVault,
@@ -184,11 +189,13 @@ abstract contract BasePortfolio is ERC20, Ownable {
           "Buying Dpx LP token failed"
         );
       } else if (bytesOfvaultName == keccak256(bytes("RadiantArbitrum-DLP"))) {
+        // slither-disable-next-line calls-loop
         require(
           vaults[idx].deposit(zapInAmountForThisVault) > 0,
           "Buying Radiant LP token failed"
         );
       } else if (bytesOfvaultName == keccak256(bytes("Equilibria-GLP"))) {
+        // slither-disable-next-line calls-loop
         require(
           vaults[idx].deposit(
             zapInAmountForThisVault,
@@ -204,6 +211,7 @@ abstract contract BasePortfolio is ERC20, Ownable {
         // In short, you need to lower the amount of Dai that you zapin to getPendleZapInData()
         // since there's 2 steps: weth -> dai -> gdai
         // so slippage is the culprit to get this error
+        // slither-disable-next-line calls-loop
         require(
           vaults[idx].deposit(
             zapInAmountForThisVault,
@@ -215,6 +223,7 @@ abstract contract BasePortfolio is ERC20, Ownable {
           "Zap Into Equilibria GDAI failed"
         );
       } else if (bytesOfvaultName == keccak256(bytes("Equilibria-RETH"))) {
+        // slither-disable-next-line calls-loop
         require(
           vaults[idx].deposit(
             zapInAmountForThisVault,
@@ -321,7 +330,9 @@ abstract contract BasePortfolio is ERC20, Ownable {
         vaults.length
       );
     for (uint256 vaultIdx = 0; vaultIdx < vaults.length; vaultIdx++) {
+      // slither-disable-next-line calls-loop
       string memory protocolNameOfThisVault = vaults[vaultIdx].name();
+      // slither-disable-next-line calls-loop
       IFeeDistribution.RewardData[] memory claimableRewardsOfThisVault = vaults[
         vaultIdx
       ].getClaimableRewards();

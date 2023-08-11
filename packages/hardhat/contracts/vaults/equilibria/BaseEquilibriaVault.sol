@@ -103,7 +103,7 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     return totalStakedButWithoutLockedAssets().sub(originalShares);
   }
 
-  function redeem(uint256 shares) public override returns (uint256) {
+  function redeem(uint256 shares) public override {
     // slither-disable-next-line unused-return
     (, , address rewardPool, ) = pendleBooster.poolInfo(pid);
     SafeERC20.safeApprove(
@@ -113,8 +113,7 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     );
     eqbZap.withdraw(pid, shares);
     claim();
-    uint256 redeemShares = super.redeem(shares, msg.sender, msg.sender);
-    return redeemShares;
+    super.redeem(shares, msg.sender, msg.sender);
   }
 
   function claim() public override {
@@ -149,6 +148,7 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     rewards = new IFeeDistribution.RewardData[](rewardTokens.length + 2);
     uint256 pendleAmount = 0;
     for (uint256 i = 0; i < rewardTokens.length; i++) {
+      // slither-disable-next-line calls-loop
       rewards[i] = IFeeDistribution.RewardData({
         token: rewardTokens[i],
         amount: Math.mulDiv(

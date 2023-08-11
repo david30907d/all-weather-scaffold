@@ -171,12 +171,12 @@ abstract contract AbstractVault is ERC4626, Ownable {
   }
 
   /* solhint-disable no-unused-vars */
-  function redeem() public virtual returns (uint256) {
+  function redeem() public virtual {
     revert("Not implemented");
   }
 
   /* solhint-disable no-unused-vars */
-  function redeem(uint256 shares) public virtual returns (uint256) {
+  function redeem(uint256 shares) public virtual {
     revert("Not implemented");
   }
 
@@ -186,7 +186,7 @@ abstract contract AbstractVault is ERC4626, Ownable {
   function redeem(
     uint256 shares,
     IPendleRouter.TokenOutput calldata output
-  ) public virtual returns (uint256) {
+  ) public virtual {
     revert("Not implemented");
   }
 
