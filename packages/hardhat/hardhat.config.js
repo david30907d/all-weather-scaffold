@@ -281,9 +281,7 @@ module.exports = {
     goerliArbitrum: {
       url: "https://goerli-rollup.arbitrum.io/rpc/",
       chainId: 421613,
-      accounts: {
-        mnemonic: mnemonic(),
-      },
+      accounts: [`0x${PRIVATE_KEY}`]
     },
     devnetArbitrum: {
       url: "https://nitro-devnet.arbitrum.io/rpc",
