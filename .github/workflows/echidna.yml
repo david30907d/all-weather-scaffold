@@ -1,0 +1,36 @@
+name: Echidna Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+        API_URL: ${{ secrets.API_URL }}
+        PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}  
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Use Node.js 16
+      uses: actions/setup-node@v2
+      with:
+        node-version: 16
+        cache: 'yarn'
+    - name: Install dependencies
+      run: yarn install
+    - name: Compile contracts
+      run: |
+        BLOCK_NUMBER=118979128 yarn compile
+        yarn add -W @openzeppelin/contracts
+        node .github/scripts/replaceStringForSlither.js        
+    - name: Run Echidna
+      uses: crytic/echidna-action@v2
+      with:
+        solc-version: 0.8.18
+        files: packages/hardhat/contracts/
+        contract: PermanentPortfolioLPToken
+        crytic-args: --hardhat-ignore-compile
