@@ -7,7 +7,7 @@
 // claim: Takes in an account and reward tokens, and claims all the available rewards across both protocols, sending them to the account.
 // The code imports several open source libraries and uses various data structures like struct, bytes, and mapping. The SPDX-License-Identifier specifies the license for the code (MIT in this case).
 
-pragma solidity ^0.8.18;
+pragma solidity 0.8.18;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./vaults/dopex/DpxArbitrumVault.sol";
 import "./vaults/equilibria/EquilibriaGlpVault.sol";
@@ -22,12 +22,12 @@ contract PermanentPortfolioLPToken is BasePortfolio {
   constructor(
     address asset_,
     string memory name_,
-    string memory symbol,
+    string memory symbol_,
     address payable dpxVaultAddr,
     address equilibriaVaultAddr,
     address equilibriaGDAIVaultAddr,
     address equilibriaRETHVaultAddr
-  ) BasePortfolio(asset_, name_, symbol) {
+  ) BasePortfolio(asset_, name_, symbol_) {
     require(dpxVaultAddr != address(0), "dpxVaultAddr cannot be zero");
     require(
       equilibriaVaultAddr != address(0),

@@ -2,7 +2,7 @@
 
 ## Deploy & Verify
 
-`npx hardhat run --network goerliArbitrum  deploy/deployPermanentPortfolio.js`
+`npx hardhat run --network arbitrumGoerli deploy/deployPermanentPortfolio.js`
 
 ## Test
 

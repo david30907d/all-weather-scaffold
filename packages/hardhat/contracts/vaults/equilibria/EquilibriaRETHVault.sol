@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.18;
+pragma solidity 0.8.18;
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./BaseEquilibriaVault.sol";
 
@@ -11,8 +11,8 @@ contract EquilibriaRETHVault is BaseEquilibriaVault {
   constructor(
     IERC20Metadata asset_,
     string memory name_,
-    string memory symbol
-  ) BaseEquilibriaVault(asset_, name_, symbol) {
+    string memory symbol_
+  ) BaseEquilibriaVault(asset_, name_, symbol_) {
     _initializePid(8);
   }
 

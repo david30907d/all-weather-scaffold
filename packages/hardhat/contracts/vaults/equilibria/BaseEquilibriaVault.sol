@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.18;
+pragma solidity 0.8.18;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -38,8 +38,8 @@ abstract contract BaseEquilibriaVault is AbstractVault {
   constructor(
     IERC20Metadata asset_,
     string memory name_,
-    string memory symbol
-  ) ERC4626(asset_) ERC20(name_, symbol) {
+    string memory symbol_
+  ) ERC4626(asset_) ERC20(name_, symbol_) {
     eqbZap = IEqbZap(0xc7517f481Cc0a645e63f870830A4B2e580421e32);
     pendleBooster = IPendleBooster(0x4D32C8Ff2fACC771eC7Efc70d6A8468bC30C26bF);
   }

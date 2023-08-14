@@ -7,7 +7,7 @@
 // claim: Takes in an account and reward tokens, and claims all the available rewards across both protocols, sending them to the account.
 // The code imports several open source libraries and uses various data structures like struct, bytes, and mapping. The SPDX-License-Identifier specifies the license for the code (MIT in this case).
 
-pragma solidity ^0.8.18;
+pragma solidity 0.8.18;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/interfaces/IERC4626.sol";
@@ -74,8 +74,8 @@ abstract contract BasePortfolio is ERC20, Ownable {
   constructor(
     address asset_,
     string memory name_,
-    string memory symbol
-  ) ERC20(name_, symbol) {
+    string memory symbol_
+  ) ERC20(name_, symbol_) {
     asset = ERC20(asset_);
   }
 
