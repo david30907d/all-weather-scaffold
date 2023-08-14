@@ -6,7 +6,8 @@ const {
   gasLimit,
   deposit,
   getBeforeEachSetUp,
-  glpMarketPoolAddress
+  glpMarketPoolAddress,
+  simulateTimeElasped
 } = require("./utils");
 
 
@@ -33,7 +34,7 @@ let equilibriaRETHVault;
 let pendleRETHMarketLPT;
 let pendleBooster; describe("All Weather Protocol", function () {
   beforeEach(async () => {
-    [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster] = await getBeforeEachSetUp([{
+    [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken] = await getBeforeEachSetUp([{
       protocol: "Equilibria-GLP", percentage: 100
     }
     ]);
@@ -73,12 +74,10 @@ let pendleBooster; describe("All Weather Protocol", function () {
           }
         }
       }
-      // TODO(david): need to change tokenOutAddress to GLP later
-      // const pendleZapOutData = await getPendleZapOutData(42161, glpMarketPoolAddress, fsGLP.address, shares, 0.4);
       const pendleZapOutData = await getPendleZapOutData(42161, glpMarketPoolAddress, weth.address, shares, 1);
       // // withdraw
       await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, { gasLimit })).wait();
-      // expect(await pendleGlpMarketLPT.balanceOf(wallet.address)).to.equal(shares);
+      expect(await pendleGlpMarketLPT.balanceOf(wallet.address)).to.equal(shares);
       expect(await equilibriaGlpVault.totalAssets()).to.equal(0);
     });
 
@@ -92,20 +91,21 @@ let pendleBooster; describe("All Weather Protocol", function () {
       const originalPendleToken = await pendleToken.balanceOf(wallet.address);
       const originalWethBalance = await weth.balanceOf(wallet.address);
       const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
+      let eqbClaimableReward;
       for (const claimableReward of claimableRewards) {
         if (claimableReward.protocol !== "Equilibria-GLP") {
           expect(claimableReward.claimableRewards).to.deep.equal([]);
         } else {
           const rewardLengthOfThisVault = claimableReward.claimableRewards.length;
-          expect(rewardLengthOfThisVault).to.equal(4);
-          console.log(claimableReward)
+          expect(rewardLengthOfThisVault).to.equal(3);
           const pendleClaimableReward = claimableReward.claimableRewards[0].amount;
           const wethClaimableReward = claimableReward.claimableRewards[1].amount;
           expect(pendleClaimableReward).to.be.gt(0);
           expect(wethClaimableReward).to.be.gt(0);
 
-          // EQB and xEQB
-          expect(Math.floor(claimableReward.claimableRewards[rewardLengthOfThisVault-2].amount/100)).to.equal(Math.floor(claimableReward.claimableRewards[rewardLengthOfThisVault-1].amount/300));
+          // ratio between Pendle:EQB is 2:1
+          eqbClaimableReward = claimableReward.claimableRewards[rewardLengthOfThisVault-1].amount;
+          expect(Math.floor(pendleClaimableReward/eqbClaimableReward)).to.equal(2);
 
           await portfolioContract.connect(wallet).claim(wallet.address);
           // NOTE: using `to.be.gt` instead of `to.equal` because the reward would somehow be increased after claim(). My hunch is that `claim()` would also claim the reward for the current block.
@@ -121,6 +121,15 @@ let pendleBooster; describe("All Weather Protocol", function () {
           expect(remainingClaimableReward.claimableRewards[1].amount).to.equal(0);
         }
       }
+      const xEqbTokenBalance = await xEqbToken.balanceOf(equilibriaGlpVault.address);
+      await equilibriaGlpVault.connect(wallet).redeemXEQB(xEqbTokenBalance, 86400*7*24);
+      timeElasped = 24 * 7 * 86400; // 24 weeks later
+      await simulateTimeElasped(timeElasped);
+      await equilibriaGlpVault.connect(wallet).finalizeRedeem(0);
+      expect(await eqbToken.balanceOf(wallet.address)).to.be.gt(xEqbTokenBalance);
+      // ratio between xEQB:EQB is 3:1
+      expect(Math.floor(xEqbTokenBalance/eqbClaimableReward)).to.be.equal(3);  
+
     })
     it("Should be able to check claimable rewards", async function () {
       const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);

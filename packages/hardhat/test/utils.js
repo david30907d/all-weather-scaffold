@@ -132,7 +132,7 @@ const getSquidCrossChainContractCallCallData = async (fromChain, toChain, fromTo
 async function getBeforeEachSetUp(allocations, portfolioContractName = "PermanentPortfolioLPToken",) {
   wallet = await ethers.getImpersonatedSigner(myImpersonatedWalletAddress);
   wallet2 = await ethers.getImpersonatedSigner(myImpersonatedWalletAddress2);
-  const [dpxSLP, weth, dpxToken, fsGLP, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, pendleToken, daiToken, gDAIToken, sushiToken, miniChefV2, glpRewardPool, dlpToken, rethToken, pendleBooster, dGDAIRewardPool,multiFeeDistribution] = await initTokens();
+  const [dpxSLP, weth, dpxToken, fsGLP, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, pendleToken, daiToken, gDAIToken, sushiToken, miniChefV2, glpRewardPool, dlpToken, rethToken, pendleBooster, dGDAIRewardPool,multiFeeDistribution, xEqbToken, eqbToken] = await initTokens();
 
   await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit });
   await weth.connect(wallet2).deposit({ value: ethers.utils.parseEther("0.1"), gasLimit });
@@ -171,7 +171,7 @@ async function getBeforeEachSetUp(allocations, portfolioContractName = "Permanen
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'pendleRETHZapInData.json'), JSON.stringify(pendleRETHZapInData, null, 2), 'utf8')
   }
   portfolioShares = amountAfterChargingFee.div(await portfolioContract.UNIT_OF_SHARES());
-  return [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster];
+  return [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken];
 }
 
 async function initTokens() {
@@ -191,34 +191,36 @@ async function initTokens() {
   dlpToken = await ethers.getContractAt("MockDAI", radiantDlpAddress);
   rethToken = await ethers.getContractAt("IERC20", rethTokenAddress);
   pendleBooster = await ethers.getContractAt("IPendleBooster", "0x4D32C8Ff2fACC771eC7Efc70d6A8468bC30C26bF");
+  xEqbToken = await ethers.getContractAt("IERC20", "0x96C4A48Abdf781e9c931cfA92EC0167Ba219ad8E");
+  eqbToken = await ethers.getContractAt("IERC20", "0xBfbCFe8873fE28Dfa25f1099282b088D52bbAD9C");
 
   // we can check our balance in equilibria with this reward pool
   dGDAIRewardPool = await ethers.getContractAt("IERC20", gDAIRewardPoolAddress);
   multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
-  return [dpxSLP, weth, dpxToken, fsGLP, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, pendleToken, daiToken, gDAIToken, sushiToken, miniChefV2, glpRewardPool, dlpToken, rethToken, pendleBooster, dGDAIRewardPool,multiFeeDistribution]
+  return [dpxSLP, weth, dpxToken, fsGLP, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, pendleToken, daiToken, gDAIToken, sushiToken, miniChefV2, glpRewardPool, dlpToken, rethToken, pendleBooster, dGDAIRewardPool,multiFeeDistribution, xEqbToken, eqbToken]
 }
 
 async function deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid, oneInchAddress, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, radiantLendingPoolAddress, eqbMinterAddress, pendleBoosterAddress, allocations, portfolioContractName = "PermanentPortfolioLPToken") {
   const DpxArbitrumVault = await ethers.getContractFactory("DpxArbitrumVault");
-  dpxVault = await DpxArbitrumVault.deploy(dpxSLP.address, sushiMiniChefV2Address, sushiPid);
+  dpxVault = await DpxArbitrumVault.connect(wallet).deploy(dpxSLP.address, sushiMiniChefV2Address, sushiPid);
   await dpxVault.deployed();
   await dpxVault.updateOneInchAggregatorAddress(oneInchAddress).then((tx) => tx.wait());
 
   const EquilibriaGlpVault = await ethers.getContractFactory("EquilibriaGlpVault");
-  equilibriaGlpVault = await EquilibriaGlpVault.deploy(pendleGlpMarketLPT.address, "Equilibria-GLP", "ALP-EQB-GLP");
+  equilibriaGlpVault = await EquilibriaGlpVault.connect(wallet).deploy(pendleGlpMarketLPT.address, "Equilibria-GLP", "ALP-EQB-GLP");
   await equilibriaGlpVault.deployed();
   await equilibriaGlpVault.updateEqbMinterAddr(eqbMinterAddress).then((tx) => tx.wait());
   await equilibriaGlpVault.updatePendleBoosterAddr(pendleBoosterAddress).then((tx) => tx.wait());
 
   const EquilibriaGDAIVault = await ethers.getContractFactory("EquilibriaGDAIVault");
-  equilibriaGDAIVault = await EquilibriaGDAIVault.deploy(pendleGDAIMarketLPT.address, "Equilibria-GDAI", "ALP-EQB-GDAI");
+  equilibriaGDAIVault = await EquilibriaGDAIVault.connect(wallet).deploy(pendleGDAIMarketLPT.address, "Equilibria-GDAI", "ALP-EQB-GDAI");
   await equilibriaGDAIVault.deployed();
   await equilibriaGDAIVault.updateOneInchAggregatorAddress(oneInchAddress).then((tx) => tx.wait());
   await equilibriaGDAIVault.updateEqbMinterAddr(eqbMinterAddress).then((tx) => tx.wait());
   await equilibriaGDAIVault.updatePendleBoosterAddr(pendleBoosterAddress).then((tx) => tx.wait());
 
   const EquilibriaRETHVault = await ethers.getContractFactory("EquilibriaRETHVault");
-  equilibriaRETHVault = await EquilibriaRETHVault.deploy(pendleRETHMarketLPT.address, "Equilibria-RETH", "ALP-EQB-RETH");
+  equilibriaRETHVault = await EquilibriaRETHVault.connect(wallet).deploy(pendleRETHMarketLPT.address, "Equilibria-RETH", "ALP-EQB-RETH");
   await equilibriaRETHVault.deployed();
   await equilibriaRETHVault.updateOneInchAggregatorAddress(oneInchAddress).then((tx) => tx.wait());
   await equilibriaRETHVault.updateEqbMinterAddr(eqbMinterAddress).then((tx) => tx.wait());
@@ -226,7 +228,7 @@ async function deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid,
 
 
   const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
-  radiantVault = await RadiantArbitrumVault.deploy(dlpToken.address, radiantLendingPoolAddress);
+  radiantVault = await RadiantArbitrumVault.connect(wallet).deploy(dlpToken.address, radiantLendingPoolAddress);
   await radiantVault.deployed();
 
   const PortfolioContractFactory = await ethers.getContractFactory(portfolioContractName);
@@ -242,7 +244,7 @@ async function deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid,
 }
 
 async function deployContractsToChain(wallet, allocations, portfolioContractName) {
-  const [dpxSLP, weth, dpxToken, fsGLP, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, pendleToken, daiToken, gDAIToken, sushiToken, miniChefV2, glpRewardPool, dlpToken, rethToken, pendleBooster, dGDAIRewardPool,multiFeeDistribution] = await initTokens();
+  const [dpxSLP, weth, dpxToken, fsGLP, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, pendleToken, daiToken, gDAIToken, sushiToken, miniChefV2, glpRewardPool, dlpToken, rethToken, pendleBooster, dGDAIRewardPool,multiFeeDistribution, xEqbToken, eqbToken] = await initTokens();
   return await deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid, oneInchAddress, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, radiantLendingPoolAddress, eqbMinterAddress, pendleBoosterAddress, allocations, portfolioContractName);
 }
 
@@ -308,10 +310,9 @@ const wbnbAddress = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 const radiantBscLockZapPoolAddress = '0x13Ef2A9e127aE8d9e9b863c7e375Ba68E1a42Ac6';
 // radiant has an one year lock, therefore need these timestamp-related variables
 let currentTimestamp = Math.floor(Date.now() / 1000);;
-async function simulateAYearLater() {
+async function simulateTimeElasped(timeElasped=12*31*86400) {
   // Simulate a year later
-  const oneMonthInSeconds = 12 * 31 * 24 * 60 * 60;
-  const futureTimestamp = currentTimestamp + oneMonthInSeconds;
+  const futureTimestamp = currentTimestamp + timeElasped;
   await ethers.provider.send('evm_setNextBlockTimestamp', [futureTimestamp]);
   await ethers.provider.send('evm_mine');
 }
@@ -409,7 +410,7 @@ module.exports = {
   gDAIRewardPoolAddress,
   gDAIAddress,
   end2endTestingAmount,
-  simulateAYearLater,
+  simulateTimeElasped,
   currentTimestamp,
   radiantLockZapPoolAddress,
   squidRouterProxyAddress,

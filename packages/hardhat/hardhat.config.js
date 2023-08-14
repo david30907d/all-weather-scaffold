@@ -278,7 +278,7 @@ module.exports = {
         mnemonic: mnemonic(),
       },
     },
-    goerliArbitrum: {
+    arbitrumGoerli: {
       url: "https://goerli-rollup.arbitrum.io/rpc/",
       chainId: 421613,
       accounts: [`0x${PRIVATE_KEY}`]
@@ -329,15 +329,18 @@ module.exports = {
     },
   },
   etherscan: {
-    apiKey: {
-      mainnet: "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW",
-      goerli: "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW",
-      kovan: "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW",
-      rinkeby: "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW",
-      ropsten: "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW",
-      sepolia: "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW",
-      // add other network's API key here
-    },
+    apiKey: '5GAY3U1N3BGFJKGFXG6V3EEIUC84EAXYU6'
+    // apiKey: {
+    //   mainnet: "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW",
+    //   goerli: "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW",
+    //   kovan: "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW",
+    //   rinkeby: "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW",
+    //   ropsten: "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW",
+    //   sepolia: "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW",
+    //   arbitrumGoerli: '5GAY3U1N3BGFJKGFXG6V3EEIUC84EAXYU6',
+    //   arbitrum: '5GAY3U1N3BGFJKGFXG6V3EEIUC84EAXYU6'
+    //   // add other network's API key here
+    // },
   },
   abiExporter: {
     path: "../react-app/src/contracts/ABI",

@@ -4,7 +4,7 @@ const {
     getPendleZapOutData,
     gDAIMarketPoolAddress,
     gasLimit,
-    simulateAYearLater,
+    simulateTimeElasped,
     getBeforeEachSetUp,
     deposit
 } = require("./utils");
@@ -90,7 +90,7 @@ describe("All Weather Protocol", function () {
                 }
 
                 currentTimestamp += 12 * 31 * 24 * 60 * 60; // Increment timestamp
-                await simulateAYearLater();
+                await simulateTimeElasped();
 
                 const totalAssetsWhichShouldBeWithdrew = await portfolioContract.totalAssets();
                 // withdraw

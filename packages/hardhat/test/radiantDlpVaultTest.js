@@ -17,7 +17,7 @@ const { fetch1InchSwapData,
   fakePendleZapOut,
   daiAddress,
   amountAfterChargingFee,
-  simulateAYearLater,
+  simulateTimeElasped,
 } = require("./utils");
 let {currentTimestamp} = require("./utils");
 
@@ -118,7 +118,7 @@ describe("All Weather Protocol", function () {
       expect(radiantLockedDlpBalanceAfterDeposit).to.gt(0);
 
       currentTimestamp += 24 * 31 * 24 * 60 * 60; // Increment timestamp
-      await simulateAYearLater();
+      await simulateTimeElasped();
 
       // withdraw
       // Error: VM Exception while processing transaction: reverted with reason string 'SafeERC20: low-level call failed'

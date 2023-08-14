@@ -7,7 +7,7 @@ const {
     deposit,
     getBeforeEachSetUp,
     glpMarketPoolAddress,
-    simulateAYearLater,
+    simulateTimeElasped,
     fakePendleZapOut,
     radiantRTokens
 } = require("./utils"); let { currentTimestamp } = require("./utils");
@@ -126,7 +126,7 @@ describe("All Weather Protocol", function () {
         //     await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
 
         //     currentTimestamp += 24 * 31 * 24 * 60 * 60; // Increment timestamp
-        //     await simulateAYearLater();
+        //     await simulateTimeElasped();
 
         //     await (await portfolioContract.connect(wallet).redeem(portfolioContract.balanceOf(wallet.address), wallet.address, fakePendleZapOut, { gasLimit: 30000000 })).wait();
         //     expect(await portfolioContract.userRewardsOfInvestedProtocols(wallet.address, radiantVault.name(), radiantRTokens[0])).to.equal(0);

@@ -14,6 +14,7 @@ import "../../3rd/equilibria/IEqbZap.sol";
 import "../../3rd/equilibria/IBaseRewardPool.sol";
 import "../../3rd/equilibria/IEqbMinterSidechain.sol";
 import "../../3rd/equilibria/IPendleBoosterSidechain.sol";
+import "../../3rd/equilibria/IXEqbToken.sol";
 import "../../3rd/pendle/IPendleRouter.sol";
 import "../../3rd/pendle/IPendleBooster.sol";
 
@@ -145,7 +146,7 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     address[] memory rewardTokens = IBaseRewardPool(rewardPool)
       .getRewardTokens();
     // leave 2 spaces for EQB and xEQB
-    rewards = new IFeeDistribution.RewardData[](rewardTokens.length + 2);
+    rewards = new IFeeDistribution.RewardData[](rewardTokens.length + 1);
     uint256 pendleAmount = 0;
     for (uint256 i = 0; i < rewardTokens.length; i++) {
       // slither-disable-next-line calls-loop
@@ -161,23 +162,30 @@ abstract contract BaseEquilibriaVault is AbstractVault {
         pendleAmount = rewards[i].amount;
       }
     }
-    (uint256 eqbAmount, uint256 xEqbAmount) = _getEqbClaimableRewards(
-      pendleAmount
-    );
+    uint256 eqbAmount = _getEqbClaimableRewards(pendleAmount);
     rewards[rewardTokens.length] = IFeeDistribution.RewardData({
       token: EQB_TOKEN_ADDR,
       amount: eqbAmount
     });
-    rewards[rewardTokens.length + 1] = IFeeDistribution.RewardData({
-      token: XEQB_TOKEN_ADDR,
-      amount: xEqbAmount
-    });
     return rewards;
+  }
+
+  function redeemXEQB(uint256 amount, uint256 duration) external onlyOwner {
+    IXEqbToken(XEQB_TOKEN_ADDR).redeem(amount, duration);
+  }
+
+  function finalizeRedeem(uint256 redeemIndex) external onlyOwner {
+    IXEqbToken(XEQB_TOKEN_ADDR).finalizeRedeem(redeemIndex);
+    SafeERC20.safeTransfer(
+      IERC20(EQB_TOKEN_ADDR),
+      msg.sender,
+      IERC20(EQB_TOKEN_ADDR).balanceOf(address(this))
+    );
   }
 
   function _getEqbClaimableRewards(
     uint256 pendleAmount
-  ) internal view returns (uint256, uint256) {
+  ) internal view returns (uint256) {
     uint256 sumOfEqbAndXeqb = Math.mulDiv(
       pendleAmount,
       IEqbMinterSidechain(eqbMinterAddr).getFactor(),
@@ -188,7 +196,7 @@ abstract contract BaseEquilibriaVault is AbstractVault {
       IPendleBoosterSidechain(pendleBoosterAddr).farmEqbShare(),
       IPendleBoosterSidechain(pendleBoosterAddr).DENOMINATOR()
     );
-    uint256 xeqbAmount = sumOfEqbAndXeqb - eqbAmount;
-    return (eqbAmount, xeqbAmount);
+    // formula: xeqbAmount = sumOfEqbAndXeqb - eqbAmount
+    return eqbAmount;
   }
 }

@@ -6,9 +6,10 @@ const {
   mineBlocks,
   gasLimit,
   deposit,
-  getBeforeEachSetUp
+  getBeforeEachSetUp,
+  simulateTimeElasped
 } = require("./utils");
-
+let { currentTimestamp } = require("./utils");
 
 let wallet;
 let weth;
@@ -34,7 +35,7 @@ let pendleRETHMarketLPT;
 
 describe("All Weather Protocol", function () {
   beforeEach(async () => {
-    [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster] = await getBeforeEachSetUp([{
+    [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken] = await getBeforeEachSetUp([{
       protocol: "Equilibria-GDAI", percentage: 100
     }
     ]);
@@ -72,7 +73,7 @@ describe("All Weather Protocol", function () {
         }
       }
       const pendleZapOutData = await getPendleZapOutData(42161, gDAIMarketPoolAddress, gDAIToken.address, shares, 0.99);
-      // // withdraw
+      // withdraw
       await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, { gasLimit })).wait();
       expect(await pendleGDAIMarketLPT.balanceOf(wallet.address)).to.equal(shares);
       expect(await equilibriaGDAIVault.totalAssets()).to.equal(0);
@@ -86,16 +87,19 @@ describe("All Weather Protocol", function () {
       const originalPendleToken = await pendleToken.balanceOf(wallet.address);
       const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
       let pendleClaimableReward;
+      let eqbClaimableReward;
       for (const claimableReward of claimableRewards) {
         if (claimableReward.protocol !== "Equilibria-GDAI") {
           expect(claimableReward.claimableRewards).to.deep.equal([]);
         } else {
+          console.log(claimableReward.claimableRewards);
           const rewardLengthOfThisVault = claimableReward.claimableRewards.length;
-          expect(rewardLengthOfThisVault).to.equal(3);
+          expect(rewardLengthOfThisVault).to.equal(2);
           pendleClaimableReward = claimableReward.claimableRewards[0].amount;
           expect(pendleClaimableReward).to.be.gt(0);
-          // EQB and xEQB
-          expect(Math.floor(claimableReward.claimableRewards[rewardLengthOfThisVault-2].amount/100)).to.equal(Math.floor(claimableReward.claimableRewards[rewardLengthOfThisVault-1].amount/300));
+          eqbClaimableReward = claimableReward.claimableRewards[rewardLengthOfThisVault-1].amount;
+          // ratio between Pendle:EQB is 2:1
+          expect(Math.floor(pendleClaimableReward/eqbClaimableReward)).to.equal(2);
         }
       }
 
@@ -108,6 +112,15 @@ describe("All Weather Protocol", function () {
           expect(claimableReward.claimableRewards[0].amount).to.equal(0);
         }
       }
+
+      const xEqbTokenBalance = await xEqbToken.balanceOf(equilibriaGDAIVault.address);
+      await equilibriaGDAIVault.connect(wallet).redeemXEQB(xEqbTokenBalance, 86400*7*24);
+      timeElasped = 24 * 7 * 86400; // 24 weeks later
+      await simulateTimeElasped(timeElasped);
+      await equilibriaGDAIVault.connect(wallet).finalizeRedeem(0);
+      expect(await eqbToken.balanceOf(wallet.address)).to.be.gt(xEqbTokenBalance);
+      // ratio between xEQB:EQB is 3:1
+      expect(Math.floor(xEqbTokenBalance/eqbClaimableReward)).to.be.equal(3);
     })
     it("Should be able to check claimable rewards", async function () {
       const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);

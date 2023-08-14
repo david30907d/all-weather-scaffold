@@ -12,7 +12,7 @@ const { fetch1InchSwapData, getUserEthBalance, sushiSwapDpxLpTokenAddress, sushi
   gDAIMarketPoolAddress,
   mineBlocks,
   daiAddress,
-  simulateAYearLater,
+  simulateTimeElasped,
   radiantRTokens,
   end2endTestingAmount,
   amountAfterChargingFee,
@@ -97,7 +97,7 @@ describe("All Weather Protocol", function () {
       await mineBlocks(20000); // Mine 100 blocks
 
       currentTimestamp += 12 * 31 * 24 * 60 * 60; // Increment timestamp
-      await simulateAYearLater();
+      await simulateTimeElasped();
 
       const randomWallet = ethers.Wallet.createRandom();
       let balancesBeforeClaim = [];
