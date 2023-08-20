@@ -1,0 +1,58 @@
+[
+  {
+    "protocol": "SushSwap-DpxETH",
+    "claimableRewards": [
+      {
+        "token": "0xd4d42F0b6DEF4CE0383636770eF773390d85c61A",
+        "amount": "111"
+      },
+      {
+        "token": "0x6C2C06790b3E3E3c38e12Ee22F8183b37a13EE55",
+        "amount": "11111"
+      }
+    ]
+  },
+  {
+    "protocol": "Equilibria-GLP",
+    "claimableRewards": [
+      {
+        "token": "0x0c880f6761F1af8d9Aa9C466984b80DAb9a8c9e8",
+        "amount": "111"
+      },
+      {
+        "token": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+        "amount": "11111"
+      },
+      {
+        "token": "0xBfbCFe8873fE28Dfa25f1099282b088D52bbAD9C",
+        "amount": "11111"
+      }
+    ]
+  },
+  {
+    "protocol": "Equilibria-GDAI",
+    "claimableRewards": [
+      {
+        "token": "0x0c880f6761F1af8d9Aa9C466984b80DAb9a8c9e8",
+        "amount": "1111"
+      },
+      {
+        "token": "0xBfbCFe8873fE28Dfa25f1099282b088D52bbAD9C",
+        "amount": "11111"
+      }
+    ]
+  },
+  {
+    "protocol": "Equilibria-RETH",
+    "claimableRewards": [
+      {
+        "token": "0x0c880f6761F1af8d9Aa9C466984b80DAb9a8c9e8",
+        "amount": "1111"
+      },
+      {
+        "token": "0xBfbCFe8873fE28Dfa25f1099282b088D52bbAD9C",
+        "amount": "11111"
+      }
+    ]
+  }
+]

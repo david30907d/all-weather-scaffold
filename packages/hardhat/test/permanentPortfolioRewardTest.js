@@ -1,4 +1,7 @@
 const { expect } = require("chai");
+const fs = require('fs');
+const path = require('path');
+
 const {
     end2endTestingAmount,
     gasLimit,
@@ -50,6 +53,7 @@ describe("All Weather Protocol", function () {
             const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData,);
             await mineBlocks(1000);
             const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
+            fs.writeFileSync(path.join(__dirname, 'fixtures', 'claimableRewards.json'), JSON.stringify(claimableRewards, null, 2), 'utf8')
             for (const claimableReward of claimableRewards) {
                 for (const reward of claimableReward.claimableRewards) {
                     if (reward.token == sushiTokenAddress) {
