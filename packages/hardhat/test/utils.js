@@ -22,7 +22,7 @@ async function mineBlocks(numBlocks) {
 
 async function fetch1InchSwapData(fromTokenAddress, toTOkenAddress, amount, fromAddress, slippage) {
   const headers = {
-    'Authorization': `Bearer ${process.env['1INCH_API_KEY']}`,
+    'Authorization': `Bearer ${process.env['ONE_INCH_API_KEY']}`,
     'accept': 'application/json'
   };
   const res = await got(`https://api.1inch.dev/swap/v5.2/42161/swap?src=${fromTokenAddress}&dst=${toTOkenAddress}&amount=${amount.toString()}&from=${fromAddress}&slippage=50&disableEstimate=true&allowPartialFill=true`, {
