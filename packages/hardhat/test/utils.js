@@ -21,13 +21,18 @@ async function mineBlocks(numBlocks) {
 }
 
 async function fetch1InchSwapData(fromTokenAddress, toTOkenAddress, amount, fromAddress, slippage) {
-  const res = await got(`https://api.1inch.io/v5.2/42161/swap?src=${fromTokenAddress}&dst=${toTOkenAddress}&amount=${amount.toString()}&from=${fromAddress}&slippage=50&disableEstimate=true&allowPartialFill=true`, {
+  const headers = {
+    'Authorization': `Bearer ${process.env['1INCH_API_KEY']}`,
+    'accept': 'application/json'
+  };
+  const res = await got(`https://api.1inch.dev/swap/v5.2/42161/swap?src=${fromTokenAddress}&dst=${toTOkenAddress}&amount=${amount.toString()}&from=${fromAddress}&slippage=50&disableEstimate=true&allowPartialFill=true`, {
+    headers,
     retry: {
       limit: 3, // Number of retries
       methods: ['GET'], // Retry only for GET requests
       statusCodes: [429, 500, 502, 503, 504], // Retry for specific status codes
       calculateDelay: ({ attemptCount }) => attemptCount * 3000, // Delay between retries in milliseconds
-    },
+    }
   })
   if (res.statusCode !== 200) {
     throw new Error(`HTTP error! status: ${res.statusCode}`);
@@ -132,7 +137,7 @@ const getSquidCrossChainContractCallCallData = async (fromChain, toChain, fromTo
 async function getBeforeEachSetUp(allocations, portfolioContractName = "PermanentPortfolioLPToken",) {
   wallet = await ethers.getImpersonatedSigner(myImpersonatedWalletAddress);
   wallet2 = await ethers.getImpersonatedSigner(myImpersonatedWalletAddress2);
-  const [dpxSLP, weth, dpxToken, fsGLP, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, pendleToken, daiToken, gDAIToken, sushiToken, miniChefV2, glpRewardPool, dlpToken, rethToken, pendleBooster, dGDAIRewardPool,multiFeeDistribution, xEqbToken, eqbToken] = await initTokens();
+  const [dpxSLP, weth, dpxToken, fsGLP, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, pendleToken, daiToken, gDAIToken, sushiToken, miniChefV2, glpRewardPool, dlpToken, rethToken, pendleBooster, dGDAIRewardPool, multiFeeDistribution, xEqbToken, eqbToken] = await initTokens();
 
   await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit });
   await weth.connect(wallet2).deposit({ value: ethers.utils.parseEther("0.1"), gasLimit });
@@ -142,6 +147,7 @@ async function getBeforeEachSetUp(allocations, portfolioContractName = "Permanen
   await (await weth.connect(wallet2).approve(portfolioContract.address, ethers.constants.MaxUint256, { gasLimit })).wait();
 
   try {
+
     console.log("read 1inch calldata and pendle calldata from json file")
     oneInchSwapDataForDpx = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForDpx.json'), 'utf8'));
     oneInchSwapDataForGDAI = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForGDAI.json'), 'utf8'));
@@ -161,7 +167,7 @@ async function getBeforeEachSetUp(allocations, portfolioContractName = "Permanen
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForRETH.json'), JSON.stringify(oneInchSwapDataForRETH, null, 2), 'utf8')
 
     // oneInchSwapDataForGDAI.toAmount).div(2): due to the 1inch slippage, need to multiple by 0.95 to pass pendle zap in
-    pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toAmount).mul(50).div(100), 0.2, daiToken.address);
+    pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toAmount).mul(50).div(100), 0.2, daiToken.address)
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'pendleGDAIZapInData.json'), JSON.stringify(pendleGDAIZapInData, null, 2), 'utf8')
 
     pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, amountAfterChargingFee.div(4), 0.99);
@@ -197,7 +203,7 @@ async function initTokens() {
   // we can check our balance in equilibria with this reward pool
   dGDAIRewardPool = await ethers.getContractAt("IERC20", gDAIRewardPoolAddress);
   multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
-  return [dpxSLP, weth, dpxToken, fsGLP, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, pendleToken, daiToken, gDAIToken, sushiToken, miniChefV2, glpRewardPool, dlpToken, rethToken, pendleBooster, dGDAIRewardPool,multiFeeDistribution, xEqbToken, eqbToken]
+  return [dpxSLP, weth, dpxToken, fsGLP, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, pendleToken, daiToken, gDAIToken, sushiToken, miniChefV2, glpRewardPool, dlpToken, rethToken, pendleBooster, dGDAIRewardPool, multiFeeDistribution, xEqbToken, eqbToken]
 }
 
 async function deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid, oneInchAddress, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, radiantLendingPoolAddress, eqbMinterAddress, pendleBoosterAddress, allocations, portfolioContractName = "PermanentPortfolioLPToken") {
@@ -244,7 +250,7 @@ async function deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid,
 }
 
 async function deployContractsToChain(wallet, allocations, portfolioContractName) {
-  const [dpxSLP, weth, dpxToken, fsGLP, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, pendleToken, daiToken, gDAIToken, sushiToken, miniChefV2, glpRewardPool, dlpToken, rethToken, pendleBooster, dGDAIRewardPool,multiFeeDistribution, xEqbToken, eqbToken] = await initTokens();
+  const [dpxSLP, weth, dpxToken, fsGLP, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, pendleToken, daiToken, gDAIToken, sushiToken, miniChefV2, glpRewardPool, dlpToken, rethToken, pendleBooster, dGDAIRewardPool, multiFeeDistribution, xEqbToken, eqbToken] = await initTokens();
   return await deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid, oneInchAddress, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, radiantLendingPoolAddress, eqbMinterAddress, pendleBoosterAddress, allocations, portfolioContractName);
 }
 
@@ -310,7 +316,7 @@ const wbnbAddress = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 const radiantBscLockZapPoolAddress = '0x13Ef2A9e127aE8d9e9b863c7e375Ba68E1a42Ac6';
 // radiant has an one year lock, therefore need these timestamp-related variables
 let currentTimestamp = Math.floor(Date.now() / 1000);;
-async function simulateTimeElasped(timeElasped=12*31*86400) {
+async function simulateTimeElasped(timeElasped = 12 * 31 * 86400) {
   // Simulate a year later
   const futureTimestamp = currentTimestamp + timeElasped;
   await ethers.provider.send('evm_setNextBlockTimestamp', [futureTimestamp]);

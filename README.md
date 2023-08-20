@@ -2,7 +2,8 @@
 
 ## Deploy & Verify
 
-`npx hardhat run --network arbitrumGoerli deploy/deployPermanentPortfolio.js`
+1. For TestNet: `npx hardhat run --network arbitrumGoerli deploy/deployPermanentPortfolio.js`
+2. For fronend development: `npx hardhat run --network localhost deploy/deployPermanentPortfolio.js`
 
 ## Test
 
