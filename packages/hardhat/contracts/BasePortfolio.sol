@@ -16,6 +16,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 
 import "./3rd/radiant/IFeeDistribution.sol";
 import "./3rd/pendle/IPendleRouter.sol";
@@ -263,7 +264,7 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard {
     address payable receiver
   ) public updateRewards nonReentrant {
     require(shares <= totalSupply(), "Shares exceed total supply");
-    claim(receiver);
+    _claim(receiver);
     for (uint256 i = 0; i < vaults.length; i++) {
       uint256 vaultShares = Math.mulDiv(
         vaults[i].balanceOf(address(this)),
@@ -287,7 +288,11 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard {
     _burn(msg.sender, shares);
   }
 
-  function claim(address payable receiver) public updateRewards nonReentrant {
+  function claim(address payable receiver) external nonReentrant {
+    _claim(receiver);
+  }
+
+  function _claim(address payable receiver) private updateRewards {
     ClaimableRewardOfAProtocol[]
       memory totalClaimableRewards = getClaimableRewards(payable(msg.sender));
     uint256 userShares = balanceOf(msg.sender);
