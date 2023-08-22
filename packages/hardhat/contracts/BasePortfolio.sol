@@ -12,19 +12,20 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./vaults/radiant/RadiantArbitrumVault.sol";
-import "./vaults/dopex/DpxArbitrumVault.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
-import "./3rd/radiant/IFeeDistribution.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
+
+import "./3rd/radiant/IFeeDistribution.sol";
 import "./3rd/pendle/IPendleRouter.sol";
+import "./vaults/radiant/RadiantArbitrumVault.sol";
+import "./vaults/dopex/DpxArbitrumVault.sol";
 import "./vaults/equilibria/EquilibriaGlpVault.sol";
 import "./vaults/equilibria/EquilibriaGDAIVault.sol";
 import "./interfaces/AbstractVault.sol";
 
-abstract contract BasePortfolio is ERC20, Ownable {
+abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
@@ -146,7 +147,9 @@ abstract contract BasePortfolio is ERC20, Ownable {
     return shareOfVaults;
   }
 
-  function deposit(DepositData calldata depositData) public updateRewards {
+  function deposit(
+    DepositData calldata depositData
+  ) public updateRewards nonReentrant {
     require(depositData.amount > 0, "amount must > 0");
 
     // Transfer tokens from the user to the contract
@@ -258,7 +261,7 @@ abstract contract BasePortfolio is ERC20, Ownable {
   function redeem(
     uint256 shares,
     address payable receiver
-  ) public updateRewards {
+  ) public updateRewards nonReentrant {
     require(shares <= totalSupply(), "Shares exceed total supply");
     claim(receiver);
     for (uint256 i = 0; i < vaults.length; i++) {
@@ -284,7 +287,7 @@ abstract contract BasePortfolio is ERC20, Ownable {
     _burn(msg.sender, shares);
   }
 
-  function claim(address payable receiver) public updateRewards {
+  function claim(address payable receiver) public updateRewards nonReentrant {
     ClaimableRewardOfAProtocol[]
       memory totalClaimableRewards = getClaimableRewards(payable(msg.sender));
     uint256 userShares = balanceOf(msg.sender);
