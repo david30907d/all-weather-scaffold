@@ -274,9 +274,7 @@ module.exports = {
     arbitrum: {
       url: "https://arb1.arbitrum.io/rpc",
       chainId: 42161,
-      accounts: {
-        mnemonic: mnemonic(),
-      },
+      accounts: [`0x${PRIVATE_KEY}`]
     },
     arbitrumGoerli: {
       url: "https://goerli-rollup.arbitrum.io/rpc/",
