@@ -26,7 +26,7 @@ import "./vaults/equilibria/EquilibriaGlpVault.sol";
 import "./vaults/equilibria/EquilibriaGDAIVault.sol";
 import "./interfaces/AbstractVault.sol";
 
-abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard {
+abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
@@ -150,7 +150,7 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard {
 
   function deposit(
     DepositData calldata depositData
-  ) public updateRewards nonReentrant {
+  ) public updateRewards whenNotPaused nonReentrant {
     require(depositData.amount > 0, "amount must > 0");
 
     // Transfer tokens from the user to the contract
@@ -252,17 +252,10 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard {
     );
   }
 
-  function redeemAndClaim(
-    uint256 shares,
-    address payable receiver
-  ) public updateRewards {
-    redeem(shares, receiver);
-  }
-
   function redeem(
     uint256 shares,
     address payable receiver
-  ) public updateRewards nonReentrant {
+  ) public updateRewards whenNotPaused nonReentrant {
     require(shares <= totalSupply(), "Shares exceed total supply");
     _claim(receiver);
     for (uint256 i = 0; i < vaults.length; i++) {
@@ -288,11 +281,13 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard {
     _burn(msg.sender, shares);
   }
 
-  function claim(address payable receiver) external nonReentrant {
+  function claim(address payable receiver) external whenNotPaused nonReentrant {
     _claim(receiver);
   }
 
-  function _claim(address payable receiver) private updateRewards {
+  function _claim(
+    address payable receiver
+  ) private whenNotPaused updateRewards {
     ClaimableRewardOfAProtocol[]
       memory totalClaimableRewards = getClaimableRewards(payable(msg.sender));
     uint256 userShares = balanceOf(msg.sender);
