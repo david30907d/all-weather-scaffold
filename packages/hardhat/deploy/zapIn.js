@@ -8,7 +8,7 @@ async function main() {
   // TODO(david): use deployer!
   const provider = new ethers.providers.JsonRpcProvider(process.env.API_URL);
   const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
-  amountAfterChargingFee = ethers.utils.parseEther("0.006").mul(997).div(1000);
+  amountAfterChargingFee = ethers.utils.parseEther("0.016").mul(997).div(1000);
   const portfolioContract = await ethers.getContractAt("PermanentPortfolioLPToken", "0x36bb138Eb364889317Fd324a8f4A1d4CB244A198");
   oneInchSwapDataForDpx = await fetch1InchSwapData(wethAddress, dpxTokenAddress, amountAfterChargingFee.div(8), "0x3e6506564daDD92502207E7b69AE583d7f2Fb184", 5);
   console.log("finished oneInchSwapDataForDpx")
@@ -23,7 +23,7 @@ async function main() {
   pendleRETHZapInData = await getPendleZapInData(42161, rethMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForRETH.toAmount).mul(95).div(100), 0.1, rethTokenAddress);
   console.log("finished pendleRETHZapInData")
   const depositData = {
-    amount: ethers.utils.parseEther("0.006"),
+    amount: ethers.utils.parseEther("0.016"),
     receiver: wallet.address,
     oneInchDataDpx: oneInchSwapDataForDpx.tx.data,
     glpMinLpOut: pendleGLPZapInData[2],
@@ -39,7 +39,7 @@ async function main() {
     rethOneInchDataRETH: oneInchSwapDataForRETH.tx.data
   }
   fs.writeFileSync("./depositData.json", JSON.stringify(depositData, null, 2), 'utf8')
-  // await (await portfolioContract.connect(wallet).deposit(depositData, { gasLimit: 6230965 })).wait();
+  await (await portfolioContract.connect(wallet).deposit(depositData, { gasLimit: 6930965 })).wait();
 }
 
 // We recommend this pattern to be able to use async/await everywhere

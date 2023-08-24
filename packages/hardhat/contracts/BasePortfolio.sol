@@ -177,6 +177,13 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
       if (zapInAmountForThisVault == 0) {
         continue;
       }
+      uint256 currentAllowance = IERC20(asset).allowance(
+        address(this),
+        address(vaults[idx])
+      );
+      if (currentAllowance > 0) {
+        SafeERC20.safeApprove(IERC20(asset), address(vaults[idx]), 0);
+      }
       SafeERC20.safeApprove(
         IERC20(asset),
         address(vaults[idx]),

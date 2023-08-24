@@ -29,6 +29,13 @@ contract EquilibriaGDAIVault is BaseEquilibriaVault {
     IPendleRouter.TokenInput calldata input
   ) internal override returns (uint256) {
     // swap weth to DAI with 1inch
+    uint256 currentAllowance = WETH.allowance(
+      address(this),
+      oneInchAggregatorAddress
+    );
+    if (currentAllowance > 0) {
+      SafeERC20.safeApprove(WETH, oneInchAggregatorAddress, 0);
+    }
     SafeERC20.safeApprove(WETH, oneInchAggregatorAddress, amount);
     // slither-disable-next-line low-level-calls
     (bool succ, bytes memory data) = address(oneInchAggregatorAddress).call(

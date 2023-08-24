@@ -59,6 +59,13 @@ contract DpxArbitrumVault is AbstractVault {
     uint256 amount,
     bytes calldata oneInchData
   ) internal override returns (uint256) {
+    uint256 wethAllowance = WETH.allowance(
+      address(this),
+      oneInchAggregatorAddress
+    );
+    if (wethAllowance > 0) {
+      SafeERC20.safeApprove(WETH, oneInchAggregatorAddress, 0);
+    }
     SafeERC20.safeApprove(
       WETH,
       oneInchAggregatorAddress,
@@ -73,6 +80,13 @@ contract DpxArbitrumVault is AbstractVault {
       "1inch failed to swap, please update your block_number when running hardhat test"
     );
     uint256 dpxReturnedAmount = abi.decode(data, (uint256));
+    uint256 dpxAllowance = DPX_TOKEN.allowance(
+      address(this),
+      SUSHISWAP_ROUTER_ADDRESS
+    );
+    if (dpxAllowance > 0) {
+      SafeERC20.safeApprove(DPX_TOKEN, SUSHISWAP_ROUTER_ADDRESS, 0);
+    }
     SafeERC20.safeApprove(
       DPX_TOKEN,
       SUSHISWAP_ROUTER_ADDRESS,
@@ -94,6 +108,17 @@ contract DpxArbitrumVault is AbstractVault {
       address(this),
       deadline
     );
+    uint256 slpAllowance = IERC20(SUSHISWAP_DPX_LPTOKEN_ADDRESS).allowance(
+      address(this),
+      address(sushiSwapMiniChef)
+    );
+    if (slpAllowance > 0) {
+      SafeERC20.safeApprove(
+        IERC20(SUSHISWAP_DPX_LPTOKEN_ADDRESS),
+        address(sushiSwapMiniChef),
+        0
+      );
+    }
     SafeERC20.safeApprove(
       IERC20(SUSHISWAP_DPX_LPTOKEN_ADDRESS),
       address(sushiSwapMiniChef),

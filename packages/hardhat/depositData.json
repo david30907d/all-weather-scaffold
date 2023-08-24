@@ -1,0 +1,118 @@
+{
+  "amount": {
+    "type": "BigNumber",
+    "hex": "0x38d7ea4c680000"
+  },
+  "receiver": "0x78000b0605E81ea9df54b33f72ebC61B5F5c8077",
+  "oneInchDataDpx": "0xe449022e000000000000000000000000000000000000000000000000000715884daea000000000000000000000000000000000000000000000000000009681640e8f5a0a00000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000001800000000000000000000000b52781c275431bd48d290a4318e338fe0df89eb98b1ccac8",
+  "glpMinLpOut": {
+    "type": "BigNumber",
+    "hex": "0x2fdae4e7516cc09a"
+  },
+  "glpGuessPtReceivedFromSy": {
+    "guessMin": {
+      "type": "BigNumber",
+      "hex": "0x0fc57e9d540da90e"
+    },
+    "guessMax": {
+      "type": "BigNumber",
+      "hex": "0x1a49285b8c16c46d"
+    },
+    "guessOffchain": {
+      "type": "BigNumber",
+      "hex": "0x11861ae7b2b9d849"
+    },
+    "maxIteration": 13,
+    "eps": "1000000000000000"
+  },
+  "glpInput": {
+    "tokenIn": "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
+    "netTokenIn": {
+      "type": "BigNumber",
+      "hex": "0x0e2b109b5d4000"
+    },
+    "tokenMintSy": "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
+    "bulk": "0x0000000000000000000000000000000000000000",
+    "pendleSwap": "0x0000000000000000000000000000000000000000",
+    "swapData": {
+      "swapType": 0,
+      "extRouter": "0x0000000000000000000000000000000000000000",
+      "extCalldata": [],
+      "needScale": false
+    }
+  },
+  "gdaiMinLpOut": {
+    "type": "BigNumber",
+    "hex": "0x152d82e84c4be397"
+  },
+  "gdaiGuessPtReceivedFromSy": {
+    "guessMin": {
+      "type": "BigNumber",
+      "hex": "0x09bcf711f9356ef8"
+    },
+    "guessMax": {
+      "type": "BigNumber",
+      "hex": "0x103af11df4ae639d"
+    },
+    "guessOffchain": {
+      "type": "BigNumber",
+      "hex": "0x0ad1f613f8744269"
+    },
+    "maxIteration": 13,
+    "eps": "1000000000000000"
+  },
+  "gdaiInput": {
+    "tokenIn": "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1",
+    "netTokenIn": {
+      "type": "BigNumber",
+      "hex": "0x2e45607f5b9118d6"
+    },
+    "tokenMintSy": "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1",
+    "bulk": "0x0000000000000000000000000000000000000000",
+    "pendleSwap": "0x0000000000000000000000000000000000000000",
+    "swapData": {
+      "swapType": 0,
+      "extRouter": "0x0000000000000000000000000000000000000000",
+      "extCalldata": [],
+      "needScale": false
+    }
+  },
+  "gdaiOneInchDataGDAI": "0xe449022e000000000000000000000000000000000000000000000000000e2b109b5d400000000000000000000000000000000000000000000000000057ea3758612d48c90000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000100000000000000000000000031fa55e03bad93c7f8affdd2ec616ebfde2460018b1ccac8",
+  "rethMinLpOut": {
+    "type": "BigNumber",
+    "hex": "0x06485051bab5d9"
+  },
+  "rethGuessPtReceivedFromSy": {
+    "guessMin": {
+      "type": "BigNumber",
+      "hex": "0x02aa0539bf298a"
+    },
+    "guessMax": {
+      "type": "BigNumber",
+      "hex": "0x0470b3603e9a92"
+    },
+    "guessOffchain": {
+      "type": "BigNumber",
+      "hex": "0x02f5ccead4670c"
+    },
+    "maxIteration": 13,
+    "eps": "1000000000000000"
+  },
+  "rethInput": {
+    "tokenIn": "0xec70dcb4a1efa46b8f2d97c310c9c4790ba5ffa8",
+    "netTokenIn": {
+      "type": "BigNumber",
+      "hex": "0x0c62cbc9c39651"
+    },
+    "tokenMintSy": "0xec70dcb4a1efa46b8f2d97c310c9c4790ba5ffa8",
+    "bulk": "0x0000000000000000000000000000000000000000",
+    "pendleSwap": "0x0000000000000000000000000000000000000000",
+    "swapData": {
+      "swapType": 0,
+      "extRouter": "0x0000000000000000000000000000000000000000",
+      "extCalldata": [],
+      "needScale": false
+    }
+  },
+  "rethOneInchDataRETH": "0xe449022e000000000000000000000000000000000000000000000000000e2b109b5d4000000000000000000000000000000000000000000000000000000c62cbc9c396510000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000100000000000000000000000009ba302a3f5ad2bf8853266e271b005a5b3716fe8b1ccac8"
+}

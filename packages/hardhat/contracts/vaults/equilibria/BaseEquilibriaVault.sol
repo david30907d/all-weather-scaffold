@@ -96,6 +96,13 @@ abstract contract BaseEquilibriaVault is AbstractVault {
     IPendleRouter.TokenInput calldata input
   ) internal override returns (uint256) {
     uint256 originalShares = totalStakedButWithoutLockedAssets();
+    uint256 currentAllowance = zapInToken.allowance(
+      address(this),
+      address(eqbZap)
+    );
+    if (currentAllowance > 0) {
+      SafeERC20.safeApprove(zapInToken, address(eqbZap), 0);
+    }
     SafeERC20.safeApprove(zapInToken, address(eqbZap), amount);
 
     // Error: VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xfa711db2)
@@ -107,6 +114,16 @@ abstract contract BaseEquilibriaVault is AbstractVault {
   function redeem(uint256 shares) public override {
     // slither-disable-next-line unused-return
     (, , address rewardPool, ) = pendleBooster.poolInfo(pid);
+    uint256 currentAllowance = IBaseRewardPool(rewardPool)
+      .stakingToken()
+      .allowance(address(this), address(eqbZap));
+    if (currentAllowance > 0) {
+      SafeERC20.safeApprove(
+        IBaseRewardPool(rewardPool).stakingToken(),
+        address(eqbZap),
+        0
+      );
+    }
     SafeERC20.safeApprove(
       IBaseRewardPool(rewardPool).stakingToken(),
       address(eqbZap),
