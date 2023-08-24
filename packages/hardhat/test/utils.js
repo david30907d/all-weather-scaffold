@@ -20,15 +20,15 @@ async function mineBlocks(numBlocks) {
   }
 }
 
-async function fetch1InchSwapData(fromTokenAddress, toTOkenAddress, amount, fromAddress, slippage) {
+async function fetch1InchSwapData(fromTokenAddress, toTOkenAddress, amount, fromAddress, slippage=50) {
   const headers = {
     'Authorization': `Bearer ${process.env['ONE_INCH_API_KEY']}`,
     'accept': 'application/json'
   };
-  const res = await got(`https://api.1inch.dev/swap/v5.2/42161/swap?src=${fromTokenAddress}&dst=${toTOkenAddress}&amount=${amount.toString()}&from=${fromAddress}&slippage=50&disableEstimate=true&allowPartialFill=true`, {
+  const res = await got(`https://api.1inch.dev/swap/v5.2/42161/swap?src=${fromTokenAddress}&dst=${toTOkenAddress}&amount=${amount.toString()}&from=${fromAddress}&slippage=${slippage}&disableEstimate=true`, {
     headers,
     retry: {
-      limit: 3, // Number of retries
+      limit: 1, // Number of retries
       methods: ['GET'], // Retry only for GET requests
       statusCodes: [429, 500, 502, 503, 504], // Retry for specific status codes
       calculateDelay: ({ attemptCount }) => attemptCount * 3000, // Delay between retries in milliseconds
@@ -430,5 +430,6 @@ module.exports = {
   getBeforeEachSetUp,
   deposit,
   rethMarketPoolAddress,
-  deployContractsToChain
+  deployContractsToChain,
+  rethTokenAddress
 };
