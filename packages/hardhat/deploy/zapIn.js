@@ -16,7 +16,7 @@ async function main() {
   console.log("finished oneInchSwapDataForGDAI")
   oneInchSwapDataForRETH = await fetch1InchSwapData(wethAddress, rethTokenAddress, amountAfterChargingFee.div(4), "0x47cF63A2C2a60efD53193504c8a9846D38254549", 5);
   console.log("finished oneInchSwapDataForRETH")
-  pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toAmount).mul(50).div(100), 0.1, daiAddress)
+  pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toAmount).mul(95).div(100), 0.1, daiAddress)
   console.log("finished pendleGDAIZapInData")
   pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, amountAfterChargingFee.div(4), 0.1);
   console.log("finished pendleGLPZapInData")
