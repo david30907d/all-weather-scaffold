@@ -4,17 +4,28 @@ const { config } = require('dotenv');
 const fs = require('fs');
 config();
 
+const permanentPortfolioAddr = "0xedbdbd03784c8dba343a23877799d113e2f257af";
+const dpxVaultAddr = "0xC6a58A8494E61fc4EF04F6075c4541C9664ADcC9";
+const gdaiVaultAddr = "0x549caec2C863a04853Fb829aac4190E1B50df0Cc";
+const rethVaultAddr = "0xE66c4EA218Cdb8DCbCf3f605ed1aC29461CBa4b8";
+
 async function main() {
   // TODO(david): use deployer!
+  const zapInAmount = ethers.utils.parseEther("0.01")
   const provider = new ethers.providers.JsonRpcProvider(process.env.API_URL);
   const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
-  amountAfterChargingFee = ethers.utils.parseEther("0.016").mul(997).div(1000);
-  const portfolioContract = await ethers.getContractAt("PermanentPortfolioLPToken", "0x36bb138Eb364889317Fd324a8f4A1d4CB244A198");
-  oneInchSwapDataForDpx = await fetch1InchSwapData(wethAddress, dpxTokenAddress, amountAfterChargingFee.div(8), "0x3e6506564daDD92502207E7b69AE583d7f2Fb184", 5);
+  const weth = await ethers.getContractAt('IWETH', wethAddress);
+  if (await weth.allowance(wallet.address, permanentPortfolioAddr) < zapInAmount) {
+    console.log("Approving WETH")
+    await (await weth.connect(wallet).approve(permanentPortfolioAddr, zapInAmount, { gasLimit: 598538 })).wait();
+  }
+  amountAfterChargingFee = zapInAmount.mul(997).div(1000);
+  const portfolioContract = await ethers.getContractAt("PermanentPortfolioLPToken", permanentPortfolioAddr);
+  oneInchSwapDataForDpx = await fetch1InchSwapData(wethAddress, dpxTokenAddress, amountAfterChargingFee.div(8), dpxVaultAddr, 5);
   console.log("finished oneInchSwapDataForDpx")
-  oneInchSwapDataForGDAI = await fetch1InchSwapData(wethAddress, daiAddress, amountAfterChargingFee.div(4), "0x38FAE405C9c78Ca8C1b4B548b5a9960b38f240F3", 5);
+  oneInchSwapDataForGDAI = await fetch1InchSwapData(wethAddress, daiAddress, amountAfterChargingFee.div(4), gdaiVaultAddr, 5);
   console.log("finished oneInchSwapDataForGDAI")
-  oneInchSwapDataForRETH = await fetch1InchSwapData(wethAddress, rethTokenAddress, amountAfterChargingFee.div(4), "0x47cF63A2C2a60efD53193504c8a9846D38254549", 5);
+  oneInchSwapDataForRETH = await fetch1InchSwapData(wethAddress, rethTokenAddress, amountAfterChargingFee.div(4), rethVaultAddr, 5);
   console.log("finished oneInchSwapDataForRETH")
   pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toAmount).mul(95).div(100), 0.1, daiAddress)
   console.log("finished pendleGDAIZapInData")
@@ -23,7 +34,7 @@ async function main() {
   pendleRETHZapInData = await getPendleZapInData(42161, rethMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForRETH.toAmount).mul(95).div(100), 0.1, rethTokenAddress);
   console.log("finished pendleRETHZapInData")
   const depositData = {
-    amount: ethers.utils.parseEther("0.016"),
+    amount: zapInAmount,
     receiver: wallet.address,
     oneInchDataDpx: oneInchSwapDataForDpx.tx.data,
     glpMinLpOut: pendleGLPZapInData[2],
@@ -39,7 +50,7 @@ async function main() {
     rethOneInchDataRETH: oneInchSwapDataForRETH.tx.data
   }
   fs.writeFileSync("./depositData.json", JSON.stringify(depositData, null, 2), 'utf8')
-  await (await portfolioContract.connect(wallet).deposit(depositData, { gasLimit: 6930965 })).wait();
+  await (await portfolioContract.connect(wallet).deposit(depositData, { gasLimit: 10000000 })).wait();
 }
 
 // We recommend this pattern to be able to use async/await everywhere

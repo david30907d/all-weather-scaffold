@@ -6,6 +6,7 @@
 2. For TestNet: `npx hardhat run --network arbitrumGoerli deploy/deployPermanentPortfolio.js`
 3. For fronend development: `export TESTNET_API_URL=http://127.0.0.1:8545/; npx hardhat run --network localhost deploy/deployPermanentPortfolio.js`
 4. Chain: `export BLOCK_NUMBER=123270171; yarn chain`
+5. Update the contract addresses resides in `rebalance` server and `frontend`
 
 ## Test
 
@@ -20,4 +21,6 @@
 add the new vault into:
 1. `deposit()` for loop
 2. `redeem()` for loop
-
+3. update need to manually add some tokens into `/debank` route in rebalance backend (for instance, 0xeeeeee for each blockchain can be different token)
+4. need to find the API of that protocol you integrated first, and then calculate its `apr_composition` in `/apr_composition` endpoint in rebalance backend
+5. check the result of `apr composition` on frontend side
