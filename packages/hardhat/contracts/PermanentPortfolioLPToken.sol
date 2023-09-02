@@ -9,7 +9,7 @@
 
 pragma solidity 0.8.18;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./vaults/dopex/DpxArbitrumVault.sol";
+import "./vaults/sushiswap/DpxArbitrumVault.sol";
 import "./vaults/equilibria/EquilibriaGlpVault.sol";
 import "./vaults/equilibria/EquilibriaGDAIVault.sol";
 import "./vaults/equilibria/EquilibriaRETHVault.sol";
@@ -26,7 +26,8 @@ contract PermanentPortfolioLPToken is BasePortfolio {
     address payable dpxVaultAddr,
     address equilibriaVaultAddr,
     address equilibriaGDAIVaultAddr,
-    address equilibriaRETHVaultAddr
+    address equilibriaRETHVaultAddr,
+    address payable magicArbitrumVaultAddr
   ) BasePortfolio(asset_, name_, symbol_) {
     require(dpxVaultAddr != address(0), "dpxVaultAddr cannot be zero");
     require(

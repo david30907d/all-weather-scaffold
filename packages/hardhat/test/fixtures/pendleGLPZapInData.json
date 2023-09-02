@@ -3,20 +3,20 @@
   "0x7d49e5adc0eaad9c027857767638613253ef125f",
   {
     "type": "BigNumber",
-    "hex": "0x212f3e4abb329c8c"
+    "hex": "0x1ef1209c11c42a7c"
   },
   {
     "guessMin": {
       "type": "BigNumber",
-      "hex": "0x0128eb38043281e2"
+      "hex": "0xd3d06a08a70cd2"
     },
     "guessMax": {
       "type": "BigNumber",
-      "hex": "0x02b21ab331c163e139"
+      "hex": "0x01ec4d66721c42cc75"
     },
     "guessOffchain": {
       "type": "BigNumber",
-      "hex": "0x73fbe1e1a3babc71"
+      "hex": "0x52bd696b61410218"
     },
     "maxIteration": 16,
     "eps": "1000000000000000"

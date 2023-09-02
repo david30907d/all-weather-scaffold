@@ -33,7 +33,7 @@ let pendleBooster;
 describe("All Weather Protocol", function () {
   beforeEach(async () => {
     [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster] = await getBeforeEachSetUp([{
-      protocol: "SushSwap-DpxETH", percentage: 25,
+      protocol: "SushiSwap-DpxETH", percentage: 25,
     }
     ]);
   });
@@ -60,7 +60,7 @@ describe("All Weather Protocol", function () {
       const originalSushiBalance = await sushiToken.balanceOf(wallet.address);
       const originalDpxBalance = await dpxToken.balanceOf(wallet.address);
       const claimableRewards = await portfolioContract.connect(wallet).getClaimableRewards(wallet.address);
-      expect(claimableRewards[0].protocol).to.equal("SushSwap-DpxETH");
+      expect(claimableRewards[0].protocol).to.equal("SushiSwap-DpxETH");
       const sushiClaimableReward = claimableRewards[0].claimableRewards[0].amount;
       const dpxClaimableReward = claimableRewards[0].claimableRewards[1].amount;
       expect(sushiClaimableReward).to.equal(0);

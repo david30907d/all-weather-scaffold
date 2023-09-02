@@ -8,7 +8,7 @@ async function main() {
   const provider = new ethers.providers.JsonRpcProvider(process.env.API_URL);
   const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
   const [portfolioContract, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, equilibriaRETHVault, radiantVault] = await deployContractsToChain(wallet, [{
-    protocol: "SushSwap-DpxETH", percentage: 25,
+    protocol: "SushiSwap-DpxETH", percentage: 25,
   }, {
     protocol: "Equilibria-GLP", percentage: 25
   }, {

@@ -13,7 +13,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./vaults/radiant/RadiantArbitrumVault.sol";
-import "./vaults/dopex/DpxArbitrumVault.sol";
+import "./vaults/sushiswap/DpxArbitrumVault.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "./3rd/radiant/IFeeDistribution.sol";
@@ -204,7 +204,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         zapInAmountForThisVault
       );
 
-      if (bytesOfvaultName == keccak256(bytes("SushSwap-DpxETH"))) {
+      if (bytesOfvaultName == keccak256(bytes("SushiSwap-DpxETH"))) {
         // slither-disable-next-line calls-loop
         require(
           vaults[idx].deposit(

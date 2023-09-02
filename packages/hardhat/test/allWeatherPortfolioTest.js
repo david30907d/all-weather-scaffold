@@ -27,7 +27,7 @@ let miniChefV2;
 describe("All Weather Protocol", function () {
     beforeEach(async () => {
         [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2] = await getBeforeEachSetUp([{
-            protocol: "SushSwap-DpxETH", percentage: 25,
+            protocol: "SushiSwap-DpxETH", percentage: 25,
           }, {
             protocol: "Equilibria-GLP", percentage: 25
           }, {
@@ -55,7 +55,7 @@ describe("All Weather Protocol", function () {
             }
             const totalAssets = await portfolioContract.totalAssets();
             for (const asset of totalAssets) {
-                if (asset.vaultName === 'SushSwap-DpxETH') {
+                if (asset.vaultName === 'SushiSwap-DpxETH') {
                     // expect(asset.assets).to.equal(await dpxVault.balanceOf(portfolioContract.address));
                 } else if (asset.vaultName === 'RadiantArbitrum-DLP') {
                     expect(asset.assets).to.equal(await radiantVault.balanceOf(portfolioContract.address));
@@ -92,7 +92,7 @@ describe("All Weather Protocol", function () {
           // withdraw
           await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, pendleZapOutData[3], { gasLimit })).wait();
           for (const asset of totalAssetsWhichShouldBeWithdrew) {
-            if (asset.vaultName === 'SushSwap-DpxETH') {
+            if (asset.vaultName === 'SushiSwap-DpxETH') {
                 // expect(asset.assets).to.equal(await dpxSLP.balanceOf(wallet.address));
             } else if (asset.vaultName === 'RadiantArbitrum-DLP') {
                 expect(asset.assets).to.equal(await dlpToken.balanceOf(wallet.address));

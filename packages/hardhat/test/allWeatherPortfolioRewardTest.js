@@ -27,7 +27,7 @@ let miniChefV2;
 describe("All Weather Protocol", function () {
   beforeEach(async () => {
     [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2] = await getBeforeEachSetUp([{
-      protocol: "SushSwap-DpxETH", percentage: 25,
+      protocol: "SushiSwap-DpxETH", percentage: 25,
     }, {
       protocol: "Equilibria-GLP", percentage: 25
     }, {

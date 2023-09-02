@@ -17,11 +17,10 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
-
 import "./3rd/radiant/IFeeDistribution.sol";
 import "./3rd/pendle/IPendleRouter.sol";
 import "./vaults/radiant/RadiantArbitrumVault.sol";
-import "./vaults/dopex/DpxArbitrumVault.sol";
+import "./vaults/sushiswap/DpxArbitrumVault.sol";
 import "./vaults/equilibria/EquilibriaGlpVault.sol";
 import "./vaults/equilibria/EquilibriaGDAIVault.sol";
 import "./interfaces/AbstractVault.sol";
@@ -59,6 +58,7 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
     IPendleRouter.ApproxParams rethGuessPtReceivedFromSy;
     IPendleRouter.TokenInput rethInput;
     bytes rethOneInchDataRETH;
+    bytes oneInchDataMagic;
   }
 
   IERC20 public immutable asset;
@@ -163,7 +163,6 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
     uint256 amountAfterDeductingFee = _getAmountAfterDeductingFee(
       depositData.amount
     );
-
     for (uint256 idx = 0; idx < vaults.length; idx++) {
       // slither-disable-next-line calls-loop
       string memory nameOfThisVault = vaults[idx].name();
@@ -190,7 +189,7 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
         zapInAmountForThisVault
       );
 
-      if (bytesOfvaultName == keccak256(bytes("SushSwap-DpxETH"))) {
+      if (bytesOfvaultName == keccak256(bytes("SushiSwap-DpxETH"))) {
         // slither-disable-next-line calls-loop
         require(
           vaults[idx].deposit(
@@ -198,6 +197,15 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
             depositData.oneInchDataDpx
           ) > 0,
           "Buying Dpx LP token failed"
+        );
+      } else if (bytesOfvaultName == keccak256(bytes("SushiSwap-MagicETH"))) {
+        // slither-disable-next-line calls-loop
+        require(
+          vaults[idx].deposit(
+            zapInAmountForThisVault,
+            depositData.oneInchDataMagic
+          ) > 0,
+          "Buying MagicETH LP token failed"
         );
       } else if (bytesOfvaultName == keccak256(bytes("RadiantArbitrum-DLP"))) {
         // slither-disable-next-line calls-loop
@@ -245,6 +253,8 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
           ) > 0,
           "Zap Into Equilibria RETH failed"
         );
+      } else {
+        revert(string(abi.encodePacked("Unknow Vault:", nameOfThisVault)));
       }
     }
 

@@ -137,7 +137,7 @@ const getSquidCrossChainContractCallCallData = async (fromChain, toChain, fromTo
 async function getBeforeEachSetUp(allocations, portfolioContractName = "PermanentPortfolioLPToken",) {
   wallet = await ethers.getImpersonatedSigner(myImpersonatedWalletAddress);
   wallet2 = await ethers.getImpersonatedSigner(myImpersonatedWalletAddress2);
-  const [dpxSLP, weth, dpxToken, fsGLP, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, pendleToken, daiToken, gDAIToken, sushiToken, miniChefV2, glpRewardPool, dlpToken, rethToken, pendleBooster, dGDAIRewardPool, multiFeeDistribution, xEqbToken, eqbToken] = await initTokens();
+  const [dpxSLP, weth, dpxToken, fsGLP, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, pendleToken, daiToken, gDAIToken, sushiToken, miniChefV2, glpRewardPool, dlpToken, rethToken, pendleBooster, dGDAIRewardPool, multiFeeDistribution, xEqbToken, eqbToken, magicToken, magicSLP] = await initTokens();
 
   await weth.connect(wallet).deposit({ value: ethers.utils.parseEther("1"), gasLimit });
   await weth.connect(wallet2).deposit({ value: ethers.utils.parseEther("0.1"), gasLimit });
@@ -147,11 +147,11 @@ async function getBeforeEachSetUp(allocations, portfolioContractName = "Permanen
   await (await weth.connect(wallet2).approve(portfolioContract.address, ethers.constants.MaxUint256, { gasLimit })).wait();
 
   try {
-
     console.log("read 1inch calldata and pendle calldata from json file")
     oneInchSwapDataForDpx = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForDpx.json'), 'utf8'));
     oneInchSwapDataForGDAI = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForGDAI.json'), 'utf8'));
     oneInchSwapDataForRETH = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForRETH.json'), 'utf8'));
+    oneInchSwapDataForMagic = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForMagic.json'), 'utf8'));
     pendleGDAIZapInData = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'pendleGDAIZapInData.json'), 'utf8'));
     pendleGLPZapInData = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'pendleGLPZapInData.json'), 'utf8'));
     pendleRETHZapInData = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'pendleRETHZapInData.json'), 'utf8'));
@@ -166,6 +166,9 @@ async function getBeforeEachSetUp(allocations, portfolioContractName = "Permanen
     oneInchSwapDataForRETH = await fetch1InchSwapData(weth.address, rethToken.address, amountAfterChargingFee.div(4), equilibriaRETHVault.address, 50);
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForRETH.json'), JSON.stringify(oneInchSwapDataForRETH, null, 2), 'utf8')
 
+    oneInchSwapDataForMagic = await fetch1InchSwapData(weth.address, magicToken.address, amountAfterChargingFee.div(2), magicVault.address, 50);
+    fs.writeFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForMagic.json'), JSON.stringify(oneInchSwapDataForMagic, null, 2), 'utf8')
+
     // oneInchSwapDataForGDAI.toAmount).div(2): due to the 1inch slippage, need to multiple by 0.95 to pass pendle zap in
     pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toAmount).mul(95).div(100), 0.2, daiToken.address)
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'pendleGDAIZapInData.json'), JSON.stringify(pendleGDAIZapInData, null, 2), 'utf8')
@@ -177,11 +180,12 @@ async function getBeforeEachSetUp(allocations, portfolioContractName = "Permanen
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'pendleRETHZapInData.json'), JSON.stringify(pendleRETHZapInData, null, 2), 'utf8')
   }
   portfolioShares = amountAfterChargingFee.div(await portfolioContract.UNIT_OF_SHARES());
-  return [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken];
+  return [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic];
 }
 
 async function initTokens() {
   dpxSLP = await ethers.getContractAt('IERC20Uniswap', sushiSwapDpxLpTokenAddress);
+  magicSLP = await ethers.getContractAt('IERC20Uniswap', sushiSwapMagicLpTokenAddress);
   weth = await ethers.getContractAt('IWETH', wethAddress);
   dpxToken = await ethers.getContractAt("MockDAI", dpxTokenAddress);
   fsGLP = await ethers.getContractAt("IERC20", fsGLPAddress);
@@ -199,11 +203,12 @@ async function initTokens() {
   pendleBooster = await ethers.getContractAt("IPendleBooster", "0x4D32C8Ff2fACC771eC7Efc70d6A8468bC30C26bF");
   xEqbToken = await ethers.getContractAt("IERC20", "0x96C4A48Abdf781e9c931cfA92EC0167Ba219ad8E");
   eqbToken = await ethers.getContractAt("IERC20", "0xBfbCFe8873fE28Dfa25f1099282b088D52bbAD9C");
+  magicToken = await ethers.getContractAt("IERC20", magicTokenAddress);
 
   // we can check our balance in equilibria with this reward pool
   dGDAIRewardPool = await ethers.getContractAt("IERC20", gDAIRewardPoolAddress);
   multiFeeDistribution = await ethers.getContractAt("IMultiFeeDistribution", multiFeeDistributionAddress);
-  return [dpxSLP, weth, dpxToken, fsGLP, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, pendleToken, daiToken, gDAIToken, sushiToken, miniChefV2, glpRewardPool, dlpToken, rethToken, pendleBooster, dGDAIRewardPool, multiFeeDistribution, xEqbToken, eqbToken]
+  return [dpxSLP, weth, dpxToken, fsGLP, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, pendleToken, daiToken, gDAIToken, sushiToken, miniChefV2, glpRewardPool, dlpToken, rethToken, pendleBooster, dGDAIRewardPool, multiFeeDistribution, xEqbToken, eqbToken, magicToken, magicSLP]
 }
 
 async function deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid, oneInchAddress, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, radiantLendingPoolAddress, eqbMinterAddress, pendleBoosterAddress, allocations, portfolioContractName = "PermanentPortfolioLPToken") {
@@ -232,6 +237,10 @@ async function deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid,
   await equilibriaRETHVault.updateEqbMinterAddr(eqbMinterAddress).then((tx) => tx.wait());
   await equilibriaRETHVault.updatePendleBoosterAddr(pendleBoosterAddress).then((tx) => tx.wait());
 
+  const MagicArbitrumVault = await ethers.getContractFactory("MagicArbitrumVault");
+  magicVault = await MagicArbitrumVault.connect(wallet).deploy(magicSLP.address, "SushiSwap-MagicETH", "ALP-MAGIC-ETH", {gasLimit:30000000});
+  await magicVault.deployed();
+  await magicVault.updateOneInchAggregatorAddress(oneInchAddress).then((tx) => tx.wait());
 
   // const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
   // radiantVault = await RadiantArbitrumVault.connect(wallet).deploy(dlpToken.address, radiantLendingPoolAddress, {gasLimit:30000000});
@@ -240,7 +249,7 @@ async function deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid,
 
   const PortfolioContractFactory = await ethers.getContractFactory(portfolioContractName);
   if (portfolioContractName === "PermanentPortfolioLPToken") {
-    portfolioContract = await PortfolioContractFactory.connect(wallet).deploy(weth.address, "PermanentLP", "PNLP", dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address, equilibriaRETHVault.address, {gasLimit:30000000});
+    portfolioContract = await PortfolioContractFactory.connect(wallet).deploy(weth.address, "PermanentLP", "PNLP", dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address, equilibriaRETHVault.address, magicVault.address, {gasLimit:30000000});
   }
   else if (portfolioContractName === "AllWeatherPortfolioLPToken") {
     portfolioContract = await PortfolioContractFactory.connect(wallet).deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address, {gas:30000000});
@@ -248,15 +257,15 @@ async function deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid,
 
   await portfolioContract.connect(wallet).deployed();
   await portfolioContract.setVaultAllocations(allocations).then((tx) => tx.wait());
-  return [portfolioContract, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, equilibriaRETHVault, radiantVault]
+  return [portfolioContract, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, equilibriaRETHVault, radiantVault, magicVault]
 }
 
 async function deployContractsToChain(wallet, allocations, portfolioContractName) {
-  const [dpxSLP, weth, dpxToken, fsGLP, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, pendleToken, daiToken, gDAIToken, sushiToken, miniChefV2, glpRewardPool, dlpToken, rethToken, pendleBooster, dGDAIRewardPool, multiFeeDistribution, xEqbToken, eqbToken] = await initTokens();
+  const [dpxSLP, weth, dpxToken, fsGLP, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, pendleToken, daiToken, gDAIToken, sushiToken, miniChefV2, glpRewardPool, dlpToken, rethToken, pendleBooster, dGDAIRewardPool, multiFeeDistribution, xEqbToken, eqbToken, magicToken, magicSLP] = await initTokens();
   return await deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid, oneInchAddress, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, radiantLendingPoolAddress, eqbMinterAddress, pendleBoosterAddress, allocations, portfolioContractName);
 }
 
-async function deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData) {
+async function deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic) {
   const depositData = {
     amount: end2endTestingAmount,
     receiver: wallet.address,
@@ -271,7 +280,8 @@ async function deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pend
     rethMinLpOut: pendleRETHZapInData[2],
     rethGuessPtReceivedFromSy: pendleRETHZapInData[3],
     rethInput: pendleRETHZapInData[4],
-    rethOneInchDataRETH: oneInchSwapDataForRETH.tx.data
+    rethOneInchDataRETH: oneInchSwapDataForRETH.tx.data,
+    oneInchDataMagic: oneInchSwapDataForMagic.tx.data,
   }
   return await (await portfolioContract.connect(wallet).deposit(depositData, { gasLimit })).wait();
 }
@@ -287,13 +297,13 @@ const dpxAmount = ethers.utils.parseUnits('0.001', 18);
 const end2endTestingAmount = ethers.utils.parseUnits('0.1', 18);
 const amountAfterChargingFee = end2endTestingAmount.mul(997).div(1000);
 const claimableRewardsTestData = [
-  ["SushSwap-DpxETH", []],
+  ["SushiSwap-DpxETH", []],
   ["RadiantArbitrum-DLP", []],
   ["Equilibria-GLP", []],
   ["Equilibria-GDAI", []]
 ];
 const claimableRewardsTestDataForPermanentPortfolio = [
-  ["SushSwap-DpxETH", []],
+  ["SushiSwap-DpxETH", []],
   ["Equilibria-GLP", []],
   ["Equilibria-GDAI", []]
 ];
@@ -301,10 +311,14 @@ const oneInchAddress = "0x1111111254EEB25477B68fb85Ed929f73A960582";
 
 // sushi dpx
 const sushiSwapDpxLpTokenAddress = "0x0C1Cf6883efA1B496B01f654E247B9b419873054";
+const sushiSwapMagicLpTokenAddress = "0xB7E50106A5bd3Cf21AF210A755F9C8740890A8c9";
 const sushiMiniChefV2Address = "0xF4d73326C13a4Fc5FD7A064217e12780e9Bd62c3";
 const dpxTokenAddress = "0x6C2C06790b3E3E3c38e12Ee22F8183b37a13EE55";
 const sushiTokenAddress = "0xd4d42F0b6DEF4CE0383636770eF773390d85c61A";
 const sushiPid = 17;
+// magic
+const magicTokenAddress = "0x539bdE0d7Dbd336b79148AA742883198BBF60342";
+const sushiMagicPid = 13;
 
 // radiant-arbitrum
 const radiantDlpAddress = "0x32dF62dc3aEd2cD6224193052Ce665DC18165841";
@@ -433,5 +447,6 @@ module.exports = {
   deposit,
   rethMarketPoolAddress,
   deployContractsToChain,
-  rethTokenAddress
+  rethTokenAddress,
+  sushiMagicPid
 };
