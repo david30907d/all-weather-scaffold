@@ -242,17 +242,16 @@ async function deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid,
   await magicVault.deployed();
   await magicVault.updateOneInchAggregatorAddress(oneInchAddress).then((tx) => tx.wait());
 
-  // const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
-  // radiantVault = await RadiantArbitrumVault.connect(wallet).deploy(dlpToken.address, radiantLendingPoolAddress, {gasLimit:30000000});
-  // await radiantVault.deployed();
-  radiantVault = undefined;
+  const RadiantArbitrumVault = await ethers.getContractFactory("RadiantArbitrumVault");
+  radiantVault = await RadiantArbitrumVault.connect(wallet).deploy(dlpToken.address, radiantLendingPoolAddress, {gasLimit:30000000});
+  await radiantVault.deployed();
 
   const PortfolioContractFactory = await ethers.getContractFactory(portfolioContractName);
   if (portfolioContractName === "PermanentPortfolioLPToken") {
     portfolioContract = await PortfolioContractFactory.connect(wallet).deploy(weth.address, "PermanentLP", "PNLP", dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address, equilibriaRETHVault.address, magicVault.address, {gasLimit:30000000});
   }
   else if (portfolioContractName === "AllWeatherPortfolioLPToken") {
-    portfolioContract = await PortfolioContractFactory.connect(wallet).deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address, {gas:30000000});
+    portfolioContract = await PortfolioContractFactory.connect(wallet).deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address, {gasLimit:30000000});
   }
 
   await portfolioContract.connect(wallet).deployed();
