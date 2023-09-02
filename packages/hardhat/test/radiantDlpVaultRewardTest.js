@@ -92,7 +92,7 @@ describe("All Weather Protocol", function () {
   describe("Portfolio LP Contract Test", function () {
     it("Should be able to claim reward", async function () {
       this.timeout(240000); // Set timeout to 120 seconds
-      const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
+      const receipt = await deposit(end2endTestingAmount, wallet, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
 
       await mineBlocks(20000); // Mine 100 blocks
 

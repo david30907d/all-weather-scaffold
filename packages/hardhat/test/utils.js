@@ -148,7 +148,6 @@ async function getBeforeEachSetUp(allocations, portfolioContractName = "Permanen
 
   try {
     console.log("read 1inch calldata and pendle calldata from json file")
-    oneInchSwapDataForDpx = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForDpx.json'), 'utf8'));
     oneInchSwapDataForGDAI = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForGDAI.json'), 'utf8'));
     oneInchSwapDataForRETH = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForRETH.json'), 'utf8'));
     oneInchSwapDataForMagic = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForMagic.json'), 'utf8'));
@@ -157,8 +156,6 @@ async function getBeforeEachSetUp(allocations, portfolioContractName = "Permanen
     pendleRETHZapInData = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'pendleRETHZapInData.json'), 'utf8'));
   } catch (err) {
     console.error('json file not found, get new 1inch calldata and pendle calldata');
-    oneInchSwapDataForDpx = await fetch1InchSwapData(weth.address, dpxTokenAddress, amountAfterChargingFee.div(8), dpxVault.address, 50);
-    fs.writeFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForDpx.json'), JSON.stringify(oneInchSwapDataForDpx, null, 2), 'utf8')
 
     oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, amountAfterChargingFee.div(4), equilibriaGDAIVault.address, 50);
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForGDAI.json'), JSON.stringify(oneInchSwapDataForGDAI, null, 2), 'utf8')
@@ -180,7 +177,7 @@ async function getBeforeEachSetUp(allocations, portfolioContractName = "Permanen
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'pendleRETHZapInData.json'), JSON.stringify(pendleRETHZapInData, null, 2), 'utf8')
   }
   portfolioShares = amountAfterChargingFee.div(await portfolioContract.UNIT_OF_SHARES());
-  return [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic];
+  return [wallet, weth, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic];
 }
 
 async function initTokens() {
@@ -212,11 +209,6 @@ async function initTokens() {
 }
 
 async function deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid, oneInchAddress, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, radiantLendingPoolAddress, eqbMinterAddress, pendleBoosterAddress, allocations, portfolioContractName = "PermanentPortfolioLPToken") {
-  const DpxArbitrumVault = await ethers.getContractFactory("DpxArbitrumVault");
-  dpxVault = await DpxArbitrumVault.connect(wallet).deploy(dpxSLP.address, sushiMiniChefV2Address, sushiPid);
-  await dpxVault.deployed();
-  await dpxVault.updateOneInchAggregatorAddress(oneInchAddress).then((tx) => tx.wait());
-
   const EquilibriaGlpVault = await ethers.getContractFactory("EquilibriaGlpVault");
   equilibriaGlpVault = await EquilibriaGlpVault.connect(wallet).deploy(pendleGlpMarketLPT.address, "Equilibria-GLP", "ALP-EQB-GLP", {gasLimit:30000000});
   await equilibriaGlpVault.deployed();
@@ -248,15 +240,15 @@ async function deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid,
 
   const PortfolioContractFactory = await ethers.getContractFactory(portfolioContractName);
   if (portfolioContractName === "PermanentPortfolioLPToken") {
-    portfolioContract = await PortfolioContractFactory.connect(wallet).deploy(weth.address, "PermanentLP", "PNLP", dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address, equilibriaRETHVault.address, magicVault.address, {gasLimit:30000000});
+    portfolioContract = await PortfolioContractFactory.connect(wallet).deploy(weth.address, "PermanentLP", "PNLP", equilibriaGlpVault.address, equilibriaGDAIVault.address, equilibriaRETHVault.address, magicVault.address, {gasLimit:30000000});
   }
   else if (portfolioContractName === "AllWeatherPortfolioLPToken") {
-    portfolioContract = await PortfolioContractFactory.connect(wallet).deploy(weth.address, radiantVault.address, dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address, {gasLimit:30000000});
+    portfolioContract = await PortfolioContractFactory.connect(wallet).deploy(weth.address, radiantVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address, {gasLimit:30000000});
   }
 
   await portfolioContract.connect(wallet).deployed();
   await portfolioContract.setVaultAllocations(allocations).then((tx) => tx.wait());
-  return [portfolioContract, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, equilibriaRETHVault, radiantVault, magicVault]
+  return [portfolioContract, equilibriaGDAIVault, equilibriaGlpVault, equilibriaRETHVault, radiantVault, magicVault]
 }
 
 async function deployContractsToChain(wallet, allocations, portfolioContractName) {
@@ -264,11 +256,10 @@ async function deployContractsToChain(wallet, allocations, portfolioContractName
   return await deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid, oneInchAddress, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, radiantLendingPoolAddress, eqbMinterAddress, pendleBoosterAddress, allocations, portfolioContractName);
 }
 
-async function deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic) {
+async function deposit(end2endTestingAmount, wallet, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic) {
   const depositData = {
     amount: end2endTestingAmount,
     receiver: wallet.address,
-    oneInchDataDpx: oneInchSwapDataForDpx.tx.data,
     glpMinLpOut: pendleGLPZapInData[2],
     glpGuessPtReceivedFromSy: pendleGLPZapInData[3],
     glpInput: pendleGLPZapInData[4],

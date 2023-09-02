@@ -7,7 +7,7 @@ async function main() {
   // TODO(david): use deployer!
   const provider = new ethers.providers.JsonRpcProvider(process.env.API_URL);
   const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
-  const [portfolioContract, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, equilibriaRETHVault, radiantVault] = await deployContractsToChain(wallet, [{
+  const [portfolioContract, equilibriaGDAIVault, equilibriaGlpVault, equilibriaRETHVault, radiantVault] = await deployContractsToChain(wallet, [{
     protocol: "SushiSwap-DpxETH", percentage: 25,
   }, {
     protocol: "Equilibria-GLP", percentage: 25
@@ -71,7 +71,6 @@ async function main() {
     console.log(error)
   }
 
-  console.log('Deployed and Verified dpxVault, Address:', dpxVault.address);
   console.log('Deployed and Verified equilibriaGDAIVault, Address:', equilibriaGDAIVault.address);
   console.log('Deployed and Verified equilibriaGlpVault, Address:', equilibriaGlpVault.address);
   console.log('Deployed and Verified equilibriaRETHVault, Address:', equilibriaRETHVault.address);

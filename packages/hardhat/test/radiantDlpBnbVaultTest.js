@@ -133,7 +133,7 @@ describe("All Weather Protocol", function () {
   describe("Portfolio LP Contract Test", function () {
     it("Should be able to zapin with WETH into equilibria GDAI", async function () {
       // this.timeout(240000); // Set timeout to 120 seconds
-      // const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
+      // const receipt = await deposit(end2endTestingAmount, wallet, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
 
       // // Iterate over the events and find the Deposit event
       // for (const event of receipt.events) {
@@ -151,7 +151,7 @@ describe("All Weather Protocol", function () {
     //   this.timeout(240000); // Set timeout to 120 seconds
     //   const radiantLockedDlpBalanceBeforeDeposit = await radiantVault.totalAssets();
     //   expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
-    //   const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
+    //   const receipt = await deposit(end2endTestingAmount, wallet, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
 
     //   let shares;
     //   for (const event of receipt.events) {
@@ -171,7 +171,7 @@ describe("All Weather Protocol", function () {
     //   this.timeout(240000); // Set timeout to 120 seconds
     //   const radiantLockedDlpBalanceBeforeDeposit = await radiantVault.totalAssets();
     //   expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
-    //   const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
+    //   const receipt = await deposit(end2endTestingAmount, wallet, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
 
     //   await mineBlocks(100); // Mine 100 blocks
     //   const originalPendleToken = await pendleToken.balanceOf(wallet.address);

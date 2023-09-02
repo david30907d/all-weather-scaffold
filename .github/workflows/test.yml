@@ -26,7 +26,6 @@ jobs:
       - name: Test
         run: |
           BLOCK_NUMBER=127196756 yarn test test/feeTest.js;
-          # BLOCK_NUMBER=127196756 yarn test test/dpxArbitrumVaultTest.js;
           BLOCK_NUMBER=127196756 yarn test test/magicArbitrumVaultTest.js;
           BLOCK_NUMBER=127196756 yarn test test/updateRewardsTest.js
           BLOCK_NUMBER=127196756 yarn test test/updateRewardsTestPart2_merge_would_fail_I_dont_know_why.js

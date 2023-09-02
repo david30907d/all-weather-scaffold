@@ -101,7 +101,7 @@ describe("All Weather Protocol", function () {
 
     //   const originalRadiantLockedDlpBalance = await radiantVault.totalAssets();
     //   expect(originalRadiantLockedDlpBalance).to.equal(0);
-    //   const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
+    //   const receipt = await deposit(end2endTestingAmount, wallet, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
 
 
     //   const vaultShareAfterDeposit = await radiantVault.balanceOf(portfolioContract.address)
@@ -112,7 +112,7 @@ describe("All Weather Protocol", function () {
     it("Should be able to withdraw Radiant dLP", async function () {
       const radiantLockedDlpBalanceBeforeDeposit = await radiantVault.totalAssets();
       expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
-      const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
+      const receipt = await deposit(end2endTestingAmount, wallet, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
 
       const radiantLockedDlpBalanceAfterDeposit = await radiantVault.totalAssets();
       expect(radiantLockedDlpBalanceAfterDeposit).to.gt(0);
@@ -130,7 +130,7 @@ describe("All Weather Protocol", function () {
     });
 
     // it("Should not be able to withdraw Radiant dLP", async function () {
-    //   const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
+    //   const receipt = await deposit(end2endTestingAmount, wallet, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
 
     //   const totalAssets = await radiantVault.totalAssets();
     //   const totalLockedAssets = await radiantVault.totalLockedAssets();

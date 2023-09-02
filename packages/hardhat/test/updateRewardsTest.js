@@ -37,7 +37,7 @@ let oneInchSwapDataForMagic;
 
 describe("All Weather Protocol", function () {
     beforeEach(async () => {
-        [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic] = await getBeforeEachSetUp([{
+        [wallet, weth, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic] = await getBeforeEachSetUp([{
             protocol: "RadiantArbitrum-DLP", percentage: 100
         }
         ], portfolioContractName = "AllWeatherPortfolioLPToken");
@@ -45,12 +45,12 @@ describe("All Weather Protocol", function () {
 
     describe("Portfolio LP Contract Test", function () {
         it("userRewardsOfInvestedProtocols should be reset to 0 after claim()", async function () {
-            const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic);
+            const receipt = await deposit(end2endTestingAmount, wallet, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic);
 
             const rewardPerShareZappedIn1 = await portfolioContract.rewardPerShareZappedIn(radiantVault.name(), radiantRTokens[0]);
             expect(rewardPerShareZappedIn1).to.equal(0);
             await mineBlocks(2000); // wait for 7 hours, otherwise the reward/shares would be too small and be rounded to 0
-            await deposit(end2endTestingAmount, wallet2, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic);
+            await deposit(end2endTestingAmount, wallet2, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic);
 
             const rewardPerShareZappedIn2 = await portfolioContract.rewardPerShareZappedIn(radiantVault.name(), radiantRTokens[0]);
             expect(rewardPerShareZappedIn2).to.be.gt(rewardPerShareZappedIn1);
@@ -65,7 +65,7 @@ describe("All Weather Protocol", function () {
             // 2nd deposit for wallet2
             await weth.connect(wallet2).deposit({ value: ethers.utils.parseEther("0.1"), gasLimit });
             await mineBlocks(2000); // wait for 7 hours, otherwise the reward/shares would be too small and be rounded to 0
-            await deposit(end2endTestingAmount, wallet2, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic);
+            await deposit(end2endTestingAmount, wallet2, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic);
 
             expect(await portfolioContract.userRewardsOfInvestedProtocols(wallet2.address, radiantVault.name(), radiantRTokens[0])).to.be.gt(0);
             await (await portfolioContract.connect(wallet2).claim(wallet2.address, { gasLimit: 30000000 })).wait();
@@ -73,10 +73,9 @@ describe("All Weather Protocol", function () {
             expect(await portfolioContract.userRewardPerTokenPaid(wallet2.address, radiantVault.name(), radiantRTokens[0])).to.equal(await portfolioContract.rewardPerShareZappedIn(radiantVault.name(), radiantRTokens[0]));
             const rewardPerShareZappedIn3 = await portfolioContract.rewardPerShareZappedIn(radiantVault.name(), radiantRTokens[0]);
             expect(rewardPerShareZappedIn3).to.be.gt(rewardPerShareZappedIn2);
-
         })
         // it("userRewardsOfInvestedProtocols should be reset to 0 after redeem()", async function () {
-        //     await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
+        //     await deposit(end2endTestingAmount, wallet, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
 
         //     currentTimestamp += 24 * 31 * 24 * 60 * 60; // Increment timestamp
         //     await simulateTimeElasped();

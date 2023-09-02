@@ -19,10 +19,6 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "./3rd/radiant/IFeeDistribution.sol";
 import "./3rd/pendle/IPendleRouter.sol";
-import "./vaults/radiant/RadiantArbitrumVault.sol";
-import "./vaults/sushiswap/DpxArbitrumVault.sol";
-import "./vaults/equilibria/EquilibriaGlpVault.sol";
-import "./vaults/equilibria/EquilibriaGDAIVault.sol";
 import "./interfaces/AbstractVault.sol";
 
 abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
@@ -46,7 +42,6 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
   struct DepositData {
     uint256 amount;
     address receiver;
-    bytes oneInchDataDpx;
     uint256 glpMinLpOut;
     IPendleRouter.ApproxParams glpGuessPtReceivedFromSy;
     IPendleRouter.TokenInput glpInput;
@@ -192,16 +187,7 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
         zapInAmountForThisVault
       );
 
-      if (bytesOfvaultName == keccak256(bytes("SushiSwap-DpxETH"))) {
-        // slither-disable-next-line calls-loop
-        require(
-          vaults[idx].deposit(
-            zapInAmountForThisVault,
-            depositData.oneInchDataDpx
-          ) > 0,
-          "Buying Dpx LP token failed"
-        );
-      } else if (bytesOfvaultName == keccak256(bytes("SushiSwap-MagicETH"))) {
+      if (bytesOfvaultName == keccak256(bytes("SushiSwap-MagicETH"))) {
         // slither-disable-next-line calls-loop
         require(
           vaults[idx].deposit(

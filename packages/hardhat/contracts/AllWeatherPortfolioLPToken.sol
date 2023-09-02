@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// The code defines a Solidity contract called AllWeatherPortfolioLPToken that inherits from ERC20. It takes in several parameters on construction, including asset, radiantVaultAddr, and dpxVaultAddr. The contract has several functions that do the following:
+// The code defines a Solidity contract called AllWeatherPortfolioLPToken that inherits from ERC20. It takes in several parameters on construction, including asset, radiantVaultAddr. The contract has several functions that do the following:
 
 // deposit: Takes in an amount and transfers tokens of asset from the user to the contract, then distributes the asset into two protocols (DPX and Radiant) based on a portfolioAllocation. The user receives an ERC20 token (AWVLP) in proportion to their deposit.
 // redeem: Takes in a number of shares and an account, then redeems all DPX LP Tokens and sends them to the account. Only DPX LP tokens are redeemed. The proportion of redeemed tokens is distributed to the sender's ERC20 tokens (AWVLP).
@@ -13,7 +13,6 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./vaults/radiant/RadiantArbitrumVault.sol";
-import "./vaults/sushiswap/DpxArbitrumVault.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "./3rd/radiant/IFeeDistribution.sol";
@@ -45,7 +44,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   struct DepositData {
     uint256 amount;
     address receiver;
-    bytes oneInchDataDpx;
     uint256 glpMinLpOut;
     IPendleRouter.ApproxParams glpGuessPtReceivedFromSy;
     IPendleRouter.TokenInput glpInput;
@@ -58,7 +56,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   IERC20 public immutable asset;
   uint256 public balanceOfProtocolFee;
   address public immutable radiantVaultAddr;
-  address payable public immutable dpxVaultAddr;
   address public immutable equilibriaVaultAddr;
   address public immutable equilibriaGDAIVaultAddr;
 
@@ -74,7 +71,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
   constructor(
     address asset_,
     address radiantVaultAddr_,
-    address payable dpxVaultAddr_,
     address equilibriaVaultAddr_,
     address equilibriaGDAIVaultAddr_
   ) ERC20("AllWeatherVaultLP", "AWVLP") {
@@ -83,9 +79,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
       "radiantVaultAddr_ cannot be zero"
     );
     radiantVaultAddr = radiantVaultAddr_;
-
-    require(dpxVaultAddr_ != address(0), "dpxVaultAddr_ cannot be zero");
-    dpxVaultAddr = dpxVaultAddr_;
 
     require(
       equilibriaVaultAddr_ != address(0),
@@ -101,7 +94,6 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
     asset = ERC20(asset_);
 
     vaults = [
-      AbstractVault(DpxArbitrumVault(dpxVaultAddr)),
       AbstractVault(RadiantArbitrumVault(radiantVaultAddr)),
       AbstractVault(EquilibriaGlpVault(equilibriaVaultAddr)),
       AbstractVault(EquilibriaGDAIVault(equilibriaGDAIVaultAddr))
@@ -204,16 +196,7 @@ contract AllWeatherPortfolioLPToken is ERC20, Ownable {
         zapInAmountForThisVault
       );
 
-      if (bytesOfvaultName == keccak256(bytes("SushiSwap-DpxETH"))) {
-        // slither-disable-next-line calls-loop
-        require(
-          vaults[idx].deposit(
-            zapInAmountForThisVault,
-            depositData.oneInchDataDpx
-          ) > 0,
-          "Buying Dpx LP token failed"
-        );
-      } else if (bytesOfvaultName == keccak256(bytes("RadiantArbitrum-DLP"))) {
+      if (bytesOfvaultName == keccak256(bytes("RadiantArbitrum-DLP"))) {
         // slither-disable-next-line calls-loop
         require(
           vaults[idx].deposit(zapInAmountForThisVault) > 0,
