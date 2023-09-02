@@ -29,7 +29,7 @@ jobs:
           # BLOCK_NUMBER=127196756 yarn test test/dpxArbitrumVaultTest.js;
           BLOCK_NUMBER=127196756 yarn test test/magicArbitrumVaultTest.js;
           BLOCK_NUMBER=127196756 yarn test test/updateRewardsTest.js
-          BLOCK_NUMBER=127196756 yarn test/updateRewardsTestPart2_merge_would_fail_I_dont_know_why.js
+          BLOCK_NUMBER=127196756 yarn test test/updateRewardsTestPart2_merge_would_fail_I_dont_know_why.js
           BLOCK_NUMBER=127196756 yarn test test/equilibriaGLP.js;
           BLOCK_NUMBER=127196756 yarn test test/equilibriaGDAI.js;
           BLOCK_NUMBER=127196756 yarn test test/equilibriaRETH.js;
