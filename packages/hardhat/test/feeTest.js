@@ -32,10 +32,11 @@ let pendleRETHZapInData;
 let equilibriaRETHVault;
 let pendleRETHMarketLPT;
 let pendleBooster;
+let oneInchSwapDataForMagic;
 
 describe("All Weather Protocol", function () {
     beforeEach(async () => {
-      [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster] = await getBeforeEachSetUp([{
+      [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic] = await getBeforeEachSetUp([{
           protocol: "Equilibria-GLP", percentage: 100
         }
         ]);
@@ -44,7 +45,7 @@ describe("All Weather Protocol", function () {
     describe("Portfolio LP Contract Test", function () {
         it("Reward Should be different, if they zap in different timeing", async function () {
             this.timeout(2400000); // Set timeout to 120 seconds
-            const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData,);
+            const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic);
 
             const originalWeth = await weth.balanceOf(wallet.address);
             expect(await portfolioContract.balanceOf(wallet.address)).to.be.equal(portfolioShares);

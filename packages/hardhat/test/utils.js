@@ -282,6 +282,9 @@ async function deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pend
     rethInput: pendleRETHZapInData[4],
     rethOneInchDataRETH: oneInchSwapDataForRETH.tx.data,
     oneInchDataMagic: oneInchSwapDataForMagic.tx.data,
+    // pendleMinLpOut: pendlePendleZapInData[2],
+    // pendleGuessPtReceivedFromSy: pendlePendleZapInData[3],
+    // pendleInput: pendlePendleZapInData[4],
   }
   return await (await portfolioContract.connect(wallet).deposit(depositData, { gasLimit })).wait();
 }

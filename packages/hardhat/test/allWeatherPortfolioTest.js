@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { 
+const {
     end2endTestingAmount,
     getPendleZapOutData,
     gDAIMarketPoolAddress,
@@ -8,7 +8,7 @@ const {
     getBeforeEachSetUp,
     deposit
 } = require("./utils");
-let {currentTimestamp} = require("./utils");
+let { currentTimestamp } = require("./utils");
 
 let wallet;
 let weth;
@@ -23,25 +23,26 @@ let equilibriaGlpVault;
 let portfolioContract;
 let sushiToken;
 let miniChefV2;
+let oneInchSwapDataForMagic;
 
 describe("All Weather Protocol", function () {
     beforeEach(async () => {
-        [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2] = await getBeforeEachSetUp([{
+        [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic]  = await getBeforeEachSetUp([{
             protocol: "SushiSwap-DpxETH", percentage: 25,
-          }, {
+        }, {
             protocol: "Equilibria-GLP", percentage: 25
-          }, {
+        }, {
             protocol: "Equilibria-GDAI", percentage: 25
-          }, {
+        }, {
             protocol: "RadiantArbitrum-DLP", percentage: 25
-          }
-          ]);
-      });
-    
+        }
+        ]);
+    });
+
     describe("Portfolio LP Contract Test", function () {
         it("Should be able to zapin with WETH into All Weather Portfolio", async function () {
             this.timeout(240000); // Set timeout to 120 seconds
-            const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
+            const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic);
 
             // Iterate over the events and find the Deposit event
             for (const event of receipt.events) {
@@ -69,45 +70,45 @@ describe("All Weather Protocol", function () {
             }
         });
         it("Should be able to withdraw everything from All Weather Portfolio", async function () {
-          this.timeout(240000); // Set timeout to 120 seconds
-          const radiantLockedDlpBalanceBeforeDeposit = await radiantVault.totalAssets();
-          expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
-          const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI);
+            this.timeout(240000); // Set timeout to 120 seconds
+            const radiantLockedDlpBalanceBeforeDeposit = await radiantVault.totalAssets();
+            expect(radiantLockedDlpBalanceBeforeDeposit).to.equal(0);
+            const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic);
 
-          let shares;
-          for (const event of receipt.events) {
-            if (event.topics.includes(equilibriaGDAIVault.interface.getEventTopic('Deposit'))) {
-              const decodedEvent = equilibriaGDAIVault.interface.decodeEventLog('Deposit', event.data, event.topics);
-              if (decodedEvent.owner === portfolioContract.address) {
-                  shares = decodedEvent.shares;
-              }
+            let shares;
+            for (const event of receipt.events) {
+                if (event.topics.includes(equilibriaGDAIVault.interface.getEventTopic('Deposit'))) {
+                    const decodedEvent = equilibriaGDAIVault.interface.decodeEventLog('Deposit', event.data, event.topics);
+                    if (decodedEvent.owner === portfolioContract.address) {
+                        shares = decodedEvent.shares;
+                    }
+                }
             }
-          }
-          const pendleZapOutData = await getPendleZapOutData(42161, gDAIMarketPoolAddress, gDAIToken.address, shares, 1);
+            const pendleZapOutData = await getPendleZapOutData(42161, gDAIMarketPoolAddress, gDAIToken.address, shares, 1);
 
-          currentTimestamp += 12 * 31 * 24 * 60 * 60; // Increment timestamp
-          await simulateTimeElasped();
-    
-          const totalAssetsWhichShouldBeWithdrew = await portfolioContract.totalAssets();
-          // withdraw
-          await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, pendleZapOutData[3], { gasLimit })).wait();
-          for (const asset of totalAssetsWhichShouldBeWithdrew) {
-            if (asset.vaultName === 'SushiSwap-DpxETH') {
-                // expect(asset.assets).to.equal(await dpxSLP.balanceOf(wallet.address));
-            } else if (asset.vaultName === 'RadiantArbitrum-DLP') {
-                expect(asset.assets).to.equal(await dlpToken.balanceOf(wallet.address));
-            } else if  (asset.vaultName === 'Equilibria-GLP') {
-                expect(asset.assets).to.equal(await pendleGlpMarketLPT.balanceOf(wallet.address));
-            } else if (asset.vaultName === 'Equilibria-GDAI') {
-                expect(asset.assets).to.equal(await pendleGDAIMarketLPT.balanceOf(wallet.address));
-            } else {
-                throw new Error(`Unknown vault name ${asset.vaultName}`);
+            currentTimestamp += 12 * 31 * 24 * 60 * 60; // Increment timestamp
+            await simulateTimeElasped();
+
+            const totalAssetsWhichShouldBeWithdrew = await portfolioContract.totalAssets();
+            // withdraw
+            await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, pendleZapOutData[3], { gasLimit })).wait();
+            for (const asset of totalAssetsWhichShouldBeWithdrew) {
+                if (asset.vaultName === 'SushiSwap-DpxETH') {
+                    // expect(asset.assets).to.equal(await dpxSLP.balanceOf(wallet.address));
+                } else if (asset.vaultName === 'RadiantArbitrum-DLP') {
+                    expect(asset.assets).to.equal(await dlpToken.balanceOf(wallet.address));
+                } else if (asset.vaultName === 'Equilibria-GLP') {
+                    expect(asset.assets).to.equal(await pendleGlpMarketLPT.balanceOf(wallet.address));
+                } else if (asset.vaultName === 'Equilibria-GDAI') {
+                    expect(asset.assets).to.equal(await pendleGDAIMarketLPT.balanceOf(wallet.address));
+                } else {
+                    throw new Error(`Unknown vault name ${asset.vaultName}`);
+                }
             }
-          }
-          const currentUnclaimedAssets = await portfolioContract.totalAssets();
-          for (const asset of currentUnclaimedAssets) {
-            expect(asset.assets).to.equal(0);
-          }
+            const currentUnclaimedAssets = await portfolioContract.totalAssets();
+            for (const asset of currentUnclaimedAssets) {
+                expect(asset.assets).to.equal(0);
+            }
         });
     });
 });

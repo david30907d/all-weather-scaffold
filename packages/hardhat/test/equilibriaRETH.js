@@ -33,9 +33,11 @@ let pendleRETHZapInData;
 let equilibriaRETHVault;
 let pendleRETHMarketLPT;
 let pendleBooster;
+let oneInchSwapDataForMagic;
+
 describe("All Weather Protocol", function () {
     beforeEach(async () => {
-        [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken] = await getBeforeEachSetUp([{
+        [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic] = await getBeforeEachSetUp([{
             protocol: "Equilibria-RETH", percentage: 100
         }
         ]);
@@ -44,7 +46,7 @@ describe("All Weather Protocol", function () {
     describe("Portfolio LP Contract Test", function () {
         it("Should be able to zapin with WETH into equilibria RETH", async function () {
             this.timeout(240000); // Set timeout to 120 seconds
-            const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData,);
+            const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic);
             // Iterate over the events and find the Deposit event
             for (const event of receipt.events) {
                 if (event.topics.includes(equilibriaRETHVault.interface.getEventTopic('Deposit')) && event.address === equilibriaRETHVault.address) {
@@ -61,7 +63,7 @@ describe("All Weather Protocol", function () {
         });
         it("Should be able to withdraw RETH from equilibria", async function () {
             this.timeout(240000); // Set timeout to 120 seconds
-            const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData,);
+            const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic);
 
             let shares;
             for (const event of receipt.events) {
@@ -80,7 +82,7 @@ describe("All Weather Protocol", function () {
 
         it("Should be able to claim rewards", async function () {
             this.timeout(240000); // Set timeout to 120 seconds
-            const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData);
+            const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic);
 
 
             await mineBlocks(100); // Mine 100 blocks
@@ -97,9 +99,9 @@ describe("All Weather Protocol", function () {
                     expect(pendleClaimableReward).to.be.gt(0);
 
                     // ratio between Pendle:EQB is 2:1
-                    eqbClaimableReward = claimableReward.claimableRewards[rewardLengthOfThisVault-1].amount;
-                    expect(Math.floor(pendleClaimableReward/eqbClaimableReward)).to.equal(2);
-          
+                    eqbClaimableReward = claimableReward.claimableRewards[rewardLengthOfThisVault - 1].amount;
+                    expect(Math.floor(pendleClaimableReward / eqbClaimableReward)).to.equal(2);
+
                     await portfolioContract.connect(wallet).claim(wallet.address);
                     expect((await pendleToken.balanceOf(wallet.address)).sub(originalPendleToken)).to.be.gt(pendleClaimableReward);
 
@@ -113,13 +115,13 @@ describe("All Weather Protocol", function () {
                 }
             }
             const xEqbTokenBalance = await xEqbToken.balanceOf(equilibriaRETHVault.address);
-            await equilibriaRETHVault.connect(wallet).redeemXEQB(xEqbTokenBalance, 86400*7*24);
+            await equilibriaRETHVault.connect(wallet).redeemXEQB(xEqbTokenBalance, 86400 * 7 * 24);
             timeElasped = 24 * 7 * 86400; // 24 weeks later
             await simulateTimeElasped(timeElasped);
             await equilibriaRETHVault.connect(wallet).finalizeRedeem(0);
             expect(await eqbToken.balanceOf(wallet.address)).to.be.gt(xEqbTokenBalance);
             // ratio between xEQB:EQB is 3:1
-            expect(Math.floor(xEqbTokenBalance/eqbClaimableReward)).to.be.equal(3);      
+            expect(Math.floor(xEqbTokenBalance / eqbClaimableReward)).to.be.equal(3);
         })
         it("Should be able to check claimable rewards", async function () {
             const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);

@@ -59,6 +59,9 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
     IPendleRouter.TokenInput rethInput;
     bytes rethOneInchDataRETH;
     bytes oneInchDataMagic;
+    // uint256 pendleMinLpOut;
+    // IPendleRouter.ApproxParams pendleGuessPtReceivedFromSy;
+    // IPendleRouter.TokenInput pendleInput;
   }
 
   IERC20 public immutable asset;
@@ -224,7 +227,20 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
           ) > 0,
           "Zap Into Equilibria GLP failed"
         );
-      } else if (bytesOfvaultName == keccak256(bytes("Equilibria-GDAI"))) {
+      }
+      // else if (bytesOfvaultName == keccak256(bytes("Equilibria-Pendle"))) {
+      //   // slither-disable-next-line calls-loop
+      //   require(
+      //     vaults[idx].deposit(
+      //       zapInAmountForThisVault,
+      //       depositData.pendleMinLpOut,
+      //       depositData.pendleGuessPtReceivedFromSy,
+      //       depositData.pendleInput
+      //     ) > 0,
+      //     "Zap Into Equilibria GLP failed"
+      //   );
+      // }
+      else if (bytesOfvaultName == keccak256(bytes("Equilibria-GDAI"))) {
         // commonly occurs error
         // Error: VM Exception while processing transaction: reverted with reason string 'Dai/insufficient-balance'
         // In short, you need to lower the amount of Dai that you zapin to getPendleZapInData()

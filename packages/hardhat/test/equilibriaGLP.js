@@ -32,9 +32,11 @@ let oneInchSwapDataForRETH;
 let pendleRETHZapInData;
 let equilibriaRETHVault;
 let pendleRETHMarketLPT;
+let oneInchSwapDataForMagic;
+
 let pendleBooster; describe("All Weather Protocol", function () {
   beforeEach(async () => {
-    [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken] = await getBeforeEachSetUp([{
+    [wallet, weth, oneInchSwapDataForDpx, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, dpxVault, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic] = await getBeforeEachSetUp([{
       protocol: "Equilibria-GLP", percentage: 100
     }
     ]);
@@ -43,7 +45,7 @@ let pendleBooster; describe("All Weather Protocol", function () {
   describe("Portfolio LP Contract Test", function () {
     it("Should be able to zapin with WETH into equilibria GLP", async function () {
       this.timeout(240000); // Set timeout to 120 seconds
-      const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData,);
+      const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic);
 
 
       // Iterate over the events and find the Deposit event
@@ -62,7 +64,7 @@ let pendleBooster; describe("All Weather Protocol", function () {
     });
     it("Should be able to withdraw GLP from equilibria", async function () {
       this.timeout(240000); // Set timeout to 120 seconds
-      const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData,);
+      const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic);
 
 
       let shares;
@@ -83,7 +85,7 @@ let pendleBooster; describe("All Weather Protocol", function () {
 
     it("Should be able to claim rewards", async function () {
       this.timeout(240000); // Set timeout to 120 seconds
-      const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData,);
+      const receipt = await deposit(end2endTestingAmount, wallet, oneInchSwapDataForDpx, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic);
 
 
 
