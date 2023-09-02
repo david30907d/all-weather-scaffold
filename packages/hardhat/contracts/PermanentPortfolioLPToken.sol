@@ -9,9 +9,11 @@
 
 pragma solidity 0.8.18;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./vaults/sushiswap/MagicArbitrumVault.sol";
 import "./vaults/equilibria/EquilibriaGlpVault.sol";
 import "./vaults/equilibria/EquilibriaGDAIVault.sol";
 import "./vaults/equilibria/EquilibriaRETHVault.sol";
+import "./vaults/equilibria/EquilibriaPendleVault.sol";
 import "./BasePortfolio.sol";
 
 contract PermanentPortfolioLPToken is BasePortfolio {
@@ -25,7 +27,8 @@ contract PermanentPortfolioLPToken is BasePortfolio {
     address equilibriaVaultAddr,
     address equilibriaGDAIVaultAddr,
     address equilibriaRETHVaultAddr,
-    address payable magicArbitrumVaultAddr
+    address payable magicArbitrumVaultAddr,
+    address equilibriaPendleVaultAddr
   ) BasePortfolio(asset_, name_, symbol_) {
     require(
       equilibriaVaultAddr != address(0),
@@ -39,11 +42,21 @@ contract PermanentPortfolioLPToken is BasePortfolio {
       equilibriaRETHVaultAddr != address(0),
       "equilibriaRETHVaultAddr cannot be zero"
     );
+    require(
+      magicArbitrumVaultAddr != address(0),
+      "magicArbitrumVaultAddr cannot be zero"
+    );
+    require(
+      equilibriaPendleVaultAddr != address(0),
+      "equilibriaPendleVaultAddr cannot be zero"
+    );
 
     vaults = [
       AbstractVault(EquilibriaGlpVault(equilibriaVaultAddr)),
       AbstractVault(EquilibriaGDAIVault(equilibriaGDAIVaultAddr)),
-      AbstractVault(EquilibriaRETHVault(equilibriaRETHVaultAddr))
+      AbstractVault(EquilibriaRETHVault(equilibriaRETHVaultAddr)),
+      AbstractVault(EquilibriaPendleVault(equilibriaPendleVaultAddr)),
+      AbstractVault(MagicArbitrumVault(magicArbitrumVaultAddr))
     ];
   }
 }

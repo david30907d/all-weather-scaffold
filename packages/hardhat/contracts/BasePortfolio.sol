@@ -1,12 +1,4 @@
 // SPDX-License-Identifier: MIT
-// The code defines a Solidity contract called AllWeatherPortfolioLPToken that inherits from ERC20. It takes in several parameters on construction, including asset, radiantVaultAddr, and dpxVaultAddr. The contract has several functions that do the following:
-
-// deposit: Takes in an amount and transfers tokens of asset from the user to the contract, then distributes the asset into two protocols (DPX and Radiant) based on a portfolioAllocation. The user receives an ERC20 token (AWVLP) in proportion to their deposit.
-// redeem: Takes in a number of shares and an account, then redeems all DPX LP Tokens and sends them to the account. Only DPX LP tokens are redeemed. The proportion of redeemed tokens is distributed to the sender's ERC20 tokens (AWVLP).
-// claimableRewards: Takes in an account, calculates the user's claimable rewards across both protocols and returns them.
-// claim: Takes in an account and reward tokens, and claims all the available rewards across both protocols, sending them to the account.
-// The code imports several open source libraries and uses various data structures like struct, bytes, and mapping. The SPDX-License-Identifier specifies the license for the code (MIT in this case).
-
 pragma solidity 0.8.18;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -54,9 +46,9 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
     IPendleRouter.TokenInput rethInput;
     bytes rethOneInchDataRETH;
     bytes oneInchDataMagic;
-    // uint256 pendleMinLpOut;
-    // IPendleRouter.ApproxParams pendleGuessPtReceivedFromSy;
-    // IPendleRouter.TokenInput pendleInput;
+    uint256 pendleMinLpOut;
+    IPendleRouter.ApproxParams pendleGuessPtReceivedFromSy;
+    IPendleRouter.TokenInput pendleInput;
   }
 
   IERC20 public immutable asset;
@@ -213,20 +205,18 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
           ) > 0,
           "Zap Into Equilibria GLP failed"
         );
-      }
-      // else if (bytesOfvaultName == keccak256(bytes("Equilibria-Pendle"))) {
-      //   // slither-disable-next-line calls-loop
-      //   require(
-      //     vaults[idx].deposit(
-      //       zapInAmountForThisVault,
-      //       depositData.pendleMinLpOut,
-      //       depositData.pendleGuessPtReceivedFromSy,
-      //       depositData.pendleInput
-      //     ) > 0,
-      //     "Zap Into Equilibria GLP failed"
-      //   );
-      // }
-      else if (bytesOfvaultName == keccak256(bytes("Equilibria-GDAI"))) {
+      } else if (bytesOfvaultName == keccak256(bytes("Equilibria-PENDLE"))) {
+        // slither-disable-next-line calls-loop
+        require(
+          vaults[idx].deposit(
+            zapInAmountForThisVault,
+            depositData.pendleMinLpOut,
+            depositData.pendleGuessPtReceivedFromSy,
+            depositData.pendleInput
+          ) > 0,
+          "Zap Into Equilibria GLP failed"
+        );
+      } else if (bytesOfvaultName == keccak256(bytes("Equilibria-GDAI"))) {
         // commonly occurs error
         // Error: VM Exception while processing transaction: reverted with reason string 'Dai/insufficient-balance'
         // In short, you need to lower the amount of Dai that you zapin to getPendleZapInData()

@@ -21,6 +21,8 @@
 add the new vault into:
 1. `deposit()` for loop
 2. `redeem()` for loop
-3. update need to manually add some tokens into `/debank` route in rebalance backend (for instance, 0xeeeeee for each blockchain can be different token)
-4. need to find the API of that protocol you integrated first, and then calculate its `apr_composition` in `/apr_composition` endpoint in rebalance backend
-5. check the result of `apr composition` on frontend side
+3. add new vault address in the portfolio's contructor, add its `require` accordingly and add this new vault into the `vault[]`
+4. need to add lots of variable in `utils.js`
+5. update need to manually add some tokens into `/debank` route in rebalance backend (for instance, 0xeeeeee for each blockchain can be different token)
+6. need to find the API of that protocol you integrated first, and then calculate its `apr_composition` in `/apr_composition` endpoint in rebalance backend
+7. check the result of `apr composition` on frontend side
