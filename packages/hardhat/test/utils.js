@@ -145,7 +145,7 @@ async function getBeforeEachSetUp(allocations, portfolioContractName = "Permanen
   await deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid, oneInchAddress, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, radiantLendingPoolAddress, eqbMinterAddress, pendleBoosterAddress, allocations, portfolioContractName);
   await (await weth.connect(wallet).approve(portfolioContract.address, ethers.constants.MaxUint256, { gasLimit })).wait();
   await (await weth.connect(wallet2).approve(portfolioContract.address, ethers.constants.MaxUint256, { gasLimit })).wait();
-
+  console.log("amountAfterChargingFee.mul(25).div(100)", amountAfterChargingFee.mul(25).div(100))
   try {
     console.log("read 1inch calldata and pendle calldata from json file")
     oneInchSwapDataForGDAI = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForGDAI.json'), 'utf8'));
@@ -158,26 +158,26 @@ async function getBeforeEachSetUp(allocations, portfolioContractName = "Permanen
   } catch (err) {
     console.error('json file not found, get new 1inch calldata and pendle calldata');
 
-    oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, amountAfterChargingFee.div(4), equilibriaGDAIVault.address, 50);
+    oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, amountAfterChargingFee.mul(12).div(100), equilibriaGDAIVault.address, 50);
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForGDAI.json'), JSON.stringify(oneInchSwapDataForGDAI, null, 2), 'utf8')
 
-    oneInchSwapDataForRETH = await fetch1InchSwapData(weth.address, rethToken.address, amountAfterChargingFee.div(4), equilibriaRETHVault.address, 50);
+    oneInchSwapDataForRETH = await fetch1InchSwapData(weth.address, rethToken.address, amountAfterChargingFee.mul(12).div(100), equilibriaRETHVault.address, 50);
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForRETH.json'), JSON.stringify(oneInchSwapDataForRETH, null, 2), 'utf8')
 
-    oneInchSwapDataForMagic = await fetch1InchSwapData(weth.address, magicToken.address, amountAfterChargingFee.div(2), magicVault.address, 50);
+    oneInchSwapDataForMagic = await fetch1InchSwapData(weth.address, magicToken.address, amountAfterChargingFee.mul(25).div(200), magicVault.address, 50);
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForMagic.json'), JSON.stringify(oneInchSwapDataForMagic, null, 2), 'utf8')
 
     // oneInchSwapDataForGDAI.toAmount).div(2): due to the 1inch slippage, need to multiple by 0.95 to pass pendle zap in
     pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toAmount).mul(95).div(100), 0.2, daiToken.address)
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'pendleGDAIZapInData.json'), JSON.stringify(pendleGDAIZapInData, null, 2), 'utf8')
 
-    pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, amountAfterChargingFee.div(4), 0.99);
+    pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, amountAfterChargingFee.mul(26).div(100), 0.2);
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'pendleGLPZapInData.json'), JSON.stringify(pendleGLPZapInData, null, 2), 'utf8')
 
     pendleRETHZapInData = await getPendleZapInData(42161, rethMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForRETH.toAmount).mul(95).div(100), 0.2, rethToken.address);
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'pendleRETHZapInData.json'), JSON.stringify(pendleRETHZapInData, null, 2), 'utf8')
 
-    pendlePendleZapInData = await getPendleZapInData(42161, pendleMarketPoolAddress, amountAfterChargingFee.div(8), 0.2);
+    pendlePendleZapInData = await getPendleZapInData(42161, pendleMarketPoolAddress, amountAfterChargingFee.div(4), 0.2);
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'pendlePendleZapInData.json'), JSON.stringify(pendlePendleZapInData, null, 2), 'utf8')
   }
   portfolioShares = amountAfterChargingFee.div(await portfolioContract.UNIT_OF_SHARES());

@@ -3,20 +3,20 @@
   "0x24e4df37ea00c4954d668e3ce19ffdcffdec2cf6",
   {
     "type": "BigNumber",
-    "hex": "0x01f15847d5946f09"
+    "hex": "0x0404c4253d0ddc4a"
   },
   {
     "guessMin": {
       "type": "BigNumber",
-      "hex": "0x98704aa633c774"
+      "hex": "0x013b4e2ce2d0f265"
     },
     "guessMax": {
       "type": "BigNumber",
-      "hex": "0x017d18ba9f8172a4"
+      "hex": "0x03144370370a5dfe"
     },
     "guessOffchain": {
       "type": "BigNumber",
-      "hex": "0xbe8c5d4fc0b952"
+      "hex": "0x018a21b81b852eff"
     },
     "maxIteration": 14,
     "eps": "1000000000000000"
@@ -25,7 +25,7 @@
     "tokenIn": "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
     "netTokenIn": {
       "type": "BigNumber",
-      "hex": "0x2c4693e5836800"
+      "hex": "0x588d27cb06d000"
     },
     "tokenMintSy": "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
     "bulk": "0x0000000000000000000000000000000000000000",

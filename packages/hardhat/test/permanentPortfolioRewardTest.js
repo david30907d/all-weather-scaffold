@@ -34,28 +34,30 @@ let equilibriaRETHVault;
 let pendleRETHMarketLPT;
 let pendleBooster;
 let oneInchSwapDataForMagic;
+let pendlePendleZapInData;
 
 describe("All Weather Protocol", function () {
     beforeEach(async () => {
-        [wallet, weth, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic] = await getBeforeEachSetUp([{
-            protocol: "SushiSwap-DpxETH", percentage: 25,
-          }, {
-            protocol: "Equilibria-GLP", percentage: 25
-          }, {
-            protocol: "Equilibria-GDAI", percentage: 25
-          }, {
-            protocol: "Equilibria-RETH", percentage: 25
-          }
-          ]);
+        [wallet, weth, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic, pendlePendleZapInData, equilibriaPendleVault, pendleMarketLPT] = await getBeforeEachSetUp([{
+            protocol: "SushiSwap-MagicETH", percentage: 25,
+        }, {
+            protocol: "Equilibria-GLP", percentage: 26
+        }, {
+            protocol: "Equilibria-GDAI", percentage: 12
+        }, {
+            protocol: "Equilibria-RETH", percentage: 12
+        }, {
+            protocol: "Equilibria-PENDLE", percentage: 25
+        }
+        ]);
     });
     describe("Portfolio LP Contract Test", function () {
         it("Should be able to claim rewards", async function () {
             const randomWallet = ethers.Wallet.createRandom();
             this.timeout(240000); // Set timeout to 120 seconds
-            const receipt = await deposit(end2endTestingAmount, wallet, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic);
-            await mineBlocks(1000);
+            const receipt = await deposit(end2endTestingAmount, wallet, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic, pendlePendleZapInData);
+            await mineBlocks(10000);
             const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
-            fs.writeFileSync(path.join(__dirname, 'fixtures', 'claimableRewards.json'), JSON.stringify(claimableRewards, null, 2), 'utf8')
             for (const claimableReward of claimableRewards) {
                 for (const reward of claimableReward.claimableRewards) {
                     if (reward.token == sushiTokenAddress) {
@@ -67,8 +69,8 @@ describe("All Weather Protocol", function () {
 
 
             await portfolioContract.connect(wallet).claim(randomWallet.address);
-            // dpx
-            expect(await dpxToken.balanceOf(randomWallet.address)).to.be.gt(0);
+            // magic
+            expect(await magicToken.balanceOf(randomWallet.address)).to.be.gt(0);
 
             // gdai
             expect(await pendleToken.balanceOf(randomWallet.address)).to.be.gt(0);

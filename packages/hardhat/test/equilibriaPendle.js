@@ -31,7 +31,6 @@ let rethToken;
 let oneInchSwapDataForRETH;
 let pendleRETHZapInData;
 let equilibriaPendleVault;
-let pendleRETHMarketLPT;
 let pendleBooster;
 let oneInchSwapDataForMagic;
 let pendlePendleZapInData;
@@ -39,7 +38,7 @@ let pendleMarketLPT;
 
 describe("All Weather Protocol", function () {
     beforeEach(async () => {
-        [wallet, weth, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaPendleVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic, pendlePendleZapInData, equilibriaPendleVault, pendleMarketLPT] = await getBeforeEachSetUp([{
+        [wallet, weth, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic, pendlePendleZapInData, equilibriaPendleVault, pendleMarketLPT] = await getBeforeEachSetUp([{
             protocol: "Equilibria-PENDLE", percentage: 100
         }
         ]);
@@ -68,18 +67,18 @@ describe("All Weather Protocol", function () {
             const receipt = await deposit(end2endTestingAmount, wallet, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic, pendlePendleZapInData);
 
             let shares;
-            // for (const event of receipt.events) {
-            //     if (event.topics.includes(equilibriaPendleVault.interface.getEventTopic('Deposit')) && event.address === equilibriaPendleVault.address) {
-            //         const decodedEvent = equilibriaPendleVault.interface.decodeEventLog('Deposit', event.data, event.topics);
-            //         if (decodedEvent.owner === portfolioContract.address) {
-            //             shares = decodedEvent.shares;
-            //         }
-            //     }
-            // }
-            // // withdraw
-            // await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, { gasLimit })).wait();
-            // expect(await pendleRETHMarketLPT.balanceOf(wallet.address)).to.equal(shares);
-            // expect(await equilibriaPendleVault.totalAssets()).to.equal(0);
+            for (const event of receipt.events) {
+                if (event.topics.includes(equilibriaPendleVault.interface.getEventTopic('Deposit')) && event.address === equilibriaPendleVault.address) {
+                    const decodedEvent = equilibriaPendleVault.interface.decodeEventLog('Deposit', event.data, event.topics);
+                    if (decodedEvent.owner === portfolioContract.address) {
+                        shares = decodedEvent.shares;
+                    }
+                }
+            }
+            // withdraw
+            await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, { gasLimit })).wait();
+            expect(await pendleMarketLPT.balanceOf(wallet.address)).to.equal(shares);
+            expect(await equilibriaPendleVault.totalAssets()).to.equal(0);
         });
 
         it("Should be able to claim rewards", async function () {

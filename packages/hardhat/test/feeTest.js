@@ -33,10 +33,11 @@ let equilibriaRETHVault;
 let pendleRETHMarketLPT;
 let pendleBooster;
 let oneInchSwapDataForMagic;
+let pendlePendleZapInData;
 
 describe("All Weather Protocol", function () {
     beforeEach(async () => {
-      [wallet, weth, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic] = await getBeforeEachSetUp([{
+      [wallet, weth, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic, pendlePendleZapInData, equilibriaPendleVault, pendleMarketLPT] = await getBeforeEachSetUp([{
           protocol: "Equilibria-GLP", percentage: 100
         }
         ]);
@@ -45,7 +46,7 @@ describe("All Weather Protocol", function () {
     describe("Portfolio LP Contract Test", function () {
         it("Reward Should be different, if they zap in different timeing", async function () {
             this.timeout(2400000); // Set timeout to 120 seconds
-            const receipt = await deposit(end2endTestingAmount, wallet, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic);
+            const receipt = await deposit(end2endTestingAmount, wallet, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic, pendlePendleZapInData);
 
             const originalWeth = await weth.balanceOf(wallet.address);
             expect(await portfolioContract.balanceOf(wallet.address)).to.be.equal(portfolioShares);

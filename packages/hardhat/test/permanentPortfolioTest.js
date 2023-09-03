@@ -33,24 +33,27 @@ let equilibriaRETHVault;
 let pendleRETHMarketLPT;
 let pendleBooster;
 let oneInchSwapDataForMagic;
+let pendlePendleZapInData;
 
 describe("All Weather Protocol", function () {
     beforeEach(async () => {
-        [wallet, weth, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic] = await getBeforeEachSetUp([{
-            protocol: "SushiSwap-DpxETH", percentage: 25,
-          }, {
-            protocol: "Equilibria-GLP", percentage: 25
-          }, {
-            protocol: "Equilibria-GDAI", percentage: 25
-          }, {
-            protocol: "Equilibria-RETH", percentage: 25
-          }
-          ]);
+        [wallet, weth, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic, pendlePendleZapInData, equilibriaPendleVault, pendleMarketLPT] = await getBeforeEachSetUp([{
+            protocol: "SushiSwap-MagicETH", percentage: 25,
+        }, {
+            protocol: "Equilibria-GLP", percentage: 26
+        }, {
+            protocol: "Equilibria-GDAI", percentage: 12
+        }, {
+            protocol: "Equilibria-RETH", percentage: 12
+        }, {
+            protocol: "Equilibria-PENDLE", percentage: 25
+        }
+        ]);
     });
     describe("Portfolio LP Contract Test", function () {
         it("Should be able to zapin with WETH and redeem", async function () {
             this.timeout(240000); // Set timeout to 120 seconds
-            const receipt = await deposit(end2endTestingAmount, wallet, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic);
+            const receipt = await deposit(end2endTestingAmount, wallet, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic, pendlePendleZapInData);
             {
                 // Iterate over the events and find the Deposit event
                 for (const event of receipt.events) {
@@ -64,14 +67,16 @@ describe("All Weather Protocol", function () {
                 }
                 const totalAssets = await portfolioContract.totalAssets();
                 for (const asset of totalAssets) {
-                    if (asset.vaultName === 'SushiSwap-DpxETH') {
-                        expect(asset.assets).to.equal(await dpxVault.balanceOf(portfolioContract.address));
+                    if (asset.vaultName === 'SushiSwap-MagicETH') {
+                        expect(asset.assets).to.equal(await magicVault.balanceOf(portfolioContract.address));
                     } else if (asset.vaultName === 'Equilibria-GLP') {
                         expect(asset.assets).to.equal(await equilibriaGlpVault.balanceOf(portfolioContract.address));
                     } else if (asset.vaultName === 'Equilibria-GDAI') {
                         expect(asset.assets).to.equal(await equilibriaGDAIVault.balanceOf(portfolioContract.address));
                     } else if (asset.vaultName === 'Equilibria-RETH') {
                         expect(asset.assets).to.equal(await equilibriaRETHVault.balanceOf(portfolioContract.address));
+                    }  else if (asset.vaultName === 'Equilibria-PENDLE') {
+                        expect(asset.assets).to.equal(await equilibriaPendleVault.balanceOf(portfolioContract.address));
                     } else {
                         throw new Error(`Unknown vault name ${asset.vaultName}`);
                     }
@@ -97,14 +102,16 @@ describe("All Weather Protocol", function () {
                 // withdraw
                 await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, { gasLimit })).wait();
                 for (const asset of totalAssetsWhichShouldBeWithdrew) {
-                    if (asset.vaultName === 'SushiSwap-DpxETH') {
-                        expect(asset.assets).to.equal(await dpxSLP.balanceOf(wallet.address));
+                    if (asset.vaultName === 'SushiSwap-MagicETH') {
+                        expect(asset.assets).to.equal(await magicSLP.balanceOf(wallet.address));
                     } else if (asset.vaultName === 'Equilibria-GLP') {
                         expect(asset.assets).to.equal(await pendleGlpMarketLPT.balanceOf(wallet.address));
                     } else if (asset.vaultName === 'Equilibria-GDAI') {
                         expect(asset.assets).to.equal(await pendleGDAIMarketLPT.balanceOf(wallet.address));
                     } else if (asset.vaultName === 'Equilibria-RETH') {
                         expect(asset.assets).to.equal(await pendleRETHMarketLPT.balanceOf(wallet.address));
+                    } else if (asset.vaultName === 'Equilibria-PENDLE') {
+                        expect(asset.assets).to.equal(await pendleMarketLPT.balanceOf(wallet.address));
                     } else {
                         throw new Error(`Unknown vault name ${asset.vaultName}`);
                     }
