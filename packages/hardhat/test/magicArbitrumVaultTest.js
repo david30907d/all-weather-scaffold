@@ -25,7 +25,7 @@ let pendlePendleZapInData;
 describe("All Weather Protocol", function () {
   beforeEach(async () => {
     [wallet, weth, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic, pendlePendleZapInData, equilibriaPendleVault, pendleMarketLPT] = await getBeforeEachSetUp([{
-      protocol: "SushiSwap-MagicETH", percentage: 100,
+      protocol: "SushiSwap-MagicETH", percentage: 25,
     }
     ]);
   });
