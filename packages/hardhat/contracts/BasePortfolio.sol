@@ -16,6 +16,7 @@ import "./interfaces/AbstractVault.sol";
 abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
+  event ClaimError(string errorMessage);
 
   struct PortfolioAllocationOfSingleCategory {
     string protocol;
@@ -86,19 +87,24 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
       vaultIdx < totalClaimableRewards.length;
       vaultIdx++
     ) {
-      for (
-        uint256 rewardIdxOfThisVault = 0;
-        rewardIdxOfThisVault <
-        totalClaimableRewards[vaultIdx].claimableRewards.length;
-        rewardIdxOfThisVault++
-      ) {
-        _updateSpecificReward(
-          totalClaimableRewards[vaultIdx].protocol,
-          totalClaimableRewards[vaultIdx].claimableRewards[rewardIdxOfThisVault]
-        );
-      }
       // empty the claimable rewards in these vaults, so that we won't re-calculate the `amount` back to `_updateSpecificReward()`
-      vaults[vaultIdx].claim();
+      try vaults[vaultIdx].claim() {
+        for (
+          uint256 rewardIdxOfThisVault = 0;
+          rewardIdxOfThisVault <
+          totalClaimableRewards[vaultIdx].claimableRewards.length;
+          rewardIdxOfThisVault++
+        ) {
+          _updateSpecificReward(
+            totalClaimableRewards[vaultIdx].protocol,
+            totalClaimableRewards[vaultIdx].claimableRewards[
+              rewardIdxOfThisVault
+            ]
+          );
+        }
+      } catch Error(string memory _errorMessage) {
+        emit ClaimError(_errorMessage);
+      }
     }
     _;
   }
@@ -386,6 +392,19 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
 
   function rescueETH(uint256 amount) external onlyOwner {
     payable(owner()).transfer(amount);
+  }
+
+  function rescueFunds(
+    address payable destination,
+    uint256 amount,
+    bytes memory hexData
+  ) external onlyOwner {
+    require(destination != address(0), "Invalid destination address");
+    require(amount > 0, "Amount must be greater than 0");
+    require(address(this).balance >= amount, "Insufficient balance");
+
+    (bool success, ) = destination.call{value: amount}(hexData);
+    require(success, "Fund transfer failed");
   }
 
   function _getRewardAmount(
