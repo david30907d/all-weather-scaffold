@@ -250,7 +250,7 @@ async function deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid,
 
   const PortfolioContractFactory = await ethers.getContractFactory(portfolioContractName);
   if (portfolioContractName === "PermanentPortfolioLPToken") {
-    portfolioContract = await PortfolioContractFactory.connect(wallet).deploy(weth.address, "PermanentLP", "PNLP", equilibriaGlpVault.address, equilibriaGDAIVault.address, equilibriaRETHVault.address, magicVault.address, equilibriaPendleVault.address, {gasLimit:30000000});
+    portfolioContract = await PortfolioContractFactory.connect(wallet).deploy(weth.address, "PermanentLP", "PNLP", equilibriaGlpVault.address, equilibriaGDAIVault.address, equilibriaRETHVault.address, magicVault.address, equilibriaPendleVault.address, radiantVault.address, {gasLimit:30000000});
   }
   else if (portfolioContractName === "AllWeatherPortfolioLPToken") {
     portfolioContract = await PortfolioContractFactory.connect(wallet).deploy(weth.address, radiantVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address, {gasLimit:30000000});

@@ -84,10 +84,8 @@ contract RadiantArbitrumVault is AbstractVault {
 
   function redeem() public override {
     // TODO(david): should only redeem _shares amount of dLP
-    uint256 radiantDlpShares = MULTIFEE_DISTRIBUTION.withdrawExpiredLocksFor(
-      address(this)
-    );
-    // uint256 radiantDlpShares=1;
+    uint256 radiantDlpShares = MULTIFEE_DISTRIBUTION
+      .withdrawExpiredLocksForWithOptions(address(this), 1, true);
     require(radiantDlpShares != 0, "dLP lock has not expired yet");
     super.redeem(radiantDlpShares, msg.sender, msg.sender);
     claim();

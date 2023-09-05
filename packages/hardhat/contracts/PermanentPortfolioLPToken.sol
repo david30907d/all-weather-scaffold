@@ -14,6 +14,7 @@ import "./vaults/equilibria/EquilibriaGlpVault.sol";
 import "./vaults/equilibria/EquilibriaGDAIVault.sol";
 import "./vaults/equilibria/EquilibriaRETHVault.sol";
 import "./vaults/equilibria/EquilibriaPendleVault.sol";
+import "./vaults/radiant/RadiantArbitrumVault.sol";
 import "./BasePortfolio.sol";
 
 contract PermanentPortfolioLPToken is BasePortfolio {
@@ -28,7 +29,8 @@ contract PermanentPortfolioLPToken is BasePortfolio {
     address equilibriaGDAIVaultAddr,
     address equilibriaRETHVaultAddr,
     address payable magicArbitrumVaultAddr,
-    address equilibriaPendleVaultAddr
+    address equilibriaPendleVaultAddr,
+    address radiantVaultAddr
   ) BasePortfolio(asset_, name_, symbol_) {
     require(
       equilibriaVaultAddr != address(0),
@@ -50,13 +52,15 @@ contract PermanentPortfolioLPToken is BasePortfolio {
       equilibriaPendleVaultAddr != address(0),
       "equilibriaPendleVaultAddr cannot be zero"
     );
+    require(radiantVaultAddr != address(0), "radiantVaultAddr cannot be zero");
 
     vaults = [
       AbstractVault(EquilibriaGlpVault(equilibriaVaultAddr)),
       AbstractVault(EquilibriaGDAIVault(equilibriaGDAIVaultAddr)),
       AbstractVault(EquilibriaRETHVault(equilibriaRETHVaultAddr)),
       AbstractVault(EquilibriaPendleVault(equilibriaPendleVaultAddr)),
-      AbstractVault(MagicArbitrumVault(magicArbitrumVaultAddr))
+      AbstractVault(MagicArbitrumVault(magicArbitrumVaultAddr)),
+      AbstractVault(RadiantArbitrumVault(radiantVaultAddr))
     ];
   }
 }

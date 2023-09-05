@@ -8,7 +8,6 @@ require("@tenderly/hardhat-tenderly");
 require("@nomicfoundation/hardhat-toolbox");
 require("hardhat-deploy");
 require("@nomiclabs/hardhat-ethers");
-
 const { PRIVATE_KEY } = process.env;
 const { isAddress, getAddress, formatUnits, parseUnits } = utils;
 
@@ -69,7 +68,8 @@ module.exports = {
       forking: {
         url: process.env.API_URL,
         blockNumber: parseInt(process.env.BLOCK_NUMBER)
-      }
+      },
+      allowUnlimitedContractSize: true,
     },
     localhost: {
       url: "http://127.0.0.1:8545/",
@@ -309,12 +309,7 @@ module.exports = {
     compilers: [
       {
         version: "0.8.18",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-        },
+        settings: { optimizer: { enabled: true, runs: 200, details: { yul: false }, }, }, 
       },
     ],
   },
