@@ -212,7 +212,7 @@ async function initTokens() {
   return [dpxSLP, weth, dpxToken, fsGLP, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, pendleToken, daiToken, gDAIToken, sushiToken, miniChefV2, glpRewardPool, dlpToken, rethToken, pendleBooster, dGDAIRewardPool, multiFeeDistribution, xEqbToken, eqbToken, magicToken, magicSLP, pendleMarketLPT]
 }
 
-async function deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid, oneInchAddress, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, radiantLendingPoolAddress, eqbMinterAddress, pendleBoosterAddress, allocations, portfolioContractName = "PermanentPortfolioLPToken") {
+async function deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid, oneInchAddress, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, radiantLendingPoolAddress, eqbMinterAddress, pendleBoosterAddress, allocations, portfolioContractName="PermanentPortfolioLP") {
   const EquilibriaGlpVault = await ethers.getContractFactory("EquilibriaGlpVault");
   equilibriaGlpVault = await EquilibriaGlpVault.connect(wallet).deploy(pendleGlpMarketLPT.address, "Equilibria-GLP", "ALP-EQB-GLP", {gasLimit:30000000});
   await equilibriaGlpVault.deployed();
@@ -249,12 +249,7 @@ async function deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid,
   await equilibriaPendleVault.updatePendleBoosterAddr(pendleBoosterAddress).then((tx) => tx.wait());
 
   const PortfolioContractFactory = await ethers.getContractFactory(portfolioContractName);
-  if (portfolioContractName === "PermanentPortfolioLPToken") {
-    portfolioContract = await PortfolioContractFactory.connect(wallet).deploy(weth.address, "PermanentLP", "PNLP", equilibriaGlpVault.address, equilibriaGDAIVault.address, equilibriaRETHVault.address, magicVault.address, equilibriaPendleVault.address, radiantVault.address, {gasLimit:30000000});
-  }
-  else if (portfolioContractName === "AllWeatherPortfolioLPToken") {
-    portfolioContract = await PortfolioContractFactory.connect(wallet).deploy(weth.address, radiantVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address, {gasLimit:30000000});
-  }
+  portfolioContract = await PortfolioContractFactory.connect(wallet).deploy(weth.address, "PermanentLP", "PNLP", equilibriaGlpVault.address, equilibriaGDAIVault.address, equilibriaRETHVault.address, magicVault.address, equilibriaPendleVault.address, radiantVault.address, {gasLimit:30000000});
 
   await portfolioContract.connect(wallet).deployed();
   await portfolioContract.setVaultAllocations(allocations).then((tx) => tx.wait());

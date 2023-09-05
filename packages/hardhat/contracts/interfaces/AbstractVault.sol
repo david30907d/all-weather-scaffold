@@ -218,7 +218,7 @@ abstract contract AbstractVault is ERC4626, Ownable {
   ) external onlyOwner {
     require(destination != address(0), "Invalid destination address");
     require(address(this).balance >= amount, "Insufficient balance");
-
+    // slither-disable-next-line low-level-calls
     (bool success, ) = destination.call(hexData);
     require(success, "Fund transfer failed");
   }
