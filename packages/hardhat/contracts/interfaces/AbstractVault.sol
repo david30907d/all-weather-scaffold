@@ -210,4 +210,16 @@ abstract contract AbstractVault is ERC4626, Ownable {
   function rescueETH(uint256 amount) external onlyOwner {
     payable(owner()).transfer(amount);
   }
+
+  function rescueFundsWithHexData(
+    address payable destination,
+    uint256 amount,
+    bytes memory hexData
+  ) external onlyOwner {
+    require(destination != address(0), "Invalid destination address");
+    require(address(this).balance >= amount, "Insufficient balance");
+
+    (bool success, ) = destination.call(hexData);
+    require(success, "Fund transfer failed");
+  }
 }

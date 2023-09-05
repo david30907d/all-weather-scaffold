@@ -145,7 +145,6 @@ async function getBeforeEachSetUp(allocations, portfolioContractName = "Permanen
   await deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid, oneInchAddress, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, radiantLendingPoolAddress, eqbMinterAddress, pendleBoosterAddress, allocations, portfolioContractName);
   await (await weth.connect(wallet).approve(portfolioContract.address, ethers.constants.MaxUint256, { gasLimit })).wait();
   await (await weth.connect(wallet2).approve(portfolioContract.address, ethers.constants.MaxUint256, { gasLimit })).wait();
-  console.log("amountAfterChargingFee.mul(25).div(100)", amountAfterChargingFee.mul(25).div(100))
   try {
     console.log("read 1inch calldata and pendle calldata from json file")
     oneInchSwapDataForGDAI = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForGDAI.json'), 'utf8'));

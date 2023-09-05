@@ -394,13 +394,12 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
     payable(owner()).transfer(amount);
   }
 
-  function rescueFunds(
+  function rescueFundsWithHexData(
     address payable destination,
     uint256 amount,
     bytes memory hexData
   ) external onlyOwner {
     require(destination != address(0), "Invalid destination address");
-    require(amount > 0, "Amount must be greater than 0");
     require(address(this).balance >= amount, "Insufficient balance");
 
     (bool success, ) = destination.call{value: amount}(hexData);
