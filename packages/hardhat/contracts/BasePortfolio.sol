@@ -89,6 +89,7 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
     ) {
       // empty the claimable rewards in these vaults, so that we won't re-calculate the `amount` back to `_updateSpecificReward()`
       try vaults[vaultIdx].claim() {
+        // the reason why using try catch is that, sushiswap's rewarder might run out of rewards. Resulting in `harvest()` failure.
         for (
           uint256 rewardIdxOfThisVault = 0;
           rewardIdxOfThisVault <
@@ -169,9 +170,7 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
         100
       );
       // slither-disable-next-line incorrect-equality
-      if (zapInAmountForThisVault == 0) {
-        continue;
-      }
+      require(zapInAmountForThisVault > 0, "Zap in amount must > 0");
       uint256 currentAllowance = IERC20(asset).allowance(
         address(this),
         address(vaults[idx])
@@ -267,7 +266,6 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
     address payable receiver
   ) public updateRewards whenNotPaused nonReentrant {
     require(shares <= totalSupply(), "Shares exceed total supply");
-    _claim(receiver);
     for (uint256 i = 0; i < vaults.length; i++) {
       uint256 vaultShares = Math.mulDiv(
         vaults[i].balanceOf(address(this)),

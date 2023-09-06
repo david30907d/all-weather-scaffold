@@ -160,27 +160,27 @@ async function getBeforeEachSetUp(allocations, portfolioContractName = "Permanen
     oneInchSwapDataForGDAI = await fetch1InchSwapData(weth.address, daiToken.address, amountAfterChargingFee.mul(12).div(100), equilibriaGDAIVault.address, 50);
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForGDAI.json'), JSON.stringify(oneInchSwapDataForGDAI, null, 2), 'utf8')
 
-    oneInchSwapDataForRETH = await fetch1InchSwapData(weth.address, rethToken.address, amountAfterChargingFee.mul(12).div(100), equilibriaRETHVault.address, 50);
+    oneInchSwapDataForRETH = await fetch1InchSwapData(weth.address, rethToken.address, amountAfterChargingFee.mul(6).div(100), equilibriaRETHVault.address, 50);
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForRETH.json'), JSON.stringify(oneInchSwapDataForRETH, null, 2), 'utf8')
 
-    oneInchSwapDataForMagic = await fetch1InchSwapData(weth.address, magicToken.address, amountAfterChargingFee.mul(25).div(200), magicVault.address, 50);
+    oneInchSwapDataForMagic = await fetch1InchSwapData(weth.address, magicToken.address, amountAfterChargingFee.mul(8).div(200), magicVault.address, 50);
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'oneInchSwapDataForMagic.json'), JSON.stringify(oneInchSwapDataForMagic, null, 2), 'utf8')
 
     // oneInchSwapDataForGDAI.toAmount).div(2): due to the 1inch slippage, need to multiple by 0.95 to pass pendle zap in
     pendleGDAIZapInData = await getPendleZapInData(42161, gDAIMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForGDAI.toAmount).mul(95).div(100), 0.2, daiToken.address)
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'pendleGDAIZapInData.json'), JSON.stringify(pendleGDAIZapInData, null, 2), 'utf8')
 
-    pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, amountAfterChargingFee.mul(26).div(100), 0.2);
+    pendleGLPZapInData = await getPendleZapInData(42161, glpMarketPoolAddress, amountAfterChargingFee.mul(35).div(100), 0.2);
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'pendleGLPZapInData.json'), JSON.stringify(pendleGLPZapInData, null, 2), 'utf8')
 
     pendleRETHZapInData = await getPendleZapInData(42161, rethMarketPoolAddress, ethers.BigNumber.from(oneInchSwapDataForRETH.toAmount).mul(95).div(100), 0.2, rethToken.address);
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'pendleRETHZapInData.json'), JSON.stringify(pendleRETHZapInData, null, 2), 'utf8')
 
-    pendlePendleZapInData = await getPendleZapInData(42161, pendleMarketPoolAddress, amountAfterChargingFee.div(4), 0.2);
+    pendlePendleZapInData = await getPendleZapInData(42161, pendleMarketPoolAddress, amountAfterChargingFee.mul(24).div(100), 0.2);
     fs.writeFileSync(path.join(__dirname, 'fixtures', 'pendlePendleZapInData.json'), JSON.stringify(pendlePendleZapInData, null, 2), 'utf8')
   }
   portfolioShares = amountAfterChargingFee.div(await portfolioContract.UNIT_OF_SHARES());
-  return [wallet, weth, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic, pendlePendleZapInData, equilibriaPendleVault, pendleMarketLPT];
+  return [wallet, weth, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic, pendlePendleZapInData, equilibriaPendleVault, pendleMarketLPT, dlpToken, dlpToken];
 }
 
 async function initTokens() {

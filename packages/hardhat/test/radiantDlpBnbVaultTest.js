@@ -40,23 +40,8 @@ let oneInchSwapDataForGDAI;
 let pendleGLPZapInData;
 let pendleGDAIZapInData;
 let portfolioShares;
+let dlpToken;
 
-
-async function deposit() {
-  const depositData = {
-    amount: dpxAmount,
-    receiver: wallet.address,
-    oneInchDataDpx: oneInchSwapDataForDpx.tx.data,
-    glpMinLpOut: pendleGLPZapInData[2],
-    glpGuessPtReceivedFromSy: pendleGLPZapInData[3],
-    glpInput: pendleGLPZapInData[4],
-    gdaiMinLpOut: pendleGDAIZapInData[2],
-    gdaiGuessPtReceivedFromSy: pendleGDAIZapInData[3],
-    gdaiInput: pendleGDAIZapInData[4],
-    gdaiOneInchDataGDAI: oneInchSwapDataForGDAI.tx.data
-  }
-  return await (await portfolioContract.connect(wallet).deposit(depositData)).wait();
-}
 
 
 describe("All Weather Protocol", function () {

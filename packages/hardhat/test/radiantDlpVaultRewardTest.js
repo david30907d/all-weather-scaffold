@@ -17,12 +17,10 @@ let portfolioContract;
 let oneInchSwapDataForRETH;
 let pendleRETHZapInData;
 let oneInchSwapDataForMagic;
-let pendlePendleZapInData;
-
-  
+let dlpToken;  
 describe("All Weather Protocol", function () {
   beforeEach(async () => {
-    [wallet, weth, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic, pendlePendleZapInData, equilibriaPendleVault, pendleMarketLPT] = await getBeforeEachSetUp([{
+    [wallet, weth, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic, pendlePendleZapInData, equilibriaPendleVault, pendleMarketLPT, dlpToken] = await getBeforeEachSetUp([{
       protocol: "RadiantArbitrum-DLP", percentage: 100
   }
   ]);
@@ -56,7 +54,7 @@ describe("All Weather Protocol", function () {
         }
       }
       // Error: VM Exception while processing transaction: reverted with reason string 'SafeERC20: low-level call failed'
-      // means you probably transfer a pretty weird token
+      // means out of gas
       await (await portfolioContract.connect(wallet).claim(randomWallet.address, { gasLimit: 30000000 })).wait();
       for (const rToken of radiantRTokens) {
         const rTokenContract = await ethers.getContractAt("MockDAI", rToken);

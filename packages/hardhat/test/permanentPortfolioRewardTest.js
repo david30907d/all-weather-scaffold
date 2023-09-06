@@ -34,20 +34,22 @@ let equilibriaRETHVault;
 let pendleRETHMarketLPT;
 let pendleBooster;
 let oneInchSwapDataForMagic;
-let pendlePendleZapInData;
+let dlpToken;
 
 describe("All Weather Protocol", function () {
     beforeEach(async () => {
-        [wallet, weth, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic, pendlePendleZapInData, equilibriaPendleVault, pendleMarketLPT] = await getBeforeEachSetUp([{
-            protocol: "SushiSwap-MagicETH", percentage: 25,
+        [wallet, weth, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic, pendlePendleZapInData, equilibriaPendleVault, pendleMarketLPT, dlpToken] = await getBeforeEachSetUp([{
+            protocol: "SushiSwap-MagicETH", percentage: 8,
         }, {
-            protocol: "Equilibria-GLP", percentage: 26
+            protocol: "RadiantArbitrum-DLP", percentage: 15,
+        }, {
+            protocol: "Equilibria-GLP", percentage: 35
         }, {
             protocol: "Equilibria-GDAI", percentage: 12
         }, {
-            protocol: "Equilibria-RETH", percentage: 12
+            protocol: "Equilibria-RETH", percentage: 6
         }, {
-            protocol: "Equilibria-PENDLE", percentage: 25
+            protocol: "Equilibria-PENDLE", percentage: 24
         }
         ]);
     });

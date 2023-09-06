@@ -34,25 +34,28 @@ let pendleRETHMarketLPT;
 let pendleBooster;
 let oneInchSwapDataForMagic;
 let pendlePendleZapInData;
+let dlpToken;
 
 describe("All Weather Protocol", function () {
     beforeEach(async () => {
-        [wallet, weth, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic, pendlePendleZapInData, equilibriaPendleVault, pendleMarketLPT] = await getBeforeEachSetUp([{
-            protocol: "SushiSwap-MagicETH", percentage: 25,
+        [wallet, weth, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic, pendlePendleZapInData, equilibriaPendleVault, pendleMarketLPT, dlpToken, dlpToken] = await getBeforeEachSetUp([{
+            protocol: "SushiSwap-MagicETH", percentage: 8,
         }, {
-            protocol: "Equilibria-GLP", percentage: 26
+            protocol: "RadiantArbitrum-DLP", percentage: 15,
+        }, {
+            protocol: "Equilibria-GLP", percentage: 35
         }, {
             protocol: "Equilibria-GDAI", percentage: 12
         }, {
-            protocol: "Equilibria-RETH", percentage: 12
+            protocol: "Equilibria-RETH", percentage: 6
         }, {
-            protocol: "Equilibria-PENDLE", percentage: 25
+            protocol: "Equilibria-PENDLE", percentage: 24
         }
         ]);
     });
     describe("Portfolio LP Contract Test", function () {
         it("Should be able to zapin with WETH and redeem", async function () {
-            this.timeout(240000); // Set timeout to 120 seconds
+            this.timeout(480000); // Set timeout to 120 seconds
             const receipt = await deposit(end2endTestingAmount, wallet, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic, pendlePendleZapInData);
             {
                 // Iterate over the events and find the Deposit event
@@ -77,6 +80,8 @@ describe("All Weather Protocol", function () {
                         expect(asset.assets).to.equal(await equilibriaRETHVault.balanceOf(portfolioContract.address));
                     }  else if (asset.vaultName === 'Equilibria-PENDLE') {
                         expect(asset.assets).to.equal(await equilibriaPendleVault.balanceOf(portfolioContract.address));
+                    }  else if (asset.vaultName === 'RadiantArbitrum-DLP') {
+                        expect(asset.assets).to.equal(await radiantVault.balanceOf(portfolioContract.address));
                     } else {
                         throw new Error(`Unknown vault name ${asset.vaultName}`);
                     }
@@ -101,6 +106,7 @@ describe("All Weather Protocol", function () {
                 const totalAssetsWhichShouldBeWithdrew = await portfolioContract.totalAssets();
                 // withdraw
                 await (await portfolioContract.connect(wallet).redeem(portfolioShares, wallet.address, { gasLimit })).wait();
+                await (await portfolioContract.connect(wallet).claim(wallet.address, { gasLimit })).wait();
                 for (const asset of totalAssetsWhichShouldBeWithdrew) {
                     if (asset.vaultName === 'SushiSwap-MagicETH') {
                         expect(asset.assets).to.equal(await magicSLP.balanceOf(wallet.address));
@@ -112,6 +118,8 @@ describe("All Weather Protocol", function () {
                         expect(asset.assets).to.equal(await pendleRETHMarketLPT.balanceOf(wallet.address));
                     } else if (asset.vaultName === 'Equilibria-PENDLE') {
                         expect(asset.assets).to.equal(await pendleMarketLPT.balanceOf(wallet.address));
+                    } else if (asset.vaultName === 'RadiantArbitrum-DLP') {
+                        expect(asset.assets).to.equal(await dlpToken.balanceOf(wallet.address));
                     } else {
                         throw new Error(`Unknown vault name ${asset.vaultName}`);
                     }
@@ -120,7 +128,6 @@ describe("All Weather Protocol", function () {
                 for (const asset of currentUnclaimedAssets) {
                     expect(asset.assets).to.equal(0);
                 }
-
             }
         });
     });
