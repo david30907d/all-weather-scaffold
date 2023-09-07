@@ -145,6 +145,7 @@ contract BaseSushiSwapVault is AbstractVault {
   function claim() public override {
     // TODO(david): current implementation doesn't support multiple portfolio vaults
     // since harvet() would harvest all of the rewards, which is owned by multiple portfolio vaults
+    // claimRewardsFromVaultToPortfolioVault need to also transfer the reward balance, residing in this contract. Not just those claimableRewards.
     IFeeDistribution.RewardData[]
       memory claimableRewards = getClaimableRewards();
     if (claimableRewards.length != 0) {

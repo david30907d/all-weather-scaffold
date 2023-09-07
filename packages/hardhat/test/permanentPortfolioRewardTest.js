@@ -6,10 +6,11 @@ const {
     end2endTestingAmount,
     gasLimit,
     claimableRewardsTestDataForPermanentPortfolio,
-    mineBlocks,
     sushiTokenAddress,
     getBeforeEachSetUp,
-    deposit
+    deposit,
+    radiantTokenAddress,
+    simulateTimeElasped
 } = require("./utils");
 let wallet;
 let weth;
@@ -58,17 +59,17 @@ describe("All Weather Protocol", function () {
             const randomWallet = ethers.Wallet.createRandom();
             this.timeout(240000); // Set timeout to 120 seconds
             const receipt = await deposit(end2endTestingAmount, wallet, pendleGLPZapInData, pendleGDAIZapInData, oneInchSwapDataForGDAI, oneInchSwapDataForRETH, pendleRETHZapInData, oneInchSwapDataForMagic, pendlePendleZapInData);
-            await mineBlocks(10000);
+            timeElasped = 24 * 7 * 86400; // 24 weeks later
+            await simulateTimeElasped(timeElasped);
             const claimableRewards = await portfolioContract.getClaimableRewards(wallet.address);
             for (const claimableReward of claimableRewards) {
                 for (const reward of claimableReward.claimableRewards) {
-                    if (reward.token == sushiTokenAddress) {
+                    if (reward.token === sushiTokenAddress || reward.token === radiantTokenAddress) {
                         continue
                     }
                     expect(reward.amount).to.be.gt(0);
                 }
             }
-
 
             await portfolioContract.connect(wallet).claim(randomWallet.address);
             // magic

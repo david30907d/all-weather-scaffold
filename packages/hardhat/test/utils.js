@@ -351,6 +351,7 @@ const radiantLendingPoolAddress = "0xF4B1486DD74D07706052A33d31d7c0AAFD0659E1";
 const radiantLockZapPoolAddress = "0x8991C4C347420E476F1cf09C03abA224A76E2997";
 const multiFeeDistributionAddress = "0x76ba3eC5f5adBf1C58c91e86502232317EeA72dE";
 const radiantRTokens = ["0xd69D402D1bDB9A2b8c3d88D98b9CEaf9e4Cd72d9", "0x48a29E756CC1C097388f3B2f3b570ED270423b3d", "0x0D914606f3424804FA1BbBE56CCC3416733acEC6", "0x0dF5dfd95966753f01cb80E76dc20EA958238C46", "0x42C248D137512907048021B30d9dA17f48B5b7B2", "0x2dADe5b7df9DA3a7e1c9748d169Cd6dFf77e3d01"]
+const radiantTokenAddress = "0x3082CC23568eA640225c2467653dB90e9250AaA0";
 
 // radiant-bsc
 const wbnbAddress = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
@@ -474,5 +475,6 @@ module.exports = {
   rethMarketPoolAddress,
   deployContractsToChain,
   rethTokenAddress,
-  sushiMagicPid
+  sushiMagicPid,
+  radiantTokenAddress
 };
