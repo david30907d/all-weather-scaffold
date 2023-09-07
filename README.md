@@ -7,6 +7,7 @@
 3. For fronend development: `export TESTNET_API_URL=http://127.0.0.1:8545/; npx hardhat run --network localhost deploy/deployPermanentPortfolio.js`
 4. Chain: `export BLOCK_NUMBER=123270171; yarn chain`
 5. Update the contract addresses resides in `rebalance` server and `frontend`
+6. (optional): Might need to manually verify if your deploy script fails: `npx hardhat verify --network arbitrum 0x47cF63A2C2a60efD53193504c8a9846D38254549 "0x14FbC760eFaF36781cB0eb3Cb255aD976117B9Bd"  "Equilibria-RETH" "ALP-EQB-RETH"`
 
 ## Test
 

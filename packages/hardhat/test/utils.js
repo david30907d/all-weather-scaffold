@@ -229,12 +229,13 @@ async function initTokens() {
 }
 
 async function deployContracts(wallet, dpxSLP, sushiMiniChefV2Address, sushiPid, oneInchAddress, pendleGlpMarketLPT, pendleGDAIMarketLPT, pendleRETHMarketLPT, radiantLendingPoolAddress, eqbMinterAddress, pendleBoosterAddress, allocations, portfolioContractName="PermanentPortfolioLP") {
+  console.log("EquilibriaGlpVault start deploying")
   const EquilibriaGlpVault = await ethers.getContractFactory("EquilibriaGlpVault");
   equilibriaGlpVault = await EquilibriaGlpVault.connect(wallet).deploy(pendleGlpMarketLPT.address, "Equilibria-GLP", "ALP-EQB-GLP", {gasLimit:30000000});
   await equilibriaGlpVault.deployed();
+  console.log("EquilibriaGlpVault deployed")
   await equilibriaGlpVault.updateEqbMinterAddr(eqbMinterAddress).then((tx) => tx.wait());
   await equilibriaGlpVault.updatePendleBoosterAddr(pendleBoosterAddress).then((tx) => tx.wait());
-
   const EquilibriaGDAIVault = await ethers.getContractFactory("EquilibriaGDAIVault");
   equilibriaGDAIVault = await EquilibriaGDAIVault.connect(wallet).deploy(pendleGDAIMarketLPT.address, "Equilibria-GDAI", "ALP-EQB-GDAI", {gasLimit:30000000});
   await equilibriaGDAIVault.deployed();
@@ -476,5 +477,7 @@ module.exports = {
   deployContractsToChain,
   rethTokenAddress,
   sushiMagicPid,
-  radiantTokenAddress
+  radiantTokenAddress,
+  pendleMarketPoolAddress,
+  sushiSwapMagicLpTokenAddress
 };

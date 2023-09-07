@@ -1,5 +1,5 @@
 const hre = require("hardhat");
-const { deployContractsToChain, sushiSwapDpxLpTokenAddress, wethAddress, sushiMiniChefV2Address, sushiPid, gDAIMarketPoolAddress, glpMarketPoolAddress, rethMarketPoolAddress, radiantLendingPoolAddress, radiantDlpAddress } = require("../test/utils");
+const { deployContractsToChain, sushiSwapMagicLpTokenAddress, wethAddress, gDAIMarketPoolAddress, glpMarketPoolAddress, rethMarketPoolAddress, radiantLendingPoolAddress, radiantDlpAddress, pendleMarketPoolAddress } = require("../test/utils");
 const { config } = require('dotenv');
 config();
 
@@ -7,22 +7,25 @@ async function main() {
   // TODO(david): use deployer!
   const provider = new ethers.providers.JsonRpcProvider(process.env.API_URL);
   const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
-  const [portfolioContract, equilibriaGDAIVault, equilibriaGlpVault, equilibriaRETHVault, radiantVault] = await deployContractsToChain(wallet, [{
-    protocol: "SushiSwap-DpxETH", percentage: 25,
+  const [portfolioContract, equilibriaGDAIVault, equilibriaGlpVault, equilibriaRETHVault, radiantVault, magicVault, equilibriaPendleVault] = await deployContractsToChain(wallet, [{
+    protocol: "SushiSwap-MagicETH", percentage: 8,
   }, {
-    protocol: "Equilibria-GLP", percentage: 25
+    protocol: "RadiantArbitrum-DLP", percentage: 15,
   }, {
-    protocol: "Equilibria-GDAI", percentage: 25
+    protocol: "Equilibria-GLP", percentage: 35
   }, {
-    protocol: "Equilibria-RETH", percentage: 25
-  }
-  ], portfolioContractName = "PermanentPortfolioLPToken");
+    protocol: "Equilibria-GDAI", percentage: 12
+  }, {
+    protocol: "Equilibria-RETH", percentage: 6
+  }, {
+    protocol: "Equilibria-PENDLE", percentage: 24
+  }], portfolioContractName = "PermanentPortfolioLPToken");
   // Verify the contract on Etherscan
   console.log("Verifying contract...");
   try {
     await hre.run("verify:verify", {
       address: portfolioContract.address,
-      constructorArguments: [wethAddress, "PermanentLP", "PNLP", dpxVault.address, equilibriaGlpVault.address, equilibriaGDAIVault.address, equilibriaRETHVault.address], // Include constructor arguments here if any
+      constructorArguments: [wethAddress, "PermanentLP", "PNLP", equilibriaGlpVault.address, equilibriaGDAIVault.address,  equilibriaRETHVault.address, magicVault.address, equilibriaPendleVault.address, radiantVault.address], // Include constructor arguments here if any
     });
   } catch (error) {
     console.log(error);
@@ -30,8 +33,8 @@ async function main() {
 
   try {
     await hre.run("verify:verify", {
-      address: dpxVault.address,
-      constructorArguments: [sushiSwapDpxLpTokenAddress, sushiMiniChefV2Address, sushiPid]
+      address: magicVault.address,
+      constructorArguments: [sushiSwapMagicLpTokenAddress, "SushiSwap-MagicETH", "ALP-MAGIC-ETH"]
     });
   } catch (error) {
     console.log(error)
@@ -71,10 +74,21 @@ async function main() {
     console.log(error)
   }
 
+  try {
+    await hre.run("verify:verify", {
+      address: equilibriaPendleVault.address,
+      constructorArguments: [pendleMarketPoolAddress, "Equilibria-PENDLE", "ALP-EQB-PENDLE"]
+    });
+  } catch (error) {
+    console.log(error)
+  }
+
   console.log('Deployed and Verified equilibriaGDAIVault, Address:', equilibriaGDAIVault.address);
   console.log('Deployed and Verified equilibriaGlpVault, Address:', equilibriaGlpVault.address);
   console.log('Deployed and Verified equilibriaRETHVault, Address:', equilibriaRETHVault.address);
+  console.log('Deployed and Verified equilibriaPendleVault, Address:', equilibriaPendleVault.address);
   console.log('Deployed and Verified radiantVault, Address:', radiantVault.address);
+  console.log('Deployed and Verified magicVault, Address:', magicVault.address);
   console.log('Deployed and Verified portfolioContract, Address:', portfolioContract.address);
 }
 
