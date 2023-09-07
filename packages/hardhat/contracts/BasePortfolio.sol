@@ -170,7 +170,9 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
         100
       );
       // slither-disable-next-line incorrect-equality
-      require(zapInAmountForThisVault > 0, "Zap in amount must > 0");
+      if (zapInAmountForThisVault == 0) {
+        continue;
+      }
       uint256 currentAllowance = IERC20(asset).allowance(
         address(this),
         address(vaults[idx])
@@ -399,7 +401,7 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
   ) external onlyOwner {
     require(destination != address(0), "Invalid destination address");
     require(address(this).balance >= amount, "Insufficient balance");
-
+    // solhint-disable-next-line avoid-low-level-calls
     (bool success, ) = destination.call{value: amount}(hexData);
     require(success, "Fund transfer failed");
   }

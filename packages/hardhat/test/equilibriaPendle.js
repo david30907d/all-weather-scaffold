@@ -39,7 +39,17 @@ let pendleMarketLPT;
 describe("All Weather Protocol", function () {
     beforeEach(async () => {
         [wallet, weth, oneInchSwapDataForGDAI, pendleGDAIZapInData, pendleGLPZapInData, portfolioShares, equilibriaGDAIVault, equilibriaGlpVault, portfolioContract, sushiToken, miniChefV2, glpRewardPool, radiantVault, wallet2, rethToken, oneInchSwapDataForRETH, pendleRETHZapInData, equilibriaRETHVault, pendleRETHMarketLPT, pendleBooster, xEqbToken, eqbToken, magicVault, magicToken, oneInchSwapDataForMagic, pendlePendleZapInData, equilibriaPendleVault, pendleMarketLPT, dlpToken] = await getBeforeEachSetUp([{
-            protocol: "Equilibria-PENDLE", percentage: 100
+            protocol: "SushiSwap-MagicETH", percentage: 0,
+        }, {
+            protocol: "RadiantArbitrum-DLP", percentage: 0,
+        }, {
+            protocol: "Equilibria-GLP", percentage: 0
+        }, {
+            protocol: "Equilibria-GDAI", percentage: 0
+        }, {
+            protocol: "Equilibria-RETH", percentage: 0
+        }, {
+            protocol: "Equilibria-PENDLE", percentage: 24
         }
         ]);
     });
