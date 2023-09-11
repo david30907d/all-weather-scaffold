@@ -27,7 +27,8 @@ add the new vault into:
 5. update need to manually add some tokens into `/debank` route in rebalance backend (for instance, 0xeeeeee for each blockchain can be different token)
 6. need to find the API of that protocol you integrated first, and then calculate its `apr_composition` in `/apr_composition` endpoint in rebalance backend
 7. check the result of `apr composition` on frontend side
-
+8. frontend side:
+    1. `/addresses`: [github](https://github.com/all-weather-protocol/all-weather-frontend/blob/94dc69d2307b1b3af056c284e6164d6b21395141/utils/rebalanceSuggestions.js#L26C32-L26C32)
 
 ## Develop
 
