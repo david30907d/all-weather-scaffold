@@ -260,7 +260,6 @@ abstract contract BasePortfolio is ERC20, Ownable, ReentrancyGuard, Pausable {
     uint256 shares = SafeMath.div(amountAfterDeductingFee, UNIT_OF_SHARES);
     require(shares > 0, "Shares must > 0");
     _mint(depositData.receiver, shares);
-    emit Transfer(address(0), depositData.receiver, shares);
   }
 
   function redeem(
